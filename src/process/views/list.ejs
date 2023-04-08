@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" />
+    <title></title>
+</head>
+
+<body>
+    <div class="container mt-2">
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>State</th>
+            </tr>
+
+            <% for (var i=0; i < processes.length; i++) { %>
+                <tr>
+                    <td>
+                        <a href="<%= processes[i].getUrl() %>">
+                            <%= processes[i]['id'] %>
+                        </a>
+                    </td>
+                    <td>
+                        <%= processes[i]['name'] ? processes[i]['name'] : 'undefined' %>
+                    </td>
+                    <td>
+                        <%= processes[i]['state'] %>
+                    </td>
+                </tr>
+                <% } %>
+        </table>
+    </div>
+</body>
+
+</html>
