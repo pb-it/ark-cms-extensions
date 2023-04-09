@@ -1,12 +1,7 @@
 const path = require('path');
-const fs = require('fs');
-const { writeFile } = require('fs').promises;
-const axios = require('axios');
 
 const appRoot = controller.getAppRoot();
-const common = require(path.join(appRoot, "./src/common/common.js"));
 const Logger = require(path.join(appRoot, "./src/common/logger/logger.js"));
-const base64 = require(path.join(appRoot, './src/common/base64'));
 
 class HttpProxy {
 
@@ -27,7 +22,7 @@ class HttpProxy {
             return Promise.resolve();
         });*/
 
-        ws.addCustomRoute(
+        ws.addExtensionRoute(
             {
                 'regex': '^/http-proxy/forward$',
                 'fn': async function (req, res, next) {

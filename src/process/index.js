@@ -8,7 +8,8 @@ const appRoot = controller.getAppRoot();
 const common = require(path.join(appRoot, "./src/common/common.js"));
 const Logger = require(path.join(appRoot, "./src/common/logger/logger.js"));
 
-const socketPath = '/sys/process/socket.io/';
+const rootPath = '/api/ext/process';
+const socketPath = rootPath + '/socket.io/';
 
 var id = 0;
 const JOBS = {};
@@ -39,7 +40,7 @@ class Process {
     }
 
     getUrl() {
-        return '/sys/process/' + this.id;
+        return rootPath + '/' + this.id;
     }
 }
 
@@ -86,7 +87,7 @@ class ProcessController {
     }
 
     _addProcessRoutes(app) {
-        app.get("/sys/process", async (req, res) => {
+        app.get(rootPath, async (req, res) => {
             //res.sendFile(path.join(__dirname, './public/index.html'));
 
             try {
@@ -102,7 +103,7 @@ class ProcessController {
             return Promise.resolve();
         });
 
-        app.get("/sys/process/:uuid", async (req, res) => {
+        app.get(rootPath + "/:uuid", async (req, res) => {
             if (JOBS[req.params.uuid]) {
                 var process = { ...JOBS[req.params.uuid] };
                 if (process['result'])
@@ -127,36 +128,6 @@ class ProcessController {
 async function init() {
     var pc = new ProcessController();
     global.processController = pc;
-
-    var ws = controller.getWebServer();
-    ws.addCustomRoute(
-        {
-            'regex': '^/test$',
-            'fn': async function (req, res) {
-                try {
-                    var process = processController.createProcess();
-                    process['name'] = 'test';
-                    process['socket'] = 'https://www.google.at';
-
-                    new Promise(function (resolve, reject) {
-                        setTimeout(function () {
-                            console.log('Done');
-                            process['state'] = 'finished';
-                            process['result'] = 'Done';
-                            resolve();
-                        }, 60000);
-                    });
-
-                    console.log(`uid:${process['id']}`);
-                    res.redirect(process.getUrl());
-                } catch (error) {
-                    Logger.parseError(error);
-                }
-                return Promise.resolve();
-            }
-        }
-    );
-
     return Promise.resolve();
 }
 
