@@ -27,6 +27,8 @@ const renderFile = (file, data) => {
 
 class Process {
 
+    _io;
+
     id;
     state;
     name;
@@ -42,6 +44,15 @@ class Process {
     getUrl() {
         return rootPath + '/' + this.id;
     }
+
+    setSocket(url, io) {
+        this.socket = url;
+        this._io = io;
+    }
+
+    getSocket() {
+        return this._io;
+    }
 }
 
 class ProcessController {
@@ -50,18 +61,20 @@ class ProcessController {
 
     constructor() {
         var ws = controller.getWebServer();
+        var server = ws.getServer();
         var app = ws.getApp();
 
-        //this._io = this._initIo(ws);
+        this._io = this._initIo(server);
+        this._addSocketRoute(ws);
         this._addProcessRoutes(app);
     }
 
     _initIo(server) {
         /*var config = controller.getServerConfig();
-                    var host = 'http';
-                    if (config.ssl)
-                        host += 's';
-                    host += '://localhost:' + config.port;*/
+        var host = 'http';
+        if (config.ssl)
+            host += 's';
+        host += '://localhost:' + config.port;*/
         var options = {
             /*cors: {
                 origin: '*',
@@ -84,6 +97,18 @@ class ProcessController {
                 console.log('user disconnected');
             });
         });
+        return io;
+    }
+
+    _addSocketRoute(ws) {
+        ws.addExtensionRoute(
+            {
+                'regex': '^/process/socket$',
+                'fn': async function (req, res) {
+                    res.sendFile(path.join(__dirname, './public/index.html'));
+                }
+            }
+        );
     }
 
     _addProcessRoutes(app) {
@@ -120,6 +145,7 @@ class ProcessController {
 
     createProcess() {
         var process = new Process();
+        process.setSocket(rootPath + '/socket', this._io);
         JOBS[process['id']] = process;
         return process;
     }
