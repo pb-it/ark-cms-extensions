@@ -9,19 +9,24 @@
 
 <body>
     <div class="container mt-2">
-        Name: <%= process['name'] ? process['name'] : 'undefined' %><br>
+        Name: <%= process['name'] ? process['name'] : '<N/A>' %><br>
             State: <b>
                 <%= process['state'] %>
             </b><br>
-            Description: <%= process['description'] ? process['description'] : 'undefined' %><br>
+            Description: <%= process['description'] ? process['description'] : '<N/A>' %><br>
                 <% if (process['socket']) { %>
                     Socket: <a href="<%= process['socket'] %>" target="_blank">
                         <%= process['socket'] %>
                     </a><br>
                     <% } %>
-                        <% if (process['result']) { %>
-                            Result: <%- process['result'] %>
-                                <% } %>
+                        <% if (process['logfile']) { %>
+                            Logfile: <a href="<%= process['logfile'] %>" target="_blank">
+                                <%= process['logfile'] %>
+                            </a><br>
+                            <% } %>
+                                <% if (process['result']) { %>
+                                    Result: <%- process['result'] %>
+                                        <% } %>
     </div>
 </body>
 

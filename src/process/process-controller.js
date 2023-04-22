@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 //const { Worker } = require("worker_threads");
 
 const ejs = require("ejs");
@@ -28,6 +29,7 @@ const renderFile = (file, data) => {
 
 class ProcessController {
 
+    _logsDir;
     _io;
 
     constructor() {
@@ -35,9 +37,16 @@ class ProcessController {
         var server = ws.getServer();
         var app = ws.getApp();
 
+        this._logsDir = path.join(__dirname, "logs");
+        if (fs.existsSync(this._logsDir) && fs.statSync(this._logsDir).isDirectory())
+            fs.rmSync(this._logsDir, { recursive: true, force: true });
+        fs.mkdirSync(this._logsDir);
+
         this._io = this._initIo(server);
         this._addSocketRoute(ws);
+        this._addLogsRoute(ws);
         this._addProcessRoutes(app);
+
     }
 
     _initIo(server) {
@@ -82,6 +91,23 @@ class ProcessController {
         );
     }
 
+    _addLogsRoute(ws) {
+        ws.addExtensionRoute(
+            {
+                'regex': '^/process/logs/(.*)$',
+                'fn': async function (req, res) {
+                    var file = req.locals['match'][1];
+                    var filePath = path.join(__dirname, 'logs', file);
+                    if (fs.existsSync(filePath))
+                        res.sendFile(filePath);
+                    else
+                        next();
+                    return Promise.resolve();
+                }
+            }
+        );
+    }
+
     _addProcessRoutes(app) {
         app.get(rootPath, async (req, res) => {
             //res.sendFile(path.join(__dirname, './public/index.html'));
@@ -100,10 +126,14 @@ class ProcessController {
         });
 
         app.get(rootPath + "/:uuid", async (req, res) => {
-            if (JOBS[req.params.uuid]) {
-                var process = { ...JOBS[req.params.uuid] };
-                if (process['result'])
-                    process['result'] = common.encodeText(process['result']);
+            var orig = JOBS[req.params.uuid];
+            if (orig) {
+                var process = { ...orig };
+                process['socket'] = orig.getSocketUrl();
+                if (fs.existsSync(orig.getLogfile()))
+                    process['logfile'] = orig.getLogfileUrl();
+                if (orig['result'])
+                    process['result'] = common.encodeText(orig['result']);
                 var result = await renderFile(path.join(__dirname, './views/process.ejs'), { 'process': process });
                 res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
                 res.end(result);
@@ -116,8 +146,11 @@ class ProcessController {
 
     createProcess() {
         var process = new Process();
-        process.setSocket(rootPath + '/socket', this._io);
-        JOBS[process['id']] = process;
+        var id = process['id'];
+        process.setSocket(this._io, rootPath + '/socket');
+        var logfile = process['id'] + '.txt';
+        process.setLogfile(path.join(this._logsDir, logfile), rootPath + '/logs/' + logfile);
+        JOBS[id] = process;
         return process;
     }
 }

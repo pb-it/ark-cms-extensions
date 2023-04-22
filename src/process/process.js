@@ -5,12 +5,15 @@ var id = 0;
 class Process {
 
     _io;
+    _socketUrl;
+    _logfile;
+    _logfileUrl;
 
     id;
     state;
     name;
     description;
-    socket;
+
     result;
 
     constructor() {
@@ -22,13 +25,30 @@ class Process {
         return rootPath + '/' + this.id;
     }
 
-    setSocket(url, io) {
-        this.socket = url;
+    setSocket(io, url) {
         this._io = io;
+        this._socketUrl = url;
     }
 
     getSocket() {
         return this._io;
+    }
+
+    getSocketUrl() {
+        return this._socketUrl;
+    }
+
+    setLogfile(file, url) {
+        this._logfile = file;
+        this._logfileUrl = url;
+    }
+
+    getLogfile() {
+        return this._logfile;
+    }
+
+    getLogfileUrl() {
+        return this._logfileUrl;
     }
 }
 

@@ -15,7 +15,7 @@ async function init() {
             'regex': '^/console/public/(.*)$',
             'fn': async function (req, res, next) {
                 var file = req.locals['match'][1];
-                console.log(file);
+                //console.log(file);
                 var filePath = path.join(__dirname, 'public', file);
                 if (fs.existsSync(filePath))
                     res.sendFile(filePath);
