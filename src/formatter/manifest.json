@@ -1,0 +1,6 @@
+{
+    "name": "formatter",
+    "version": "1.0.0",
+    "description": "Text Formatter",
+    "app_version": "^0.5.3"
+}

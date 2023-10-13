@@ -3,7 +3,6 @@ async function init() {
 
     if (typeof ConsolePanel === 'undefined') {
         var apiController = controller.getApiController();
-        //var root = apiController.getApiClient().getApiRoot();
         await loadScript(apiController.getApiOrigin() + "/api/ext/console/public/console-panel.js");
     }
 
@@ -27,9 +26,9 @@ async function init() {
                     controller.getView().getSideNavigationBar().close();
 
                     if (event.ctrlKey)
-                    controller.getModalController().openPanelInModal(new ConsolePanel());
+                        controller.getModalController().openPanelInModal(new ConsolePanel());
                     else
-                    controller.loadState(new State({ customRoute: '/console' }), true);
+                        controller.loadState(new State({ customRoute: '/console' }), true);
                 }
             };
         }

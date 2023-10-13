@@ -86,7 +86,8 @@ class HttpProxy {
             if (response.status === 200) {
                 data = await response.text();
                 //data = await response.json();
-            }
+            } else
+                throw new Error(response.status);
         }
         return Promise.resolve(data);
     }

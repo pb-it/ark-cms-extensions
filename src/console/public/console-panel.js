@@ -130,7 +130,7 @@ class ConsolePanel extends Panel {
         this._$input = $('<textarea/>')
             .attr('rows', 40)
             .attr('cols', 100)
-            .val('await sleep(1000);\nreturn \'123\';');
+            .val('await sleep(1000);\nreturn Promise.resolve(\'123\');');
         this._$input.keydown(function (e) {
             e.stopPropagation(); //https://www.rockyourcode.com/assertion-failed-input-argument-is-not-an-htmlinputelement/
             if (e.keyCode == 9) { // TAB
