@@ -9,13 +9,11 @@ async function setup() {
 
 async function init() {
     const ws = controller.getWebServer();
-    //ws.getApp().use('/api/ext/console/public', express.static(path.join(__dirname, 'public'), { fallthrough: false }));
     ws.addExtensionRoute(
         {
-            'regex': '^/console/public/(.*)$',
+            'regex': '^/mime-text/public/(.*)$',
             'fn': async function (req, res, next) {
                 var file = req.locals['match'][1];
-                //console.log(file);
                 var filePath = path.join(__dirname, 'public', file);
                 if (fs.existsSync(filePath))
                     res.sendFile(filePath);
@@ -25,6 +23,19 @@ async function init() {
             }.bind(this)
         }
     );
+
+    const dtc = controller.getDataTypeController();
+    const mimeText = {
+        'tag': 'mime-text',
+        'add': function (model, table, attribute) {
+            attr = { ...attribute };
+            attr['dataType'] = 'text';
+            model._addColumn(table, attr);
+            return;
+        }
+    }
+    dtc.addDataType(mimeText);
+
     return Promise.resolve();
 }
 

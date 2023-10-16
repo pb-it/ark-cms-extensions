@@ -8,5 +8,4 @@ for f in *; do
         zip -r ../dist/"$f"@1.0.0.zip $f -x "*/.*";
     fi
 done
-
-cd -;
+cd - > /dev/null;
