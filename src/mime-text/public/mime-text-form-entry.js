@@ -9,6 +9,7 @@ class MimeTextFormEntry extends FormEntry {
         { 'value': 'html' },
         { 'value': 'plain+html' },
         { 'value': 'markdown' },
+        { 'value': 'javascript' },
         { 'value': 'bat' },
         { 'value': 'x-bat' },
         { 'value': 'x-sh' },

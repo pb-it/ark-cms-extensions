@@ -6,56 +6,71 @@ async function init() {
         await loadScript(apiController.getApiOrigin() + "/api/ext/mime-text/public/mime-text-form-entry.js");
     }
 
-    var skeleton = [
-        { 'name': 'length', 'dataType': 'string', 'tooltip': '**Info**: Constraints depend on database and character encoding. Default is 255 for \'string\' and 65,535 for \'text\'' }
-    ];
-    var info = controller.getApiController().getApiInfo();
-    var client = info['db']['client'];
-    if (client === 'mysql' || client === 'mysql2') {
-        skeleton.push(
-            {
-                'name': 'charEncoding',
-                'label': 'Encoding',
-                'tooltip': `**Info**: The default character encoding for the column will be taken from its table.`,
-                'dataType': 'enumeration',
-                'options': [
-                    { 'value': 'default' },
-                    { 'value': 'latin1' },
-                    { 'value': 'utf8' },
-                    { 'value': 'utf8mb4' }
-                ],
-                'view': 'select'
-            }
-        );
-    }
-    skeleton.push(
-        {
-            'name': 'view',
-            'label': 'syntax',
-            'dataType': 'enumeration',
-            'options': MimeTextFormEntry.OPTIONS,
-            'tooltip': `Default behavior is as \'plain\' which may result in WYSIWYG.
-\'plain+html\' enables you to mix preformatted plain text with interpret and rendered html-code between \<html\>/\</html\> tags.`,
-            'view': 'select'
-        },
-        {
-            'name': 'bSyntaxPrefix',
-            'label': 'individual syntax',
-            'tooltip': `Choose syntax individual for every entry.
-An media / MIME type string will be prepended to your data.
-You will not see this information in forms, but it is stored with your actual string in the database and consumes space.`,
-            'dataType': 'boolean',
-            'required': true,
-            'defaultValue': false
-        },
-        { 'name': 'size', 'dataType': 'string' },
-        { 'name': 'defaultValue', 'dataType': 'string' }
-    );
-
     const dtc = controller.getDataTypeController();
     var mimeText = {
         tag: 'mime-text',
-        skeleton: skeleton,
+        //skeleton: skeleton,
+        getSkeleton: function (attributes) {
+            var stringAttrNames;
+            if (attributes) {
+                var stringAttr = attributes.filter(function (x) { return (x['dataType'] === 'string' || x['dataType'] === 'text' || x['dataType'] === 'enumeration' || x['dataType'] === 'url') });
+                stringAttrNames = stringAttr.map(function (x) { return { 'value': x['name'] } });
+            } else
+                stringAttrNames = [];
+
+            var skeleton = [
+                { 'name': 'length', 'dataType': 'string', 'tooltip': '**Info**: Constraints depend on database and character encoding. Default is 255 for \'string\' and 65,535 for \'text\'' }
+            ];
+            var info = controller.getApiController().getApiInfo();
+            var client = info['db']['client'];
+            if (client === 'mysql' || client === 'mysql2') {
+                skeleton.push(
+                    {
+                        'name': 'charEncoding',
+                        'label': 'Encoding',
+                        'tooltip': `**Info**: The default character encoding for the column will be taken from its table.`,
+                        'dataType': 'enumeration',
+                        'options': [
+                            { 'value': 'default' },
+                            { 'value': 'latin1' },
+                            { 'value': 'utf8' },
+                            { 'value': 'utf8mb4' }
+                        ],
+                        'view': 'select'
+                    }
+                );
+            }
+            skeleton.push(
+                {
+                    'name': 'view',
+                    'label': 'syntax',
+                    'dataType': 'enumeration',
+                    'options': MimeTextFormEntry.OPTIONS,
+                    'tooltip': `Default behavior is as \'plain\' which may result in WYSIWYG.
+\'plain+html\' enables you to mix preformatted plain text with interpret and rendered html-code between \<html\>/\</html\> tags.`,
+                    'view': 'select'
+                },
+                {
+                    'name': 'bSyntaxPrefix',
+                    'label': 'individual syntax',
+                    'tooltip': `Choose syntax individual for every entry.
+An media / MIME type string will be prepended to your data.
+You will not see this information in forms, but it is stored with your actual string in the database and consumes space.`,
+                    'dataType': 'boolean',
+                    'required': true,
+                    'defaultValue': false
+                },
+                {
+                    'name': 'syntaxProp',
+                    'dataType': 'enumeration',
+                    'options': stringAttrNames,
+                    'view': 'select'
+                },
+                { 'name': 'size', 'dataType': 'string' },
+                { 'name': 'defaultValue', 'dataType': 'string' }
+            );
+            return skeleton;
+        },
         /*applySkeleton: function (data, change) {
             if (change.length) //TODO: MEDIUMTEXT / LONGTEXT
                 data.length = change.length;
@@ -97,12 +112,15 @@ You will not see this information in forms, but it is stored with your actual st
             return !oldValue || (newValue !== oldValue);
         },
         formEntryClass: MimeTextFormEntry,
-        renderView: async function ($value, attribute, value) {
+        renderView: async function ($value, attribute, data) {
             var view;
             $value.addClass('text');
-            if (value) {
+            if (data) {
+                var value = data[attribute['name']]
                 if (typeof value === 'string' || value instanceof String) {
-                    if (attribute['bSyntaxPrefix']) {
+                    if (attribute['syntaxProp']) {
+                        view = data[attribute['syntaxProp']];
+                    } else if (attribute['bSyntaxPrefix']) {
                         var index = value.indexOf(','); //data:text/plain;charset=utf-8,
                         if (index > -1) {
                             view = DataView.getSyntax(value.substr(0, index));
@@ -111,6 +129,8 @@ You will not see this information in forms, but it is stored with your actual st
                     } else
                         view = attribute['view'];
                     if (view) {
+                        if (view.startsWith('text/'))
+                            view = view.substring(5);
                         switch (view) {
                             case 'html':
                                 break;
