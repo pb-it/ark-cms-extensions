@@ -51,6 +51,8 @@ class MimeTextFormEntry extends FormEntry {
                 syntax = DataView.getSyntax(value.substr(0, index));
                 value = value.substr(index + 1);
             }
+            if (!syntax)
+                syntax = 'plain';
 
             this._$syntax = $('<select/>');
             var $option;
@@ -58,7 +60,7 @@ class MimeTextFormEntry extends FormEntry {
                 $option = $('<option/>').attr('value', o['value']).text(o['value']);
                 if (o.hasOwnProperty('disabled'))
                     $option.prop('disabled', o['disabled']);
-                if (syntax && syntax === o['value'])
+                if (syntax === o['value'])
                     $option.prop('selected', true);
                 this._$syntax.append($option);
             };

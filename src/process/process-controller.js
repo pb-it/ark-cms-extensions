@@ -110,8 +110,6 @@ class ProcessController {
 
     _addProcessRoutes(app) {
         app.get(rootPath, async (req, res) => {
-            //res.sendFile(path.join(__dirname, './public/index.html'));
-
             try {
                 var result = await renderFile(path.join(__dirname, './views/list.ejs'), { 'processes': [...Object.values(JOBS)] });
                 res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
@@ -126,19 +124,27 @@ class ProcessController {
         });
 
         app.get(rootPath + "/:uuid", async (req, res) => {
-            var orig = JOBS[req.params.uuid];
-            if (orig) {
-                var process = { ...orig };
-                process['socket'] = orig.getSocketUrl();
-                if (fs.existsSync(orig.getLogfile()))
-                    process['logfile'] = orig.getLogfileUrl();
-                if (orig['result'])
-                    process['result'] = common.encodeText(orig['result']);
-                var result = await renderFile(path.join(__dirname, './views/process.ejs'), { 'process': process });
-                res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
-                res.end(result);
+            var format = req.query['format'];
+            var job = JOBS[req.params.uuid];
+            if (job) {
+                var process = { ...job };
+                process['socket'] = job.getSocketUrl();
+                if (fs.existsSync(job.getLogfile()))
+                    process['logfile'] = job.getLogfileUrl();
+                if (format == 'json') {
+                    if (job['result'])
+                        process['result'] = job['result'];
+                    res.json(process);
+                } else {
+                    if (job['result'])
+                        process['result'] = common.encodeText(job['result']);
+                    var result = await renderFile(path.join(__dirname, './views/process.ejs'), { 'process': process });
+                    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
+                    res.end(result);
+                }
             } else {
-                res.send("No valid process ID.");
+                res.status(404); // Not Found
+                res.send('Invalid process ID');
             }
             return Promise.resolve();
         });
