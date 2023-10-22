@@ -95,7 +95,7 @@ class ProcessController {
         ws.addExtensionRoute(
             {
                 'regex': '^/process/logs/(.*)$',
-                'fn': async function (req, res) {
+                'fn': async function (req, res, next) {
                     var file = req.locals['match'][1];
                     var filePath = path.join(__dirname, 'logs', file);
                     if (fs.existsSync(filePath))
@@ -124,27 +124,35 @@ class ProcessController {
         });
 
         app.get(rootPath + "/:uuid", async (req, res) => {
-            var format = req.query['format'];
-            var job = JOBS[req.params.uuid];
-            if (job) {
-                var process = { ...job };
-                process['socket'] = job.getSocketUrl();
-                if (fs.existsSync(job.getLogfile()))
-                    process['logfile'] = job.getLogfileUrl();
-                if (format == 'json') {
-                    if (job['result'])
-                        process['result'] = job['result'];
-                    res.json(process);
+            try {
+                var format;
+                if (req.query)
+                    format = req.query['format'];
+                var process = JOBS[req.params.uuid];
+                if (process) {
+                    var data = process.getData();
+                    if (format == 'json') {
+                        res.json(data);
+                    } else {
+                        if (process['result'])
+                            data['result'] = common.encodeText(process['result']);
+                        var result = await renderFile(path.join(__dirname, './views/process.ejs'), { 'process': data });
+                        res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
+                        res.end(result);
+                    }
                 } else {
-                    if (job['result'])
-                        process['result'] = common.encodeText(job['result']);
-                    var result = await renderFile(path.join(__dirname, './views/process.ejs'), { 'process': process });
-                    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
-                    res.end(result);
+                    res.status(404); // Not Found
+                    res.send('Invalid process ID');
                 }
-            } else {
-                res.status(404); // Not Found
-                res.send('Invalid process ID');
+            } catch (error) {
+                Logger.parseError(error);
+                if (!res.headersSent) {
+                    res.status(500); // Internal Server Error
+                    if (error['message'])
+                        res.send(error['message']);
+                    else
+                        res.send('An unexpected error has occurred');
+                }
             }
             return Promise.resolve();
         });
