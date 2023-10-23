@@ -1,0 +1,6 @@
+{
+    "name": "mime-enum",
+    "version": "1.0.0",
+    "description": "Data Type Extension - Enumeration with MIME types.",
+    "app_version": "^0.5.3"
+}

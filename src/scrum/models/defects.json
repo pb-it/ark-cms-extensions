@@ -1,0 +1,48 @@
+{
+    "name": "defects",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "severity:asc"
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "project",
+            "model": "projects",
+            "dataType": "relation"
+        },
+        {
+            "name": "description",
+            "size": "20",
+            "dataType": "text"
+        },
+        {
+            "name": "severity",
+            "view": "radio",
+            "options": [
+                {
+                    "value": "A"
+                },
+                {
+                    "value": "B"
+                },
+                {
+                    "value": "C"
+                },
+                {
+                    "value": "D"
+                },
+                {
+                    "value": "E"
+                }
+            ],
+            "dataType": "enumeration"
+        }
+    ]
+}

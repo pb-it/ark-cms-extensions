@@ -1,0 +1,38 @@
+{
+    "name": "user-stories",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "priority:desc"
+    },
+    "tableName": "user_stories",
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "priority",
+            "dataType": "decimal"
+        },
+        {
+            "name": "project",
+            "model": "projects",
+            "dataType": "relation"
+        },
+        {
+            "via": "user-story",
+            "name": "tasks",
+            "model": "tasks",
+            "dataType": "relation",
+            "multiple": true
+        },
+        {
+            "name": "description",
+            "size": "20",
+            "dataType": "text"
+        }
+    ]
+}

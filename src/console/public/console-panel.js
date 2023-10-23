@@ -157,12 +157,14 @@ class ConsolePanel extends Panel {
             .click(async function (event) {
                 event.stopPropagation();
 
+                const controller = app.getController();
                 try {
-                    app.controller.setLoadingState(true);
+                    controller.setLoadingState(true);
                     var code = this._$input.val();
                     //eval(code);
 
                     this._$console.val('');
+                    this._$output.val('');
 
                     const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
                     this._output = await new AsyncFunction('console', code).bind(this, this._console)();
@@ -172,10 +174,10 @@ class ConsolePanel extends Panel {
                         output = await ConsolePanel._format(this._output, oFormat);
                     }
                     this._$output.val(output);
-                    app.controller.setLoadingState(false);
+                    controller.setLoadingState(false);
                 } catch (error) {
-                    app.controller.setLoadingState(false);
-                    app.controller.showError(error);
+                    controller.setLoadingState(false);
+                    controller.showError(error);
                 }
 
                 return Promise.resolve();
@@ -226,14 +228,15 @@ class ConsolePanel extends Panel {
             this._$oFormat.append($option);
         }
         this._$oFormat.on("change", async function (event) {
+            const controller = app.getController();
             try {
-                app.controller.setLoadingState(true);
+                controller.setLoadingState(true);
                 var output = await ConsolePanel._format(this._output, event.target.value);
                 this._$output.val(output);
-                app.controller.setLoadingState(false);
+                controller.setLoadingState(false);
             } catch (error) {
-                app.controller.setLoadingState(false);
-                app.controller.showError(error);
+                controller.setLoadingState(false);
+                controller.showError(error);
             }
             return Promise.resolve();
         }.bind(this));

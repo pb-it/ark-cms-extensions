@@ -1,0 +1,26 @@
+{
+    "name": "tasks",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "title:asc"
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "user-story",
+            "model": "user-stories",
+            "dataType": "relation"
+        },
+        {
+            "name": "description",
+            "size": "20",
+            "dataType": "text"
+        }
+    ]
+}
