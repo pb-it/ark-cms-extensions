@@ -43,9 +43,12 @@ async function setup() {
         ]
     };
 
+    var profiles;
+    var bUpdate;
     const registry = controller.getRegistry();
-    var profiles = await registry.get('profiles');
-    if (profiles) {
+    var str = await registry.get('profiles');
+    if (str) {
+        profiles = JSON.parse(str);
         if (profiles['available']) {
             var bFound;
             for (var x of profiles['available']) {
@@ -56,15 +59,17 @@ async function setup() {
             }
             if (!bFound) {
                 profiles['available'].push(profile);
-                registry.upsert('profiles', profiles);
+                bUpdate = true;
             }
         }
     } else {
         profiles = {
             "available": [profile]
         };
-        registry.upsert('profiles', profiles);
+        bUpdate = true;
     }
+    if (bUpdate)
+        await registry.upsert('profiles', JSON.stringify(profiles));
 
     return Promise.resolve(data);
 }
