@@ -66,12 +66,10 @@ class Process {
         if (this['result'])
             data['result'] = this['result'];
         data['url'] = this.getUrl();
-        var socketUrl = this.getSocketUrl();
-        if (socketUrl)
-            data['socket'] = socketUrl;
-        var logfileUrl = this.getLogfileUrl();
-        if (logfileUrl && fs.existsSync(path.join(__dirname, logfileUrl)))
-            data['logfile'] = logfileUrl;
+        if (this._socketUrl)
+            data['socket'] = this._socketUrl;
+        if (this._logfile && fs.existsSync(this._logfile))
+            data['logfile'] = this._logfileUrl;
         return data;
     }
 }

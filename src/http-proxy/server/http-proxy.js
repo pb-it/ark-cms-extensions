@@ -7,13 +7,17 @@ class HttpProxy {
 
     static async forward(req, res, next) {
         var url;
+        var bCache;
         var options;
         if (req.method == 'GET') {
             url = req.query['url'];
+            if (req.query['_cache'])
+                bCache = req.query['_cache'] === 'true';
         } else if (req.method == 'POST') {
             var body = req.body;
             url = body['url'];
             options = body['options'];
+            bCache = body['bCache'];
             /*if (body['method'])
                 options['method'] = body['method'];
             if (body['headers'])
@@ -36,6 +40,11 @@ class HttpProxy {
             var format = req.query['format'];
             try {
                 var response = await HttpProxy.request(url, options);
+                if (response && bCache) {
+                    const model = controller.getShelf().getModel('http-proxy-cache');
+                    if (model)
+                        await model.create({ 'url': url, 'body': response });
+                }
                 if (format == 'json')
                     res.json({ 'data': response });
                 else

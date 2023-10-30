@@ -1,0 +1,29 @@
+{
+    "name": "extensions",
+    "version": "1.0.0",
+    "description": "Extensions for CMS",
+    "main": "",
+    "directories": {
+        "test": "tests"
+    },
+    "scripts": {
+        "pretest": "./build.sh",
+        "test": "mocha --bail tests/*.test.js",
+        "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
+        "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\""
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/pb-it/extensions.git"
+    },
+    "author": "Patrick Bauer <patrick.bauer@pb-it.at>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/pb-it/extensions/issues"
+    },
+    "homepage": "https://github.com/pb-it/extensions#readme",
+    "devDependencies": {
+        "mocha": "^10.2.0",
+        "selenium-webdriver": "^4.8.2"
+    }
+}
