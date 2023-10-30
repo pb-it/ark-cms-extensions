@@ -2,8 +2,5 @@
     "name": "http-proxy",
     "version": "1.0.0",
     "description": "HTTP Proxy/Agent/Client - Forwarding HTTP Requests",
-    "app_version": "^0.5.0",
-    "npm_dependencies": {
-        "axios": ""
-    }
+    "app_version": "^0.5.0"
 }

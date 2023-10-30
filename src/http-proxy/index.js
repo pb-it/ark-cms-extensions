@@ -1,7 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 
-var HttpProxy;
+const HttpProxy = require("./server/http-proxy.js");
 
 async function setup() {
     var data = {};
@@ -10,7 +10,6 @@ async function setup() {
 }
 
 async function init() {
-    _update();
     await _createModels();
 
     const ws = controller.getWebServer();
@@ -39,13 +38,9 @@ async function init() {
     return Promise.resolve();
 }
 
-function _update() {
-    var sPath = path.join(__dirname, './server/http-proxy.js');
-    var resolved;
-    resolved = require.resolve(sPath);
-    if (resolved)
-        delete require.cache[resolved];
-    HttpProxy = require(sPath);
+async function teardown() {
+    controller.setRestartRequest();
+    return Promise.resolve();
 }
 
 async function _createModels() {
@@ -99,4 +94,4 @@ async function _createModels() {
     return Promise.resolve();
 }
 
-module.exports = { setup, init, HttpProxy };
+module.exports = { setup, init, teardown, HttpProxy };

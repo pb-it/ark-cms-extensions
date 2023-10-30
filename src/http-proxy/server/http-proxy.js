@@ -79,7 +79,7 @@ class HttpProxy {
     static async request(url, options) {
         var data;
         var response = await fetch(url, options);
-        if (options['meta']) {
+        if (options && options['meta']) {
             var data = {};
             data['status'] = response.status;
             data['statusText'] = response.statusText;
