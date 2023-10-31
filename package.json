@@ -10,7 +10,9 @@
         "pretest": "./build.sh",
         "test": "mocha --bail tests/*.test.js",
         "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
-        "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\""
+        "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\"",
+        "test:scraper": "./build.sh scraper && mocha tests/scraper.test.js",
+        "test:scraper:scrape": "mocha tests/scraper.test.js --grep \"#test scrape\""
     },
     "repository": {
         "type": "git",

@@ -1,0 +1,13 @@
+{
+    "name": "scraper",
+    "version": "1.0.0",
+    "description": "Web Scraper",
+    "app_version": "^0.4.5",
+    "npm_dependencies": {
+        "jsdom": ""
+    },
+    "ext_dependencies": {
+        "http-proxy": "^1.0.0",
+        "mime-text": "^1.0.0"
+    }
+}
