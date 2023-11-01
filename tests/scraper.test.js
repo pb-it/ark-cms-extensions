@@ -146,14 +146,14 @@ describe('Testsuit', function () {
             if (!tmp || tmp.length == 0) {
                 var data = {
                     'domain': 'www.finanzen.at',
-                    'function': str
+                    'funcScrape': str
                 };
                 var obj = new CrudObject('scraper', data);
                 tmp = await obj.create();
             } else if (tmp && tmp.length == 1) {
-                if (tmp[0]['function'] != str) {
+                if (tmp[0]['funcScrape'] != str) {
                     var obj = new CrudObject('scraper', tmp[0]);
-                    tmp = await obj.update({ 'function': str });
+                    tmp = await obj.update({ 'funcScrape': str });
                 }
             }
 
@@ -165,6 +165,36 @@ describe('Testsuit', function () {
             'name': 'NVIDIA'
         });
         assert.equal(JSON.stringify(response), expect);
+
+        //edit-modal
+        var response = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
+            const controller = app.getController();
+            try {
+                controller.setLoadingState(true);
+                var rule = await Scraper._getRule(url);
+                if (rule) {
+                    var obj = new CrudObject('scraper', rule);
+                    var body = await HttpProxy.request(url);
+                    var parser = new DOMParser();
+                    var doc = parser.parseFromString(body, 'text/html');
+
+                    controller.setLoadingState(false);
+                    //res = await Scraper.openEditScraperModal(rule, url, body, doc);
+                    Scraper.openEditScraperModal(obj, url, body, doc);
+                } else
+                    throw new Error('No matching rule found!');
+            } catch (error) {
+                controller.setLoadingState(false);
+                controller.showError(error);
+            }
+            callback();
+        });
+
+        modal = await helper.getTopModal();
+        assert.equal(modal != null, true);
 
         return Promise.resolve();
     });

@@ -20,7 +20,7 @@ const definition = {
             "dataType": "string"
         },
         {
-            "name": "function",
+            "name": "funcScrape",
             "view": "javascript",
             "dataType": "mime-text"
         },

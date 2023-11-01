@@ -1,5 +1,6 @@
 const definition = {
     "name": "http-proxy-cache",
+    "tableName": "http_proxy_cache",
     "options": {
         "increments": true,
         "timestamps": true
