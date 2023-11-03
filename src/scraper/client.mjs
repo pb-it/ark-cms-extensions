@@ -1,10 +1,16 @@
 async function init() {
     const controller = app.getController();
 
-    if (typeof Scraper === 'undefined') {
-        const apiController = controller.getApiController();
-        await loadScript(apiController.getApiOrigin() + "/api/ext/scraper/public/scraper.js");
-    }
+    const scripts = [];
+    const apiController = controller.getApiController();
+    const origin = apiController.getApiOrigin();
+    const publicDir = origin + "/api/ext/scraper/public";
+    if (typeof Scraper === 'undefined')
+        scripts.push(loadScript(publicDir + "/scraper.js"));
+    if (typeof EditScraperPanel === 'undefined')
+        scripts.push(loadScript(publicDir + "/edit-scraper-panel.js"));
+    await Promise.all(scripts);
+
     await Scraper.initModel();
 
     return Promise.resolve();

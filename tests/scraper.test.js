@@ -110,8 +110,7 @@ describe('Testsuit', function () {
             const callback = arguments[arguments.length - 1];
 
             const func = async function (url, doc, data) {
-                if (!data)
-                    data = {};
+                var data = {};
                 var title = doc.querySelector("meta[property='og:title']").getAttribute("content");
                 var index = title.toLowerCase().indexOf('aktie');
                 if (index > 0)
@@ -182,8 +181,7 @@ describe('Testsuit', function () {
                     var doc = parser.parseFromString(body, 'text/html');
 
                     controller.setLoadingState(false);
-                    //res = await Scraper.openEditScraperModal(rule, url, body, doc);
-                    Scraper.openEditScraperModal(obj, url, body, doc);
+                    await Scraper.openEditScraperModal(url, body, doc, obj);
                 } else
                     throw new Error('No matching rule found!');
             } catch (error) {

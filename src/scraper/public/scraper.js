@@ -48,7 +48,7 @@ class Scraper {
             var body = await HttpProxy.request(url);
             var parser = new DOMParser();
             var doc = parser.parseFromString(body, 'text/html');
-            res = await Scraper._scrape(rule, url, doc);
+            res = await Scraper._scrape(url, doc, rule);
         }
         return Promise.resolve(res);
     }
@@ -59,7 +59,8 @@ class Scraper {
         var domain = tmp.hostname;
         const ac = app.getController().getApiController();
         const client = ac.getApiClient();
-        tmp = await client.requestData('GET', 'scraper?domain=' + domain);
+        var resource = 'scraper?domain=' + domain;
+        tmp = await client.requestData('GET', resource);
         if (tmp && tmp.length > 0) {
             if (tmp.length == 1)
                 rule = tmp[0];
@@ -69,160 +70,22 @@ class Scraper {
         return Promise.resolve(rule);
     }
 
-    static async _scrape(rule, url, doc, data) {
+    static async _scrape(url, doc, rule, options) {
+        var data;
         if (rule && rule['funcScrape']) {
-            if (!data)
-                data = {};
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
-            var fn = new AsyncFunction('url', 'doc', 'data', rule['funcScrape']);
-            data = await fn(url, doc, data);
+            var fn = new AsyncFunction('url', 'doc', 'options', rule['funcScrape']);
+            data = await fn(url, doc, options);
         }
         return Promise.resolve(data);
     }
 
-    static async openEditScraperModal(ruleObj, url, body, doc) {
-        return new Promise(async (resolve, reject) => {
-            const controller = app.getController();
-            var bLoading = controller.getLoadingState();
-            controller.setLoadingState(true);
-
-            /*var model = app.controller.getModelController().getModel('scraper');
-            var skeleton = [...model.getModelAttributesController().getAttributes()];*/
-
-            var newConfig;
-
-            var skeleton = [...ruleObj.getSkeleton()];
-            skeleton.push(
-                {
-                    name: 'body',
-                    dataType: 'text',
-                    readonly: true,
-                    size: '10'
-                },
-                {
-                    name: 'result',
-                    dataType: 'json'
-                }
-            );
-            var data = { ...ruleObj.getData() };
-            data['body'] = body;
-            var form = new Form(skeleton, data);
-            var $form = await form.renderForm();
-
-            var panel = new Panel();
-
-            var $d = $('<div/>')
-                .css({ 'padding': '10' });
-
-            $d.append($form);
-
-            var $test = $('<button>')
-                .text('Test')
-                .click(async function (event) {
-                    event.stopPropagation();
-
-                    const controller = app.getController();
-                    controller.setLoadingState(true);
-                    try {
-                        var tmpConfig = await form.readForm();
-
-                        if (!body && tmpConfig['curl'] && url) {
-                            body = await HttpProxy.request(url);
-                            tmpConfig['body'] = body;
-                        }
-                        if (!doc && body) {
-                            var parser = new DOMParser();
-                            doc = parser.parseFromString(body, 'text/html');
-                        }
-
-                        tmpConfig['result'] = await Scraper._scrape(tmpConfig, url, doc);
-                        form.setFormData(tmpConfig);
-                        await form.renderForm();
-                        controller.setLoadingState(false);
-                    } catch (error) {
-                        controller.setLoadingState(false);
-                        controller.showError(error);
-                    }
-
-                    return Promise.resolve();
-                }.bind(this));
-            $d.append($test);
-
-            var $save = $('<button>')
-                .text('Save')
-                .click(async function (event) {
-                    event.stopPropagation();
-
-                    const controller = app.getController();
-                    controller.setLoadingState(true);
-                    try {
-                        var data = await form.readForm();
-                        if (data['domain']) {
-                            delete data['body'];
-                            delete data['result'];
-                            var oldData = ruleObj.getData();
-                            if (oldData['id']) {
-                                var changes = CrudObject.getChanges(ruleObj.getSkeleton(), oldData, data);
-                                if (changes && Object.keys(changes).length > 0) {
-                                    await ruleObj.update(changes);
-                                    alert('updated');
-                                } else
-                                    alert('nothing changed');
-                            } else {
-                                await ruleObj.create(data);
-                                alert('created');
-                            }
-                        } else
-                            alert('field \'domain\' required')
-                        controller.setLoadingState(false);
-                    } catch (error) {
-                        controller.setLoadingState(false);
-                        controller.showError(error);
-                    }
-
-                    return Promise.resolve();
-                }.bind(panel));
-            $d.append($save);
-            var $ok = $('<button>')
-                .text('Apply')
-                .css({ 'float': 'right' })
-                .click(async function (event) {
-                    event.stopPropagation();
-
-                    const controller = app.getController();
-                    controller.setLoadingState(true);
-                    try {
-                        newConfig = await form.readForm();
-                        var id = ruleObj.getId();
-                        if (id)
-                            newConfig['id'] = id;
-                        delete newConfig['body'];
-                        delete newConfig['result'];
-                        await ruleObj.setData(newConfig);
-
-                        controller.setLoadingState(false);
-                        this.dispose();
-                    } catch (error) {
-                        controller.setLoadingState(false);
-                        controller.showError(error);
-                    }
-
-                    return Promise.resolve();
-                }.bind(panel));
-            $d.append($ok);
-
-            panel.setContent($d);
-
-            var modal = await controller.getModalController().openPanelInModal(panel);
-            var $modal = modal.getModalDomElement();
-            $modal.on("remove", function () {
-                controller.setLoadingState(bLoading);
-                if (newConfig)
-                    resolve();
-                else
-                    reject();
-            });
-            controller.setLoadingState(false);
-        });
+    static async openEditScraperModal(url, body, doc, scraper, options) {
+        const controller = app.getController();
+        controller.setLoadingState(true);
+        var panel = new EditScraperPanel(url, body, doc, scraper, options);
+        var modal = await controller.getModalController().openPanelInModal(panel);
+        controller.setLoadingState(false);
+        return Promise.resolve(modal);
     }
 }
