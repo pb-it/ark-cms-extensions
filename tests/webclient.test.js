@@ -1,0 +1,103 @@
+const path = require('path');
+
+const assert = require('assert');
+
+const config = require('./config.js');
+const TestSetup = require('./helper/test-setup.js');
+const TestHelper = require('./helper/test-helper.js');
+
+var driver;
+var helper;
+
+describe('Testsuit', function () {
+    before('description', async function () {
+        this.timeout(10000);
+        driver = await new TestSetup(config).getDriver();
+        helper = new TestHelper(driver);
+
+        await TestHelper.delay(1000);
+    });
+
+    it('#test add extension', async function () {
+        this.timeout(30000);
+
+        const ext = 'axios-webclient';
+        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+
+        await helper.addExtension(ext, file);
+
+        return Promise.resolve();
+    });
+
+    it('#test request', async function () {
+        this.timeout(30000);
+
+        var error = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const url = 'https://www.finanzen.at/aktien/nvidia-aktie'; // AKTEN
+            var res;
+            try {
+                res = await HttpProxy.request(url);
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        });
+        assert.equal(error['response']['status'], 403);
+
+        var response = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
+            const options = {
+                'client': 'axios'
+            };
+            const res = await HttpProxy.request(url, options);
+            callback(res);
+        });
+        assert.equal(response.startsWith('\r\n<!DOCTYPE html>'), true);
+
+        error = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const url = 'https://www.finanzen.at/akten/nvidia-aktie'; // AKTEN
+            const options = {
+                'client': 'axios'
+            };
+            var res;
+            try {
+                res = await HttpProxy.request(url, options);
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        });
+        assert.equal(error['response']['status'], 404);
+
+        response = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const data = {
+                'cmd': `async function test() {
+    controller.getWebClientController().setDefaultWebClient('axios');
+    return Promise.resolve('OK');
+};
+                
+module.exports = test;`};
+
+            const ac = app.getController().getApiController();
+            const client = ac.getApiClient();
+            var tmp = await client.request('POST', '/sys/tools/dev/eval?_format=text', data);
+            if (tmp !== 'OK')
+                throw new Error('Switching WebClient Failed');
+
+            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
+            const res = await HttpProxy.request(url);
+            callback(res);
+        });
+        assert.equal(response.startsWith('\r\n<!DOCTYPE html>'), true);
+
+        return Promise.resolve();
+    });
+});

@@ -1,9 +1,6 @@
 const path = require('path');
 
 const assert = require('assert');
-const webdriver = require('selenium-webdriver');
-//const test = require('selenium-webdriver/testing');
-//const remote = require('selenium-webdriver/remote');
 
 const config = require('./config.js');
 const TestSetup = require('./helper/test-setup.js');
@@ -22,83 +19,12 @@ describe('Testsuit', function () {
     });
 
     it('#test add extension', async function () {
-        this.timeout(10000);
+        this.timeout(30000);
 
-        var ext = 'scraper';
+        const ext = 'scraper';
+        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        //driver.setFileDetector(new remote.FileDetector());
-
-        // https://copyprogramming.com/howto/selenium-close-file-picker-dialog
-        driver.executeScript(function () {
-            HTMLInputElement.prototype.click = function () {
-                if (this.type !== 'file') {
-                    HTMLElement.prototype.click.call(this);
-                }
-                else if (!this.parentNode) {
-                    this.style.display = 'none';
-                    this.ownerDocument.documentElement.appendChild(this);
-                    this.addEventListener('change', () => this.remove());
-                }
-            }
-        });
-
-        await TestHelper.delay(1000);
-
-        try {
-            var tmp = await driver.switchTo().alert();
-            if (tmp)
-                await tmp.dismiss();
-        } catch (error) {
-            ;
-        }
-
-        await helper.login();
-
-        await TestHelper.delay(1000);
-
-        var modal = await helper.getTopModal();
-        assert.equal(modal, null);
-
-        var xpath = `//*[@id="sidenav"]/div[contains(@class, 'menu') and contains(@class, 'iconbar')]/div[contains(@class, 'menuitem') and @title="Extensions"]`;
-        var button;
-        button = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        button.click();
-
-        await TestHelper.delay(1000);
-
-        xpath = `//*[@id="sidepanel"]/div/div[contains(@class, 'menu')]/div[contains(@class, 'menuitem') and starts-with(text(),"${ext}")]`;
-        var tmp = await driver.findElements(webdriver.By.xpath(xpath));
-        var bExists = (tmp.length > 0);
-
-        xpath = `//*[@id="sidepanel"]/div/div[contains(@class, 'menu')]/div[contains(@class, 'menuitem') and starts-with(text(),"Add")]`;
-        button = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        button.click();
-
-        await TestHelper.delay(1000);
-
-        xpath = `//input[@type="file"]`;
-        var input = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        if (input) {
-            var absolutePath = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
-            input.sendKeys(absolutePath);
-
-            var alert;
-            if (bExists) {
-                await driver.wait(webdriver.until.alertIsPresent());
-                alert = await driver.switchTo().alert();
-                await alert.accept();
-            }
-
-            await driver.wait(webdriver.until.alertIsPresent());
-            alert = await driver.switchTo().alert();
-            var text = await alert.getText();
-            assert.equal(text.startsWith('Uploaded \'' + ext + '\' successfully!'), true);
-            await alert.accept();
-        } else
-            assert.fail("Input not found");
-
-        await driver.navigate().refresh();
-        await TestHelper.delay(100);
+        await helper.addExtension(ext, file);
 
         return Promise.resolve();
     });
@@ -106,10 +32,14 @@ describe('Testsuit', function () {
     it('#test scraper', async function () {
         this.timeout(30000);
 
+        await TestHelper.delay(5000);
+
         var response = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
 
-            const func = async function (url, doc, data) {
+            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
+
+            const funcScrape = async function (url, doc, data) {
                 var data = {};
                 var title = doc.querySelector("meta[property='og:title']").getAttribute("content");
                 var index = title.toLowerCase().indexOf('aktie');
@@ -135,29 +65,32 @@ describe('Testsuit', function () {
                 }
                 return Promise.resolve(data);
             };
-            const formatter = app.getController().getFormatter();
-            var str = await formatter.formatText(func.toString().match(/function[^{]+\{([\s\S]*)\}$/)[1].trim(), 'javascript');
+            const controller = app.getController();
+            const formatter = controller.getFormatter();
+            var str = await formatter.formatText(funcScrape.toString().match(/function[^{]+\{([\s\S]*)\}$/)[1].trim(), 'javascript');
 
-            const ac = app.getController().getApiController();
-            const client = ac.getApiClient();
-            var tmp = await client.requestData('GET', 'scraper?domain=www.finanzen.at');
-
-            if (!tmp || tmp.length == 0) {
-                var data = {
+            var rule = await Scraper.getRule(url);
+            if (!rule || rule.length == 0) {
+                const options = {
+                    'headers': {
+                        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0'
+                    }
+                };
+                const data = {
                     'domain': 'www.finanzen.at',
+                    'options': options,
                     'funcScrape': str
                 };
-                var obj = new CrudObject('scraper', data);
-                tmp = await obj.create();
-            } else if (tmp && tmp.length == 1) {
-                if (tmp[0]['funcScrape'] != str) {
-                    var obj = new CrudObject('scraper', tmp[0]);
-                    tmp = await obj.update({ 'funcScrape': str });
+                const obj = new CrudObject('scraper', data);
+                rule = await obj.create();
+            } else if (rule && rule.length == 1) {
+                if (rule[0]['funcScrape'] != str) {
+                    const obj = new CrudObject('scraper', rule[0]);
+                    rule = await obj.update({ 'funcScrape': str });
                 }
             }
 
-            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
-            var res = await Scraper.scrape(url);
+            const res = await Scraper.scrape(url);
             callback(res);
         });
         var expect = JSON.stringify({
@@ -173,12 +106,12 @@ describe('Testsuit', function () {
             const controller = app.getController();
             try {
                 controller.setLoadingState(true);
-                var rule = await Scraper._getRule(url);
+                const rule = await Scraper.getRule(url);
                 if (rule) {
-                    var obj = new CrudObject('scraper', rule);
-                    var body = await HttpProxy.request(url);
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(body, 'text/html');
+                    const obj = new CrudObject('scraper', rule);
+                    const body = await HttpProxy.request(url, rule['options']);
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(body, 'text/html');
 
                     controller.setLoadingState(false);
                     await Scraper.openEditScraperModal(url, body, doc, obj);

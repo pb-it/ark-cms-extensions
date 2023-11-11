@@ -3,4 +3,6 @@ _*
 node_modules
 package-lock.json
 
+src/axios-webclient/ssl/*
+
 !.git*

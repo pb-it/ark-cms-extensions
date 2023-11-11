@@ -1,0 +1,319 @@
+const debug = require('debug');
+const log = debug('app:webclient');
+const path = require('path');
+const fs = require('fs');
+const axios = require('axios');
+const { stringify } = require('flatted');
+
+const appRoot = controller.getAppRoot();
+const Logger = require(path.join(appRoot, './src/common/logger/logger.js'));
+const base64 = require(path.join(appRoot, './src/common/base64.js'));
+
+class AxiosWebClient {
+
+    static _parseResponse(response) {
+        const res = {};
+        res['status'] = response.status;
+        res['statusText'] = response.statusText;
+        res['url'] = response.config.url;
+        res['headers'] = response.headers;
+        //res['redirected'] = response.redirected;
+        //res['type'] = response.type;
+        res['body'] = response.data;
+        return res;
+    }
+
+    static _progress(progressEvent) {
+        const total = parseFloat(progressEvent.currentTarget.responseHeaders['Content-Length'])
+        const current = progressEvent.currentTarget.response.length
+
+        let percentCompleted = Math.floor(current / total * 100);
+        console.log('completed: ', percentCompleted);
+    }
+
+    _ax;
+    _options;
+    _bDebug;
+
+    constructor(config) {
+        if (!config) {
+            config = {
+                headers: {
+                    common: {
+                        'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0'
+                    }
+                },
+                withCredentials: true
+            }
+        }
+        this._ax = axios.create(config);
+        this._options = [];
+
+        var debug = controller.getServerConfig()['debug'];
+        if (debug) {
+            if (debug['download'])
+                this._bDebug = true;
+
+            if (debug['axios'])
+                this._ax.interceptors.request.use(request => {
+                    console.log('Starting Request', JSON.stringify(request, null, 2));
+                    return request;
+                });
+        }
+    }
+
+    getAxios() {
+        return this._ax;
+    }
+
+    setOption(url, options) {
+        this._options[url] = options;
+    }
+
+    async get(url, options) {
+        return this.request(url, 'GET', null, options);
+    }
+
+    async post(url, data, options) {
+        return this.request(url, 'POST', data, options);
+    }
+
+    async put(url, data, options) {
+        return this.request(url, 'PUT', data, options);
+    }
+
+    async delete(url) {
+        return this.request(url, 'DELETE');
+    }
+
+    async request(url, method, data, options) {
+        log(method + ': ' + url);
+        if (debug.enabled('app:webclient')) {
+            var str;
+            if (options)
+                str = JSON.stringify(options, null, '\t');
+            else
+                str = 'null';
+            Logger.info('[webclient(axios)] options:\n' + str);
+        }
+        var res;
+        var bMeta;
+        if (options && options.hasOwnProperty('meta')) {
+            bMeta = options['meta'];
+            delete options['meta'];
+        }
+        var response;
+        try {
+            switch (method) {
+                case 'GET':
+                    response = await this._ax.get(url, options);
+                    break;
+                case 'DELETE':
+                    response = await this._ax.delete(url);
+                    break;
+                case 'POST':
+                    response = await this._ax.post(url, data, options);
+                    break;
+                case 'PUT':
+                    response = await this._ax.put(url, data, options);
+                    break;
+                default:
+                    throw new Error('Unsupported method');
+            }
+        } catch (error) {
+            //console.log(error);
+            if (error.isAxiosError)
+                response = error['response'];
+            else
+                throw error;
+        }
+        if (response) {
+            //console.log(response);
+            /*if (debug.enabled('app:webclient')) {
+                var str;
+                if (response)
+                    str = stringify(response);
+                else
+                    str = 'null';
+                Logger.info('[webclient(axios)] response:\n' + str);
+            }*/
+            if (bMeta)
+                res = AxiosWebClient._parseResponse(response);
+            else if (response.data)
+                res = response.data;
+        }
+        return Promise.resolve(res);
+    }
+
+    /*async getBlob(url) {
+        var data;
+        if (url) {
+            var resp = await this._ax.get(url, { responseType: 'blob' });
+            if (resp && resp.data)
+                data = resp.data;
+        }
+        return Promise.resolve(data);
+    }*/
+
+    async getBase64(url) {
+        log('BASE64: ' + url);
+        var res;
+        var opt = {
+            'responseType': 'arraybuffer' //'stream' / 'blob'
+        }
+        const response = await this._ax.get(url, opt);
+        const contentType = response.headers['content-type'];
+        const buffer = Buffer.from(response.data, 'binary'); // Buffer.from(response.data, 'base64');
+        res = base64.getStringFromBuffer(contentType, buffer);
+        return Promise.resolve(res);
+    }
+
+    async download(url, file, config) {
+        log('DOWNLOAD(axios): ' + url);
+
+        if (this._bDebug) {
+            var start = Date.now();
+            Logger.info('[App] Start: ' + new Date(start).toISOString());
+        }
+
+        var fpath;
+        var name;
+        var ext;
+        var index = file.lastIndexOf(path.sep);
+        if (index >= 0) {
+            fpath = file.substr(0, index);
+            name = file.substr(index + 1);
+        } else
+            name = file;
+        index = name.lastIndexOf('.');
+        if (index != -1)
+            ext = name.substr(index + 1);
+
+        if (!config) {
+            var match;
+            for (var key in this._options) {
+                match = new RegExp(key, 'ig').exec(url);
+                if (match) {
+                    config = this._options[key];
+                    break;
+                }
+            }
+        }
+        if (!config || !config['client'] || config['client'] == 'axios') {
+            var opt;
+            if (config && config['options'])
+                opt = config['options'];
+            else
+                opt = {};
+            opt['responseType'] = 'stream';
+            //opt['onDownloadProgress'] = WebClient._progress;
+            const response = await this._ax.get(url, opt);
+
+            var extFromHeader;
+            const type = response.headers['content-type'];
+            const disposition = response.headers['content-disposition'];
+            if (disposition && disposition != 'inline') {
+                extFromHeader = disposition.substr(disposition.lastIndexOf('.') + 1);
+                if (extFromHeader.endsWith('"'))
+                    extFromHeader = extFromHeader.substr(0, extFromHeader.length - 1);
+            } else if (type) {
+                var parts = type.split('/');
+                if (parts.length == 2 && !parts[1].startsWith('octet-stream')) {// 'application/octet-stream', 'binary/octet-stream'
+                    extFromHeader = parts[1];
+                    parts = extFromHeader.split(';');
+                    if (parts[0])
+                        extFromHeader = parts[0];
+                }
+            }
+            if (extFromHeader) {
+                var bChanged = false;
+                if (!ext) {
+                    name += '.' + extFromHeader;
+                    bChanged = true;
+                } else if (ext != extFromHeader) {
+                    var pic = ['jpg', 'jpeg', 'webp'];
+                    if (!pic.includes(ext) || !pic.includes(extFromHeader)) {
+                        name = name.substr(0, index + 1) + extFromHeader;
+                        bChanged = true;
+                    }
+                }
+                if (bChanged) {
+                    if (fpath)
+                        file = `${fpath}${path.sep}${name}`;
+                    else
+                        file = name;
+                }
+            }
+
+            if (fs.existsSync(file))
+                throw new Error("File '" + file + "' already exists!");
+
+            if (this._bDebug) {
+                const contentLength = response.headers['content-length'];
+                var total = 0;
+                var percentage = 0;
+                var last = 0;
+                response.data.on('data', (chunk) => {
+                    total += chunk.length;
+                    percentage = ((total / contentLength) * 100);
+                    if (percentage - last > 1) {
+                        last = percentage;
+                        console.log(percentage.toFixed(2) + "%");
+                    }
+                });
+            }
+
+            //stream.data.pipe(fs.createWriteStream(file));
+            await this._streamToFile(response, file);
+        }
+
+        if (this._bDebug) {
+            var end = Date.now();
+            Logger.info('[App] End: ' + new Date(end).toISOString());
+            var duration = (end - start) / 1000;
+            Logger.info('[App] Duration: ' + duration.toFixed(2) + ' sec');
+
+            var stats = fs.statSync(file);
+            var size = stats.size / (1024 * 1024);
+            Logger.info('[App] Size: ' + size.toFixed(2) + 'MB');
+
+            Logger.info('[App] Speed: ' + (size / duration).toFixed(2) + 'MB/s');
+        }
+
+        return Promise.resolve(name);
+    }
+
+    async _streamToFile(stream, file) {
+        return new Promise((resolve, reject) => {
+            var err;
+            const writer = fs.createWriteStream(file);
+            writer.on('error', error => {
+                err = error;
+                writer.close();
+                reject(error);
+            });
+            writer.on('close', () => {
+                if (err) {
+                    if (file && fs.existsSync(file))
+                        fs.unlinkSync(file);
+                } else
+                    resolve();
+            });
+            stream.data.pipe(writer);
+        });
+    }
+
+    async isImage(url) {
+        return new Promise(async function (resolve) {
+            const opt = {
+                'responseType': 'stream'
+            };
+            const response = await this._ax.get(url, opt);
+            console.log(response.headers['content-type']);
+            var match = response.headers['content-type'].match(/(image)+\//g);
+            resolve(match && match.length != 0);
+        });
+    }
+}
+
+module.exports = AxiosWebClient;

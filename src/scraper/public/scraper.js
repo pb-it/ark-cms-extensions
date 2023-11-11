@@ -43,17 +43,17 @@ class Scraper {
 
     static async scrape(url) {
         var res;
-        var rule = await Scraper._getRule(url);
+        const rule = await Scraper.getRule(url);
         if (rule) {
-            var body = await HttpProxy.request(url);
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(body, 'text/html');
+            const body = await HttpProxy.request(url, rule['options']);
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(body, 'text/html');
             res = await Scraper._scrape(url, doc, rule);
         }
         return Promise.resolve(res);
     }
 
-    static async _getRule(url) {
+    static async getRule(url) {
         var rule;
         var tmp = new URL(url);
         var domain = tmp.hostname;

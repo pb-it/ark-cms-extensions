@@ -20,6 +20,10 @@ const definition = {
             "dataType": "string"
         },
         {
+            "name": "options",
+            "dataType": "json"
+        },
+        {
             "name": "funcScrape",
             "view": "javascript",
             "dataType": "mime-text"

@@ -12,7 +12,9 @@
         "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
         "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\"",
         "test:scraper": "./build.sh scraper && mocha tests/scraper.test.js",
-        "test:scraper:scrape": "mocha tests/scraper.test.js --grep \"#test scrape\""
+        "test:scraper:scrape": "mocha tests/scraper.test.js --grep \"#test scrape\"",
+        "test:webclient": "./build.sh axios-webclient && mocha tests/webclient.test.js",
+        "test:webclient:request": "mocha tests/webclient.test.js --grep \"#test request\""
     },
     "repository": {
         "type": "git",

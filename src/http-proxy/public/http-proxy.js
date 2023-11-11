@@ -1,11 +1,18 @@
 class HttpProxy {
 
-    static async request(url, options, bCache) {
-        const ac = app.getController().getApiController();
-        const client = ac.getApiClient();
-
+    /**
+     * Supported options depend on used backend client:
+     * * client, rejectUnauthorized, formdata, bCache, meta
+     * * method, mode, credentials, ...
+     * * headers, redirect, ...
+     * * body/data, agent/httpsAgent
+     * @param {*} url 
+     * @param {*} options
+     * @returns 
+     */
+    static async request(url, options) {
         var res;
-        if (bCache) {
+        if (options && options['bCache']) {
             var tmp = await HttpProxy.lookup(url);
             if (tmp) {
                 if (confirm("Use cached response?"))
@@ -13,16 +20,19 @@ class HttpProxy {
             }
         }
         if (!res) {
-            var data = { 'url': url };
+            var data = {
+                'url': url
+            };
             if (options)
                 data['options'] = options;
+
+            const ac = app.getController().getApiController();
+            const client = ac.getApiClient();
+            const response = JSON.parse(await client.request('POST', '/api/ext/http-proxy/forward', data));
+            if (response && response['status'] == 200)
+                res = response['body'];
             else
-                data['options'] = {
-                    'method': 'GET'
-                };
-            if (bCache)
-                data['bCache'] = true;
-            res = await client.request('POST', '/api/ext/http-proxy/forward', data);
+                throw new HttpError(null, response);
         }
         return Promise.resolve(res);
     }

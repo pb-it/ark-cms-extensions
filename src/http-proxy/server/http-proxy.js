@@ -1,7 +1,14 @@
+const debug = require('debug');
+const log = debug('app:http-proxy');
 const path = require('path');
+const https = require('https');
+
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: false
+});
 
 const appRoot = controller.getAppRoot();
-const Logger = require(path.join(appRoot, "./src/common/logger/logger.js"));
+const Logger = require(path.join(appRoot, './src/common/logger/logger.js'));
 
 class HttpProxy {
 
@@ -17,38 +24,31 @@ class HttpProxy {
             var body = req.body;
             url = body['url'];
             options = body['options'];
-            bCache = body['bCache'];
-            /*if (body['method'])
-                options['method'] = body['method'];
-            if (body['headers'])
-                options['headers'] = body['headers'];*/
-            if (body['data']) {
-                if (typeof body['data'] === 'string' || body['data'] instanceof String)
-                    options['body'] = body['data'];
-                else
-                    options['body'] = JSON.stringify(body['data']);
-            }
-            if (body['formdata']) {
-                const formData = new FormData();
-                for (const name in body['formdata']) {
-                    formData.append(name, body['formdata'][name]);
-                }
-                options['body'] = formData;
+            if (options && options.hasOwnProperty('bCache')) {
+                bCache = options['bCache'];
+                delete options['bCache'];
             }
         }
         if (url) {
-            var format = req.query['format'];
+            log(url);
+            if (debug.enabled('app:http-proxy')) {
+                var str;
+                if (options)
+                    str = JSON.stringify(options, null, '\t');
+                else
+                    str = 'null';
+                Logger.info('[app:http-proxy] options:\n' + str);
+            }
             try {
                 var response = await HttpProxy.request(url, options);
                 if (response && bCache) {
-                    const model = controller.getShelf().getModel('http-proxy-cache');
-                    if (model)
-                        await model.create({ 'url': url, 'body': response });
+                    if (response['status'] == 200 && response['body']) {
+                        const model = controller.getShelf().getModel('http-proxy-cache');
+                        if (model)
+                            await model.create({ 'url': url, 'body': response['body'] });
+                    }
                 }
-                if (format == 'json')
-                    res.json({ 'data': response });
-                else
-                    res.send(response);
+                res.json(response);
             } catch (error) {
                 Logger.parseError(error);
                 if (!res.headersSent) {
@@ -70,35 +70,73 @@ class HttpProxy {
      *  headers: {
      *    ...
      *  },
+     *  agent: ...
      *  body: '...'
      * }
-     * @param {*} url 
+     * @param {*} url
      * @param {*} options 
      * @returns 
      */
     static async request(url, options) {
+        var res;
+        var client;
+        var method;
         var data;
-        var response = await fetch(url, options);
-        if (options && options['meta']) {
-            var data = {};
-            data['status'] = response.status;
-            data['statusText'] = response.statusText;
-            data['url'] = response.url;
-            data['redirected'] = response.redirected;
-            data['type'] = response.type;
-            //data['headers'] = response.headers;
-            //data['body'] = response.body;
-            if (response.status === 200)
-                data['body'] = await response.text();
-            //console.log(data);
-        } else {
-            if (response.status === 200) {
-                data = await response.text();
-                //data = await response.json();
-            } else
-                throw new Error(response.status);
-        }
-        return Promise.resolve(data);
+        if (options) {
+            client = options['client'];
+            method = options['method'];
+            if (!client || client === 'fetch') {
+                if (options.hasOwnProperty('formdata')) {
+                    const params = new URLSearchParams();
+                    for (const name in options['formdata']) {
+                        params.append(name, options['formdata'][name]);
+                    }
+                    options['body'] = params;
+                    delete options['formdata'];
+                }
+                if (options.hasOwnProperty('rejectUnauthorized')) {
+                    if (!options['rejectUnauthorized'])
+                        options['agent'] = httpsAgent;
+                    delete options['rejectUnauthorized'];
+                }
+            } else if (client === 'axios') {
+                if (options.hasOwnProperty('formdata')) {
+                    const formData = new FormData();
+                    for (const name in options['formdata']) {
+                        formData.append(name, options['formdata'][name]);
+                    }
+                    data = formData;
+                    delete options['formdata'];
+                }
+                var tmp;
+                if (options.hasOwnProperty('data')) {
+                    tmp = options['data'];
+                    delete options['data'];
+                }
+                if (options.hasOwnProperty('body')) {
+                    tmp = options['body'];
+                    delete options['body'];
+                }
+                if (tmp) {
+                    if (typeof tmp === 'string' || tmp instanceof String)
+                        data = tmp;
+                    else
+                        data = JSON.stringify(tmp);
+                }
+                if (options.hasOwnProperty('rejectUnauthorized')) {
+                    if (!options['rejectUnauthorized'])
+                        options['httpsAgent'] = httpsAgent;
+                    delete options['rejectUnauthorized'];
+                }
+            }
+        } else
+            options = {};
+        options['meta'] = true;
+        if (!method)
+            method = 'GET';
+        const webclient = controller.getWebClientController().getWebClient(client);
+        res = await webclient.request(url, method, data, options); // await fetch(url, options);
+        return Promise.resolve(res);
     }
 }
 

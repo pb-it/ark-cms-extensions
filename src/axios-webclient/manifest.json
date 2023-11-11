@@ -1,0 +1,11 @@
+{
+    "name": "axios-webclient",
+    "version": "1.0.0",
+    "description": "Axios WebClient",
+    "app_version": "^0.5.0",
+    "npm_dependencies": {
+        "axios": "",
+        "ssl-root-cas": "",
+        "flatted": ""
+    }
+}
