@@ -2,6 +2,7 @@ const debug = require('debug');
 const log = debug('app:http-proxy');
 const path = require('path');
 const https = require('https');
+//const FormData = require('form-data');
 
 const httpsAgent = new https.Agent({
     rejectUnauthorized: false
@@ -21,7 +22,7 @@ class HttpProxy {
             if (req.query['_cache'])
                 bCache = req.query['_cache'] === 'true';
         } else if (req.method == 'POST') {
-            var body = req.body;
+            const body = req.body;
             url = body['url'];
             options = body['options'];
             if (options && options.hasOwnProperty('bCache')) {
@@ -40,7 +41,7 @@ class HttpProxy {
                 Logger.info('[app:http-proxy] options:\n' + str);
             }
             try {
-                var response = await HttpProxy.request(url, options);
+                const response = await HttpProxy.request(url, options);
                 if (response && bCache) {
                     if (response['status'] == 200 && response['body']) {
                         const model = controller.getShelf().getModel('http-proxy-cache');
@@ -85,29 +86,30 @@ class HttpProxy {
         if (options) {
             client = options['client'];
             method = options['method'];
+            var agent;
+            if (options.hasOwnProperty('rejectUnauthorized')) {
+                if (!options['rejectUnauthorized'])
+                    agent = httpsAgent;
+                delete options['rejectUnauthorized'];
+            }
+            var formData;
+            if (options.hasOwnProperty('formdata')) {
+                formData = new FormData();
+                for (const name in options['formdata']) {
+                    formData.append(name, options['formdata'][name]);
+                }
+                delete options['formdata'];
+            }
             if (!client || client === 'fetch') {
-                if (options.hasOwnProperty('formdata')) {
-                    const params = new URLSearchParams();
-                    for (const name in options['formdata']) {
-                        params.append(name, options['formdata'][name]);
-                    }
-                    options['body'] = params;
-                    delete options['formdata'];
-                }
-                if (options.hasOwnProperty('rejectUnauthorized')) {
-                    if (!options['rejectUnauthorized'])
-                        options['agent'] = httpsAgent;
-                    delete options['rejectUnauthorized'];
-                }
+                if (agent)
+                    options['agent'] = agent;
+                if (formData)
+                    options['body'] = new URLSearchParams(formData);
             } else if (client === 'axios') {
-                if (options.hasOwnProperty('formdata')) {
-                    const formData = new FormData();
-                    for (const name in options['formdata']) {
-                        formData.append(name, options['formdata'][name]);
-                    }
+                if (agent)
+                    options['httpsAgent'] = httpsAgent;
+                if (formData)
                     data = formData;
-                    delete options['formdata'];
-                }
                 var tmp;
                 if (options.hasOwnProperty('data')) {
                     tmp = options['data'];
@@ -123,11 +125,6 @@ class HttpProxy {
                     else
                         data = JSON.stringify(tmp);
                 }
-                if (options.hasOwnProperty('rejectUnauthorized')) {
-                    if (!options['rejectUnauthorized'])
-                        options['httpsAgent'] = httpsAgent;
-                    delete options['rejectUnauthorized'];
-                }
             }
         } else
             options = {};
@@ -135,7 +132,10 @@ class HttpProxy {
         if (!method)
             method = 'GET';
         const webclient = controller.getWebClientController().getWebClient(client);
-        res = await webclient.request(url, method, data, options); // await fetch(url, options);
+        if (webclient)
+            res = await webclient.request(url, method, data, options); // await fetch(url, options);
+        else
+            throw new Error('WebClient not found');
         return Promise.resolve(res);
     }
 }

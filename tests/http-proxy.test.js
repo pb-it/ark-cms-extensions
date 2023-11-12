@@ -10,11 +10,15 @@ var driver;
 var helper;
 
 describe('Testsuit', function () {
-    before('description', async function () {
+
+    before('#setup', async function () {
+        this.timeout(10000);
         driver = await new TestSetup(config).getDriver();
         helper = new TestHelper(driver);
 
         await TestHelper.delay(1000);
+
+        return Promise.resolve();
     });
 
     it('#test add extension', async function () {
@@ -23,7 +27,7 @@ describe('Testsuit', function () {
         const ext = 'http-proxy';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.addExtension(ext, file);
+        await helper.addExtension(ext, file, true);
 
         return Promise.resolve();
     });
@@ -70,6 +74,18 @@ describe('Testsuit', function () {
             callback(res);
         });
         assert.equal(response.startsWith('\r\n<!DOCTYPE html>'), true);
+
+        return Promise.resolve();
+    });
+
+    it('#test forward formdata', async function () {
+        this.timeout(10000);
+
+        await helper.login();
+
+        await TestHelper.delay(5000);
+
+        //TODO:
 
         return Promise.resolve();
     });

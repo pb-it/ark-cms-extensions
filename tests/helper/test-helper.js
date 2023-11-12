@@ -89,7 +89,7 @@ class TestHelper {
         return Promise.resolve();
     }
 
-    async addExtension(name, file) {
+    async addExtension(name, file, bRestartIfRequested) {
         //this._driver.setFileDetector(new remote.FileDetector());
 
         await this.login();
@@ -148,6 +148,13 @@ class TestHelper {
         } else
             assert.fail("Input not found");
 
+        if (bRestartIfRequested)
+            await this.checkRestartRequest();
+
+        return Promise.resolve();
+    }
+
+    async checkRestartRequest() {
         var response = await this._driver.executeAsyncScript(async () => {
             var callback = arguments[arguments.length - 1];
             var res = 1;
