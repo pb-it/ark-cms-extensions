@@ -1,22 +1,45 @@
 const path = require('path');
 const fs = require('fs');
 //const { opendir } = require('fs').promises;
-const https = require('https');
+//const https = require('https');
 
 const AxiosWebClient = require('./server/axios-webclient.js');
 
 async function init() {
     const sslRootCAs = require('ssl-root-cas') // 'ssl-root-cas/latest'
-        .inject();
+        .inject(); // same as .create()?
 
     const dir = fs.opendirSync(path.join(__dirname, 'ssl'));
     for await (const file of dir)
         sslRootCAs.addFile(path.join(__dirname, 'ssl/' + file.name));
 
-    https.globalAgent.options.ca = sslRootCAs;
+    var httpsAgent;
+    /*httpsAgent = new https.Agent({
+        ca: sslRootCAs
+    });*/
+    //https.globalAgent.options.ca = sslRootCAs; // injection seems to work globally by default
+    //https.globalAgent.options.rejectUnauthorized = false;
 
-    const axios = new AxiosWebClient();
-    controller.getWebClientController().addWebClient('axios', axios);
+    const registry = controller.getRegistry();
+    const userAgent = await registry.get('defaultUserAgent');
+    const bDefault = await registry.get('defaultWebClient') === 'axios';
+    var config;
+    if (httpsAgent || userAgent) {
+        config = {
+            withCredentials: true
+        };
+        if (httpsAgent)
+            config['httpsAgent'] = httpsAgent;
+        if (userAgent) {
+            config['headers'] = {
+                common: {
+                    'User-Agent': userAgent
+                }
+            }
+        }
+    }
+    const axios = new AxiosWebClient(config);
+    controller.getWebClientController().addWebClient('axios', axios, bDefault);
 
     return Promise.resolve();
 }

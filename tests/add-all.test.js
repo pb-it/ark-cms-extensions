@@ -1,10 +1,9 @@
 const path = require('path');
 
-const assert = require('assert');
+//const assert = require('assert');
 
 const config = require('./config.js');
-const TestSetup = require('./helper/test-setup.js');
-const TestHelper = require('./helper/test-helper.js');
+const { TestSetup, TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
 
 var driver;
 var helper;
