@@ -81,60 +81,64 @@ class HttpProxy {
     static async request(url, options) {
         var res;
         var client;
-        var method;
-        var data;
-        if (options) {
+        if (options)
             client = options['client'];
-            method = options['method'];
-            var agent;
-            if (options.hasOwnProperty('rejectUnauthorized')) {
-                if (!options['rejectUnauthorized'])
-                    agent = httpsAgent;
-                delete options['rejectUnauthorized'];
-            }
-            var formData;
-            if (options.hasOwnProperty('formdata')) {
-                formData = new FormData();
-                for (const name in options['formdata']) {
-                    formData.append(name, options['formdata'][name]);
-                }
-                delete options['formdata'];
-            }
-            if (!client || client === 'fetch') {
-                if (agent)
-                    options['agent'] = agent;
-                if (formData)
-                    options['body'] = new URLSearchParams(formData);
-            } else if (client === 'axios') {
-                if (agent)
-                    options['httpsAgent'] = httpsAgent;
-                if (formData)
-                    data = formData;
-                var tmp;
-                if (options.hasOwnProperty('data')) {
-                    tmp = options['data'];
-                    delete options['data'];
-                }
-                if (options.hasOwnProperty('body')) {
-                    tmp = options['body'];
-                    delete options['body'];
-                }
-                if (tmp) {
-                    if (typeof tmp === 'string' || tmp instanceof String)
-                        data = tmp;
-                    else
-                        data = JSON.stringify(tmp);
-                }
-            }
-        } else
-            options = {};
-        options['meta'] = true;
-        if (!method)
-            method = 'GET';
         const webclient = controller.getWebClientController().getWebClient(client);
-        if (webclient)
+        if (webclient) {
+            if (!client)
+                client = webclient.getName();
+            var method;
+            var data;
+            if (options) {
+                method = options['method'];
+                var agent;
+                if (options.hasOwnProperty('rejectUnauthorized')) {
+                    if (!options['rejectUnauthorized'])
+                        agent = httpsAgent;
+                    delete options['rejectUnauthorized'];
+                }
+                var formData;
+                if (options.hasOwnProperty('formdata')) {
+                    formData = new FormData();
+                    for (const name in options['formdata']) {
+                        formData.append(name, options['formdata'][name]);
+                    }
+                    delete options['formdata'];
+                }
+                if (!client || client === 'fetch') {
+                    if (agent)
+                        options['agent'] = agent;
+                    if (formData)
+                        options['body'] = new URLSearchParams(formData);
+                } else if (client === 'axios') {
+                    if (agent)
+                        options['httpsAgent'] = httpsAgent;
+                    if (formData)
+                        data = formData;
+                    var tmp;
+                    if (options.hasOwnProperty('data')) {
+                        tmp = options['data'];
+                        delete options['data'];
+                    }
+                    if (options.hasOwnProperty('body')) {
+                        tmp = options['body'];
+                        delete options['body'];
+                    }
+                    if (tmp) {
+                        if (typeof tmp === 'string' || tmp instanceof String)
+                            data = tmp;
+                        else
+                            data = JSON.stringify(tmp);
+                    }
+                }
+            } else
+                options = {};
+            options['meta'] = true;
+            if (!method)
+                method = 'GET';
+
             res = await webclient.request(url, method, data, options); // await fetch(url, options);
-        else
+        } else
             throw new Error('WebClient not found');
         return Promise.resolve(res);
     }

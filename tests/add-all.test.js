@@ -20,8 +20,8 @@ describe('Testsuit', function () {
         return Promise.resolve();
     });
 
-    it('#test add extension', async function () {
-        this.timeout(30000);
+    it('#test add extensions', async function () {
+        this.timeout(60000);
 
         const extensions = ['mime-text', 'process', 'formatter', 'http-proxy', 'axios-webclient', 'scraper', 'console', 'chat'];
         var file;

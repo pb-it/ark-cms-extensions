@@ -3,9 +3,16 @@ const fs = require('fs');
 //const { opendir } = require('fs').promises;
 //const https = require('https');
 
-const AxiosWebClient = require('./server/axios-webclient.js');
+var AxiosWebClient;
 
 async function init() {
+    var resolved;
+    var p = './server/axios-webclient.js';
+    resolved = require.resolve(p);
+    if (resolved)
+        delete require.cache[p];
+    AxiosWebClient = require('./server/axios-webclient.js');
+
     const sslRootCAs = require('ssl-root-cas') // 'ssl-root-cas/latest'
         .inject(); // same as .create()?
 
@@ -39,7 +46,7 @@ async function init() {
         }
     }
     const axios = new AxiosWebClient(config);
-    controller.getWebClientController().addWebClient('axios', axios, bDefault);
+    controller.getWebClientController().addWebClient(axios, bDefault);
 
     return Promise.resolve();
 }

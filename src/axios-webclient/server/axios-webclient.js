@@ -3,13 +3,14 @@ const log = debug('app:webclient');
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
-const { stringify } = require('flatted');
+//const { stringify } = require('flatted');
 
 const appRoot = controller.getAppRoot();
+const WebClient = require(path.join(appRoot, './src/common/webclient/webclient.js'));
 const Logger = require(path.join(appRoot, './src/common/logger/logger.js'));
 const base64 = require(path.join(appRoot, './src/common/base64.js'));
 
-class AxiosWebClient {
+class AxiosWebClient extends WebClient {
 
     static _parseResponse(response) {
         const res = {};
@@ -33,9 +34,10 @@ class AxiosWebClient {
 
     _ax;
     _options;
-    _bDebug;
+    _debugOptions;
 
     constructor(config) {
+        super('axios');
         if (!config) {
             config = {
                 headers: {
@@ -49,16 +51,30 @@ class AxiosWebClient {
         this._ax = axios.create(config);
         this._options = [];
 
-        var debug = controller.getServerConfig()['debug'];
-        if (debug) {
-            if (debug['download'])
-                this._bDebug = true;
+        this._debugOptions = {};
+        const debugConfig = controller.getServerConfig()['debug'];
+        if (debugConfig) {
+            if (debugConfig['download'])
+                this._debugOptions['download'] = true;
 
-            if (debug['axios'])
+            if (debugConfig['axios']) {
+                this.setDebugOption('request');
+            }
+        }
+        if (debug.enabled('app:webclient') && !this._debugOptions['request'])
+            this.setDebugOption('request');
+    }
+
+    setDebugOption(name, value = true) {
+        this._debugOptions[name] = value;
+        if (name === 'request') {
+            if (value) {
                 this._ax.interceptors.request.use(request => {
-                    console.log('Starting Request', JSON.stringify(request, null, 2));
+                    //console.log('request', JSON.stringify(request, null, 2));
+                    Logger.info('[webclient(axios)] data:\n' + JSON.stringify(request, null, '\t'));
                     return request;
                 });
+            }
         }
     }
 
@@ -66,6 +82,12 @@ class AxiosWebClient {
         return this._ax;
     }
 
+    /**
+     * 
+     * @param {*} url 
+     * @param {*} options 
+     *  [ 'request', 'response', 'download' ]
+     */
     setOption(url, options) {
         this._options[url] = options;
     }
@@ -88,13 +110,18 @@ class AxiosWebClient {
 
     async request(url, method, data, options) {
         log(method + ': ' + url);
-        if (debug.enabled('app:webclient')) {
+        if (this._debugOptions['request']) {
             var str;
             if (options)
                 str = JSON.stringify(options, null, '\t');
             else
                 str = 'null';
             Logger.info('[webclient(axios)] options:\n' + str);
+            if (data)
+                str = JSON.stringify(data, null, '\t');
+            else
+                str = 'null';
+            Logger.info('[webclient(axios)] data:\n' + str);
         }
         var res;
         var bMeta;
@@ -129,7 +156,7 @@ class AxiosWebClient {
         }
         if (response) {
             //console.log(response);
-            /*if (debug.enabled('app:webclient')) {
+            /*if (this._debugOptions['response']) {
                 var str;
                 if (response)
                     str = stringify(response);
@@ -171,7 +198,7 @@ class AxiosWebClient {
     async download(url, file, config) {
         log('DOWNLOAD(axios): ' + url);
 
-        if (this._bDebug) {
+        if (this._debugOptions['download']) {
             var start = Date.now();
             Logger.info('[App] Start: ' + new Date(start).toISOString());
         }
@@ -248,7 +275,7 @@ class AxiosWebClient {
             if (fs.existsSync(file))
                 throw new Error("File '" + file + "' already exists!");
 
-            if (this._bDebug) {
+            if (this._debugOptions['download']) {
                 const contentLength = response.headers['content-length'];
                 var total = 0;
                 var percentage = 0;
@@ -267,7 +294,7 @@ class AxiosWebClient {
             await this._streamToFile(response, file);
         }
 
-        if (this._bDebug) {
+        if (this._debugOptions['download']) {
             var end = Date.now();
             Logger.info('[App] End: ' + new Date(end).toISOString());
             var duration = (end - start) / 1000;

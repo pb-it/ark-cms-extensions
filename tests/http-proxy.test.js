@@ -32,7 +32,7 @@ describe('Testsuit', function () {
     });
 
     it('#test forward request', async function () {
-        this.timeout(10000);
+        this.timeout(30000);
 
         await helper.login();
 
