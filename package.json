@@ -29,10 +29,8 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
+        "@pb-it/ark-cms-selenium-test-helper": "^0.1.2-beta",
         "mocha": "^10.2.0",
-        "selenium-webdriver": "^4.8.2"
-    },
-    "dependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "^0.1.1-beta"
+        "selenium-webdriver": "^4.15.0"
     }
 }

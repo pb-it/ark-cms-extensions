@@ -66,14 +66,29 @@ class AxiosWebClient extends WebClient {
     }
 
     setDebugOption(name, value = true) {
-        this._debugOptions[name] = value;
-        if (name === 'request') {
-            if (value) {
-                this._ax.interceptors.request.use(request => {
-                    //console.log('request', JSON.stringify(request, null, 2));
-                    Logger.info('[webclient(axios)] data:\n' + JSON.stringify(request, null, '\t'));
-                    return request;
-                });
+        if (this._debugOptions[name] != value) {
+            this._debugOptions[name] = value;
+            if (name === 'request') {
+                if (value) {
+                    this._ax.interceptors.request.use(request => {
+                        //console.log('request', JSON.stringify(request, null, 2));
+                        Logger.info('[webclient(axios)] request:\n' + JSON.stringify(request, null, '\t'));
+                        return request;
+                    }, error => {
+                        Logger.info('[webclient(axios)] error:\n' + JSON.stringify(error, null, '\t'));
+                        return request;
+                    });
+                }
+            } else if (name === 'response') {
+                if (value) {
+                    this._ax.interceptors.response.use(response => {
+                        Logger.info('[webclient(axios)] response:\n' + JSON.stringify(response, null, '\t'));
+                        return request;
+                    }, error => {
+                        Logger.info('[webclient(axios)] error:\n' + JSON.stringify(error, null, '\t'));
+                        return request;
+                    });
+                }
             }
         }
     }
@@ -117,9 +132,12 @@ class AxiosWebClient extends WebClient {
             else
                 str = 'null';
             Logger.info('[webclient(axios)] options:\n' + str);
-            if (data)
-                str = JSON.stringify(data, null, '\t');
-            else
+            if (data) {
+                if (data instanceof FormData)
+                    str = JSON.stringify(Object.fromEntries(data), null, '\t'); // data.entries()
+                else
+                    str = JSON.stringify(data, null, '\t');
+            } else
                 str = 'null';
             Logger.info('[webclient(axios)] data:\n' + str);
         }

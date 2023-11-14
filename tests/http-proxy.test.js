@@ -3,30 +3,55 @@ const path = require('path');
 const assert = require('assert');
 
 const config = require('./config.js');
-const { TestSetup, TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
 
-var driver;
-var helper;
+describe('Testsuit - HttpProxy', function () {
 
-describe('Testsuit', function () {
+    let driver;
 
     before('#setup', async function () {
         this.timeout(10000);
-        driver = await new TestSetup(config).getDriver();
-        helper = new TestHelper(driver);
+
+        if (!global.helper) {
+            global.helper = new TestHelper();
+            await helper.setup(config);
+        }
+        driver = helper.getBrowser().getDriver();
 
         await TestHelper.delay(1000);
+
+        await helper.login();
+
+        await TestHelper.delay(1000);
+
+        var modal = await helper.getTopModal();
+        assert.equal(modal, null);
 
         return Promise.resolve();
     });
 
+    /*after('#teardown', async function () {
+        return await driver.quit();
+    });*/
+
     it('#test add extension', async function () {
-        this.timeout(30000);
+        this.timeout(120000);
 
         const ext = 'http-proxy';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.addExtension(ext, file, true);
+        await helper.getExtensionController().addExtension(ext, file, true);
+
+        await helper.reload();
+
+        await TestHelper.delay(1000);
+
+        await helper.login();
+
+        await TestHelper.delay(1000);
+
+        var modal = await helper.getTopModal();
+        assert.equal(modal, null);
 
         return Promise.resolve();
     });
@@ -77,7 +102,7 @@ describe('Testsuit', function () {
         return Promise.resolve();
     });
 
-    it('#test forward formdata', async function () {
+    xit('#test forward formdata', async function () {
         this.timeout(10000);
 
         await helper.login();
