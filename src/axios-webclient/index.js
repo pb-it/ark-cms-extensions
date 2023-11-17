@@ -6,19 +6,17 @@ const fs = require('fs');
 var AxiosWebClient;
 
 async function init() {
-    var resolved;
-    var p = './server/axios-webclient.js';
-    resolved = require.resolve(p);
-    if (resolved)
-        delete require.cache[p];
     AxiosWebClient = require('./server/axios-webclient.js');
 
     const sslRootCAs = require('ssl-root-cas') // 'ssl-root-cas/latest'
         .inject(); // same as .create()?
 
-    const dir = fs.opendirSync(path.join(__dirname, 'ssl'));
-    for await (const file of dir)
-        sslRootCAs.addFile(path.join(__dirname, 'ssl/' + file.name));
+    const dirPath = path.join(__dirname, 'ssl');
+    if (fs.existsSync(dirPath)) {
+        const dir = fs.opendirSync(dirPath);
+        for await (const file of dir)
+            sslRootCAs.addFile(path.join(__dirname, 'ssl/' + file.name));
+    }
 
     var httpsAgent;
     /*httpsAgent = new https.Agent({
@@ -52,6 +50,12 @@ async function init() {
 }
 
 async function teardown() {
+    var resolved;
+    var p = './server/axios-webclient.js';
+    resolved = require.resolve(p);
+    if (resolved)
+        delete require.cache[p];
+
     controller.setRestartRequest();
     return Promise.resolve();
 }

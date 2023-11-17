@@ -1,8 +1,9 @@
 const path = require('path');
+const fs = require('fs');
 
 const assert = require('assert');
 
-const config = require('./config.js');
+const config = require('./config/test-config.js');
 const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
 
 describe('Testsuit - Add all', function () {
@@ -42,6 +43,7 @@ describe('Testsuit - Add all', function () {
         var file;
         for (var ext of extensions) {
             file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+            assert.equal(fs.existsSync(file), true, "File '" + file + "' not found!");
             await ec.addExtension(ext, file);
         }
         await helper.checkRestartRequest();

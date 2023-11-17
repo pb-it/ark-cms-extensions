@@ -5,4 +5,6 @@ package-lock.json
 
 src/axios-webclient/ssl/*
 
+tests/config/test-config.js
+
 !.git*

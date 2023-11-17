@@ -2,7 +2,7 @@ const path = require('path');
 
 const assert = require('assert');
 
-const config = require('./config.js');
+const config = require('./config/test-config.js');
 const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
 
 describe('Testsuit - WebClient', function () {

@@ -7,7 +7,7 @@
         "test": "tests"
     },
     "scripts": {
-        "pretest": "./build.sh",
+        "pretest": "node build.js",
         "test": "mocha --bail tests/*.test.js",
         "test:add-all": "./build.sh && mocha tests/add-all.test.js",
         "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
