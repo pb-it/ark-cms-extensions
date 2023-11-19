@@ -8,7 +8,7 @@
     },
     "scripts": {
         "pretest": "node build.js",
-        "test": "mocha --bail tests/*.test.js",
+        "test": "mocha --bail tests/root.test.js",
         "test:add-all": "./build.sh && mocha tests/add-all.test.js",
         "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
         "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\"",
@@ -29,7 +29,7 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "^0.1.2-beta",
+        "@pb-it/ark-cms-selenium-test-helper": "^0.1.3-beta",
         "mocha": "^10.2.0",
         "selenium-webdriver": "^4.15.0"
     }

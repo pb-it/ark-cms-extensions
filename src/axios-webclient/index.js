@@ -3,11 +3,9 @@ const fs = require('fs');
 //const { opendir } = require('fs').promises;
 //const https = require('https');
 
-var AxiosWebClient;
+const AxiosWebClient = require('./server/axios-webclient.js');
 
 async function init() {
-    AxiosWebClient = require('./server/axios-webclient.js');
-
     const sslRootCAs = require('ssl-root-cas') // 'ssl-root-cas/latest'
         .inject(); // same as .create()?
 
@@ -56,7 +54,7 @@ async function teardown() {
     if (resolved)
         delete require.cache[p];
 
-    controller.setRestartRequest();
+    //controller.setRestartRequest();
     return Promise.resolve();
 }
 

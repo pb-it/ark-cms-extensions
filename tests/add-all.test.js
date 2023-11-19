@@ -18,22 +18,28 @@ describe('Testsuit - Add all', function () {
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
+        const app = helper.getApp();
 
         await TestHelper.delay(1000);
 
-        await helper.login();
+        await app.login(config['api'], config['username'], config['password']);
 
         await TestHelper.delay(1000);
 
-        var modal = await helper.getTopModal();
+        const modal = await app.getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
     });
 
     /*after('#teardown', async function () {
-        return await driver.quit();
+        return driver.quit();
     });*/
+
+    afterEach(function () {
+        if (global.allPassed)
+            allPassed = allPassed && (this.currentTest.state === 'passed');
+    });
 
     it('#test add extensions', async function () {
         this.timeout(300000);
@@ -46,17 +52,19 @@ describe('Testsuit - Add all', function () {
             assert.equal(fs.existsSync(file), true, "File '" + file + "' not found!");
             await ec.addExtension(ext, file);
         }
-        await helper.checkRestartRequest();
+        const ac = helper.getApiController();
+        await ac.checkRestartRequest();
 
-        await helper.reload();
-
-        await TestHelper.delay(1000);
-
-        await helper.login();
+        const app = helper.getApp();
+        await app.reload();
 
         await TestHelper.delay(1000);
 
-        var modal = await helper.getTopModal();
+        await app.login();
+
+        await TestHelper.delay(1000);
+
+        var modal = await app.getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();

@@ -1,4 +1,5 @@
 const host = 'http://localhost:4000';
+const api = 'https://localhost:3002';
 
 const firefox = {
     'name': 'firefox',
@@ -16,5 +17,6 @@ else
 
 module.exports = {
     host: host,
+    api: api,
     browser: chrome
 }

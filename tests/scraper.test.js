@@ -17,22 +17,28 @@ describe('Testsuit - scraper', function () {
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
+        const app = helper.getApp();
 
         await TestHelper.delay(1000);
 
-        await helper.login();
+        await app.login(config['api'], config['username'], config['password']);
 
         await TestHelper.delay(1000);
 
-        var modal = await helper.getTopModal();
+        const modal = await app.getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
     });
 
     /*after('#teardown', async function () {
-        return await driver.quit();
+        return driver.quit();
     });*/
+
+    afterEach(function () {
+        if (global.allPassed)
+            allPassed = allPassed && (this.currentTest.state === 'passed');
+    });
 
     it('#test add extension', async function () {
         this.timeout(120000);
@@ -42,15 +48,16 @@ describe('Testsuit - scraper', function () {
 
         await helper.getExtensionController().addExtension(ext, file, true);
 
-        await helper.reload();
+        const app = helper.getApp();
+        await app.reload();
 
         await TestHelper.delay(1000);
 
-        await helper.login();
+        await app.login();
 
         await TestHelper.delay(1000);
 
-        var modal = await helper.getTopModal();
+        const modal = await app.getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -151,13 +158,14 @@ describe('Testsuit - scraper', function () {
             callback();
         });
 
-        modal = await helper.getTopModal();
-        assert.equal(modal != null, true);
+        const app = helper.getApp();
+        modal = await app.getTopModal();
+        assert.notEqual(modal, null);
 
-        await helper.closeModal();
+        await modal.closeModal();
 
-        modal = await helper.getTopModal();
-        assert.equal(modal == null, true);
+        modal = await app.getTopModal();
+        assert.equal(modal, null);
 
         return Promise.resolve();
     });
