@@ -13,21 +13,26 @@ describe('Testsuit - Add all', function () {
     before('#setup', async function () {
         this.timeout(10000);
 
-        if (!global.helper) {
-            global.helper = new TestHelper();
-            await helper.setup(config);
+        try {
+            if (!global.helper) {
+                global.helper = new TestHelper();
+                await helper.setup(config);
+            }
+            driver = helper.getBrowser().getDriver();
+            const app = helper.getApp();
+
+            await TestHelper.delay(1000);
+
+            await app.login(config['api'], config['username'], config['password']);
+
+            await TestHelper.delay(1000);
+
+            const modal = await app.getTopModal();
+            assert.equal(modal, null);
+        } catch (error) {
+            global.allPassed = false;
+            throw error;
         }
-        driver = helper.getBrowser().getDriver();
-        const app = helper.getApp();
-
-        await TestHelper.delay(1000);
-
-        await app.login(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
-
-        const modal = await app.getTopModal();
-        assert.equal(modal, null);
 
         return Promise.resolve();
     });
@@ -53,7 +58,7 @@ describe('Testsuit - Add all', function () {
             await ec.addExtension(ext, file);
         }
         const ac = helper.getApiController();
-        await ac.checkRestartRequest();
+        await ac.processOpenRestartRequest();
 
         const app = helper.getApp();
         await app.reload();
@@ -66,6 +71,9 @@ describe('Testsuit - Add all', function () {
 
         var modal = await app.getTopModal();
         assert.equal(modal, null);
+
+        //prevent race condition within express webserver, caused by calling listen() and then immediately calling close()
+        //await TestHelper.delay(10000); //ensure minimum uptime before next test might restart again 
 
         return Promise.resolve();
     });

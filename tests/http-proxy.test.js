@@ -28,6 +28,18 @@ describe('Testsuit - HttpProxy', function () {
         const modal = await app.getTopModal();
         assert.equal(modal, null);
 
+        const tools = await helper.getApiController().getTools();
+        const client = 'fetch';
+        const cmd = `async function test() {
+    const registry = controller.getRegistry();
+    await registry.upsert('defaultWebClient', '${client}');
+    controller.getWebClientController().setDefaultWebClient('${client}');
+    return Promise.resolve('OK');
+};        
+module.exports = test;`
+        const res = await tools.serverEval(cmd);
+        assert.equal(res, 'OK', "Setting WebClient Failed!");
+
         return Promise.resolve();
     });
 
@@ -47,6 +59,9 @@ describe('Testsuit - HttpProxy', function () {
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
         await helper.getExtensionController().addExtension(ext, file, true);
+        //await TestHelper.delay(2000); //TODO: why does this extension need such a long delay?
+        //const ac = helper.getApiController();
+        //await ac.processOpenRestartRequest();
 
         const app = helper.getApp();
         await app.reload();

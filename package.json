@@ -29,7 +29,7 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "^0.1.4-beta",
+        "@pb-it/ark-cms-selenium-test-helper": "^0.1.6-beta",
         "mocha": "^10.2.0",
         "selenium-webdriver": "^4.15.0"
     }

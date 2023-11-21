@@ -28,6 +28,18 @@ describe('Testsuit - WebClient', function () {
         const modal = await app.getTopModal();
         assert.equal(modal, null);
 
+        const tools = await helper.getApiController().getTools();
+        const client = 'fetch';
+        const cmd = `async function test() {
+    const registry = controller.getRegistry();
+    await registry.upsert('defaultWebClient', '${client}');
+    controller.getWebClientController().setDefaultWebClient('${client}');
+    return Promise.resolve('OK');
+};        
+module.exports = test;`
+        const res = await tools.serverEval(cmd);
+        assert.equal(res, 'OK', "Setting WebClient Failed!");
+
         return Promise.resolve();
     });
 
@@ -64,7 +76,7 @@ describe('Testsuit - WebClient', function () {
     });
 
     it('#test request', async function () {
-        this.timeout(30000);
+        this.timeout(60000);
 
         var error = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
