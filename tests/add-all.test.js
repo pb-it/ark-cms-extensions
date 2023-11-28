@@ -23,7 +23,7 @@ describe('Testsuit - Add all', function () {
 
             await TestHelper.delay(1000);
 
-            await app.login(config['api'], config['username'], config['password']);
+            await app.prepare(config['api'], config['username'], config['password']);
 
             await TestHelper.delay(1000);
 

@@ -310,7 +310,8 @@ class AxiosWebClient extends WebClient {
 
             //stream.data.pipe(fs.createWriteStream(file));
             await this._streamToFile(response, file);
-        }
+        } else
+            throw new Error('Client missmatch');
 
         if (this._debugOptions['download']) {
             var end = Date.now();
