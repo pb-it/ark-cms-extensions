@@ -1,7 +1,9 @@
 const path = require('path');
 const fs = require('fs');
 //const { opendir } = require('fs').promises;
-//const https = require('https');
+const http = require('http');
+const https = require('https');
+const CacheableLookup = require('@esm2cjs/cacheable-lookup').default;
 
 const AxiosWebClient = require('./server/axios-webclient.js');
 
@@ -22,6 +24,10 @@ async function init() {
     });*/
     //https.globalAgent.options.ca = sslRootCAs; // injection seems to work globally by default
     //https.globalAgent.options.rejectUnauthorized = false;
+
+    const cacheable = new CacheableLookup();
+    cacheable.install(http.globalAgent);
+    cacheable.install(https.globalAgent);
 
     const registry = controller.getRegistry();
     const userAgent = await registry.get('defaultUserAgent');

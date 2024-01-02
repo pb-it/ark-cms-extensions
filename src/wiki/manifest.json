@@ -1,0 +1,6 @@
+{
+    "name": "wiki",
+    "version": "1.0.0",
+    "description": "Wiki Appliction/Panel/Model",
+    "app_version": "^0.5.7"
+}
