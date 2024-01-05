@@ -25,9 +25,14 @@ async function init() {
     //https.globalAgent.options.ca = sslRootCAs; // injection seems to work globally by default
     //https.globalAgent.options.rejectUnauthorized = false;
 
-    const cacheable = new CacheableLookup();
-    cacheable.install(http.globalAgent);
-    cacheable.install(https.globalAgent);
+    try {
+        const cacheable = new CacheableLookup();
+        cacheable.install(http.globalAgent);
+        cacheable.install(https.globalAgent);
+    } catch (error) {
+        if (error.message != 'CacheableLookup has been already installed')
+            throw error;
+    }
 
     const registry = controller.getRegistry();
     const userAgent = await registry.get('defaultUserAgent');

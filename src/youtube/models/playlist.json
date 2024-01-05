@@ -1,0 +1,26 @@
+{
+    "name": "playlist",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "list",
+            "dataType": "string",
+            "length": "2000"
+        }
+    ],
+    "defaults": {
+        "collectionModel": "youtube",
+        "collection": "list",
+        "view": {
+            "panelType": "CollectionPanel",
+            "details": "title"
+        }
+    }
+}
