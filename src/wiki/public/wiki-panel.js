@@ -5,7 +5,7 @@ class WikiPanel extends CrudPanel {
     }*/
 
     static _convertToHtml(text) {
-        text = text.replace(/\[\[([A-ZÄÖÜa-zäöüß0-9_\.\s\+\-\/\\]*)\]\]/g, '<a class="wiki-link" href="wiki-pages?title=$1">[$1]</a>');
+        text = text.replace(/\[\[([A-ZÄÖÜa-zäöüß0-9_\.\s\+\-\/\\]*)\]\]/g, '<a class="wiki-link" href="wiki-page?title=$1">[$1]</a>');
         text = text.replace(/<link>([A-ZÄÖÜa-zäöüß@µ§$%!?0-9_\s\/\\\=\:\.\'\"\;\,\#\&\|\-\+\~\*\>]*)<\/link>/g, '<a href="$1">$1</a>');
         text = text.replace(/<code>((?:[A-ZÄÖÜa-zäöüß@µ§$%!?0-9_\s\(\)\{\}\[\]\/\\\=\:\.\'\"\„\“\′\`\^\°\;\,\#\&\|\-\+\~\*\>]|<\/br>|<br>|<\s)*)<\/code>/g, '<div class="wiki_code">$1</div>');
         return text;
@@ -78,7 +78,7 @@ class WikiPanel extends CrudPanel {
             this._$page.find('a.wiki-link').click(function (e) {
                 e.preventDefault();
                 var state = new State();
-                state.typeString = 'wiki-pages';
+                state.typeString = 'wiki-page';
                 state.where = this.getAttribute('href').substring('wiki-page?'.length);
                 app.controller.loadState(state, true);
                 return false;

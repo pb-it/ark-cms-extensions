@@ -18,11 +18,8 @@ const definition = {
     "tableName": "wiki_page",
     "defaults": {
         "view": {
-            "width": "320",
-            "format": "16/9",
-            "height": 180,
-            "details": "title",
-            "panelType": "WikiPanel"
+            "panelType": "WikiPanel",
+            "details": "title"
         }
     }
 }

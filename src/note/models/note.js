@@ -13,12 +13,8 @@ const definition = {
     ],
     "defaults": {
         "view": {
-            "float": "none",
-            "width": 320,
-            "format": "16/9",
-            "height": 180,
-            "details": "title",
-            "panelType": "NotePanel"
+            "panelType": "NotePanel",
+            "details": "title"
         }
     }
 }

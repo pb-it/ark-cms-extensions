@@ -30,6 +30,7 @@ const definition = {
     ],
     "defaults": {
         "title": "title",
+        "thumbnail": "thumbnail",
         "sort": "title:asc",
         "view": {
             "panelType": "MediaPanel",
