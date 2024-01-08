@@ -29,4 +29,5 @@ describe("Root Suite", function () {
     require('./http-proxy.test.js');
     require('./webclient.test.js');
     require('./scraper.test.js');
+    require('./youtube.test.js');
 });

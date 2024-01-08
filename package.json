@@ -17,7 +17,11 @@
         "test:scraper": "./build.sh scraper && mocha tests/scraper.test.js",
         "test:scraper:scrape": "mocha tests/scraper.test.js --grep \"#test scrape\"",
         "test:webclient": "./build.sh axios-webclient && mocha tests/webclient.test.js",
-        "test:webclient:request": "mocha tests/webclient.test.js --grep \"#test request\""
+        "test:webclient:request": "mocha tests/webclient.test.js --grep \"#test request\"",
+        "test:youtube": "./build.sh youtube && mocha tests/youtube.test.js",
+        "test:youtube:playlist": "mocha tests/youtube.test.js --grep \"#test create playlist\"",
+        "test:youtube:drop": "mocha tests/youtube.test.js --grep \"#test add to playlist\"",
+        "test:youtube:delete": "mocha tests/youtube.test.js --grep \"#test delete extension\""
     },
     "repository": {
         "type": "git",
@@ -30,7 +34,7 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "^0.1.9-beta",
+        "@pb-it/ark-cms-selenium-test-helper": "^0.1.10-beta",
         "mocha": "^10.2.0",
         "selenium-webdriver": "^4.15.0"
     }
