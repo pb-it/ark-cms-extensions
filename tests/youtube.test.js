@@ -22,6 +22,7 @@ describe('Testsuit - WebClient', function () {
 
         await TestHelper.delay(1000);
 
+        await app.resetLocalStorage();
         await app.prepare(config['api'], config['username'], config['password']);
 
         await TestHelper.delay(1000);
