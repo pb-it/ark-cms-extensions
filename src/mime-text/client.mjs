@@ -117,7 +117,7 @@ You will not see this information in forms, but it is stored with your actual st
                 var view;
                 $value.addClass('text');
                 if (data) {
-                    var value = data[attribute['name']]
+                    var value = data[attribute['name']];
                     if (typeof value === 'string' || value instanceof String) {
                         if (attribute['syntaxProp']) {
                             view = data[attribute['syntaxProp']];
