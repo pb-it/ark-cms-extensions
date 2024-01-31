@@ -10,7 +10,22 @@ class File2FormEntry extends FormEntry {
     }
 
     async renderValue(value) {
-        this._value = value;
+        if (value) {
+            if (typeof (value) === 'string' || (value) instanceof String) {
+                this._value = {};
+                var data = this._form.getFormData();
+                if (this._attribute['storage'] == 'filesystem')
+                    this._value['filename'] = value;
+                else if (attr['storage'] == 'base64')
+                    this._value['base64'] = value;
+                if (this._attribute['filename_prop'])
+                    this._value['filename'] = data[this._attribute['filename_prop']];
+                if (this._attribute['url_prop'])
+                    this._value['url'] = data[this._attribute['url_prop']];
+            } else
+                this._value = value;
+        } else
+            this._value = value;
 
         if (this._$value)
             this._$value.empty();
@@ -23,8 +38,8 @@ class File2FormEntry extends FormEntry {
         else
             size = "100";
 
-        if (value) {
-            var str = value['base64'];
+        if (this._value) {
+            var str = this._value['base64'];
             if (str) {
                 if (str.length > size)
                     this._$value.append(str.substr(0, size) + "...<br/>");
@@ -36,7 +51,7 @@ class File2FormEntry extends FormEntry {
         if (this._attribute['storage'] == 'filesystem' || this._attribute['filename_prop']) {
             this._$delete = $('<input/>')
                 .attr('type', 'checkbox')
-                .prop('checked', value && value['delete'])
+                .prop('checked', this._value && this._value['delete'])
                 .click(function () {
                     if (this._$delete.prop('checked'))
                         this._$inputFilename.val('');
@@ -50,8 +65,8 @@ class File2FormEntry extends FormEntry {
             this._$inputFilename = $('<input/>')
                 .attr('type', 'text')
                 .attr('size', size);
-            if (value && value['filename'])
-                this._$inputFilename.val(value['filename']);
+            if (this._value && this._value['filename'])
+                this._$inputFilename.val(this._value['filename']);
             this._$value.append(this._$inputFilename);
             this._$value.append("<br/>");
         }
@@ -73,8 +88,8 @@ class File2FormEntry extends FormEntry {
                     }
                 }
             }.bind(this));
-        if (value && value['url'])
-            this._$inputUrl.val(value['url']);
+        if (this._value && this._value['url'])
+            this._$inputUrl.val(this._value['url']);
         this._$value.append(this._$inputUrl);
         this._$value.append("<br/>");
 
@@ -89,7 +104,7 @@ class File2FormEntry extends FormEntry {
             }.bind(this));
         this._$value.append(this._$inputFile);
 
-        if ((value && value['base64']) || (this._$inputFile && this._$inputFile[0] && this._$inputFile[0].files && this._$inputFile[0].length > 0)) {
+        if ((this._value && this._value['base64']) || (this._$inputFile && this._$inputFile[0] && this._$inputFile[0].files && this._$inputFile[0].length > 0)) {
             this._$value.append("<br/>");
 
             var $remove = $('<button>')

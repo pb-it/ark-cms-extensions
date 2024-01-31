@@ -1,28 +1,15 @@
 async function init() {
     const controller = app.getController();
+    const apiController = controller.getApiController();
+
+    const scripts = [];
+    if (typeof MimeEnumDataType === 'undefined')
+        scripts.push(loadScript(apiController.getApiOrigin() + "/api/ext/mime-text/public/mime-text-data-type.js"));
+    if (scripts.length > 0)
+        await Promise.all(scripts);
 
     const dtc = controller.getDataTypeController();
-    var mimeEnum = {
-        tag: 'mime-enum',
-        baseDataType: {
-            dataType: 'enumeration',
-            view: 'select',
-            options: [
-                { 'value': 'text/csv' },
-                { 'value': 'text/xml' },
-                { 'value': 'text/json' },
-                { 'value': 'text/plain' },
-                { 'value': 'text/html' },
-                { 'value': 'text/plain+html' },
-                { 'value': 'text/markdown' },
-                { 'value': 'text/javascript' },
-                { 'value': 'text/bat' },
-                { 'value': 'text/x-bat' },
-                { 'value': 'text/x-sh' },
-                { 'value': 'text/x-shellscript' }
-            ],
-        }
-    };
+    const mimeEnum = new MimeEnumDataType();
     dtc.addDataType(mimeEnum);
 
     return Promise.resolve();

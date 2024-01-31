@@ -8,6 +8,22 @@ async function setup() {
 }
 
 async function init() {
+    const ws = controller.getWebServer();
+    ws.addExtensionRoute(
+        {
+            'regex': '^/mime-enum/public/(.*)$',
+            'fn': async function (req, res, next) {
+                var file = req.locals['match'][1];
+                var filePath = path.join(__dirname, 'public', file);
+                if (fs.existsSync(filePath))
+                    res.sendFile(filePath);
+                else
+                    next();
+                return Promise.resolve();
+            }.bind(this)
+        }
+    );
+
     const dtc = controller.getDataTypeController();
     const mimeEnum = {
         'tag': 'mime-enum',

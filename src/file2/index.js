@@ -54,9 +54,9 @@ async function init() {
                     else if (data[str]['url'] && data[str]['url'].startsWith("http"))
                         throw new Error('NotImplementedException'); //TODO:
                 } else if (attr['storage'] == 'filesystem') {
-                    var localPath = controller.getPathForFile(attr);
+                    const localPath = controller.getPathForFile(attr);
                     if (localPath) {
-                        var tmpDir = await controller.getTmpDir();
+                        const tmpDir = await controller.getTmpDir();
                         var tmpFilePath;
                         var fileName;
                         if (data[str]['filename'])

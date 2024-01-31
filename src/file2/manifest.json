@@ -2,7 +2,7 @@
     "name": "file2",
     "version": "1.0.0",
     "description": "Data Type Extension - File2",
-    "app_version": "^0.6.0",
+    "app_version": "^0.6.2",
     "npm_dependencies": {},
     "ext_dependencies": {}
 }

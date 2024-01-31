@@ -25,7 +25,7 @@ async function init() {
     );
 
     const dtc = controller.getDataTypeController();
-    const mimeText = {
+    const editorDataType = {
         'tag': 'editor.js',
         'add': function (model, table, attribute) {
             attr = { ...attribute };
@@ -34,7 +34,7 @@ async function init() {
             return;
         }
     }
-    dtc.addDataType(mimeText);
+    dtc.addDataType(editorDataType);
 
     return Promise.resolve();
 }

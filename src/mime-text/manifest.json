@@ -2,5 +2,5 @@
     "name": "mime-text",
     "version": "1.0.0",
     "description": "Data Type Extension - Text will be stored with preceding string(prefix), which contains MIME type information and character encoding.",
-    "app_version": "^0.5.3"
+    "app_version": "^0.6.2"
 }
