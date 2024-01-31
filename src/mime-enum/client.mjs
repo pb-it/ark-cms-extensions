@@ -4,7 +4,7 @@ async function init() {
 
     const scripts = [];
     if (typeof MimeEnumDataType === 'undefined')
-        scripts.push(loadScript(apiController.getApiOrigin() + "/api/ext/mime-text/public/mime-text-data-type.js"));
+        scripts.push(loadScript(apiController.getApiOrigin() + "/api/ext/mime-enum/public/mime-enum-data-type.js"));
     if (scripts.length > 0)
         await Promise.all(scripts);
 

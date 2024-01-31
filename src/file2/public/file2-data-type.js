@@ -186,8 +186,14 @@ class File2DataType extends DataType {
                 if (newValue['filename'] || newValue['base64'])
                     return true;
             }
-            if (newValue['url'] && (!attribute['url_prop'] || (olddata && olddata[attribute['url_prop']] != newValue['url'])))
-                return true;
+            if (newValue['url']) {
+                if (olddata && Object.keys(olddata).length > 0 && attribute['url_prop']) {
+                    var val = olddata[attribute['url_prop']];
+                    if (!val || val != newValue['url'])
+                        return true;
+                } else
+                    return true;
+            }
             return false;
         }
     }
