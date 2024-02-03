@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Face Recognition</title>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js/dist/face-api.js"></script>
+    <script src="/api/ext/face-recognition/public/face-recognition.js"></script>
+</head>
+
+<body>
+    <img id="refImg" src="/api/ext/face-recognition/public/President_Barack_Obama.jpg"
+        style="width: 100%; max-width: 800px;">
+    <canvas id="refImgOverlay" class="overlay" style="position: absolute; top: 0px; left: 0px;" height="438"
+        width="780"></canvas>
+
+    <script>
+        $(document).ready(function () {
+            runFaceDetection();
+        });
+    </script>
+</body>
+
+</html>

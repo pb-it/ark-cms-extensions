@@ -1,0 +1,6 @@
+{
+    "name": "face-recognition",
+    "version": "1.0.0",
+    "description": "Face Recognition",
+    "app_version": "^0.6.2"
+}
