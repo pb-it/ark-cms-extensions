@@ -1,0 +1,37 @@
+{
+    "name": "file2",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "view": {
+            "float": "left",
+            "width": 320,
+            "format": "16/9",
+            "height": 180,
+            "details": "title",
+            "panelType": "MediaPanel"
+        },
+        "title": "title",
+        "thumbnail": "file"
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "url",
+            "dataType": "url"
+        },
+        {
+            "cdn": "/cdn",
+            "name": "file",
+            "length": "250",
+            "unique": true,
+            "storage": "filesystem",
+            "dataType": "file2"
+        }
+    ]
+}

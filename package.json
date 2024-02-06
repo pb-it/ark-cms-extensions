@@ -10,6 +10,7 @@
         "build": "node build.js",
         "pretest": "node build.js",
         "test": "mocha --bail tests/root.test.js",
+        "test:clear": "./build.sh && mocha tests/clear.test.js",
         "test:add-all": "./build.sh && mocha tests/add-all.test.js",
         "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
         "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\"",
@@ -21,7 +22,9 @@
         "test:youtube": "./build.sh youtube && mocha tests/youtube.test.js",
         "test:youtube:playlist": "mocha tests/youtube.test.js --grep \"#test create playlist\"",
         "test:youtube:drop": "mocha tests/youtube.test.js --grep \"#test add to playlist\"",
-        "test:youtube:delete": "mocha tests/youtube.test.js --grep \"#test delete extension\""
+        "test:youtube:delete": "mocha tests/youtube.test.js --grep \"#test delete extension\"",
+        "test:file2": "./build.sh file2 && mocha tests/file2.test.js",
+        "test:file2:create": "mocha tests/file2.test.js --grep \"#test create file\""
     },
     "repository": {
         "type": "git",
@@ -34,7 +37,7 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "^0.1.11-beta",
+        "@pb-it/ark-cms-selenium-test-helper": "^0.1.12-beta",
         "mocha": "^10.2.0",
         "selenium-webdriver": "^4.15.0"
     }

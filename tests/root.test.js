@@ -25,9 +25,11 @@ describe("Root Suite", function () {
         return Promise.resolve();
     });
 
+    //require('./clear.test.js');
     require('./add-all.test.js');
     require('./http-proxy.test.js');
     require('./webclient.test.js');
     require('./scraper.test.js');
     require('./youtube.test.js');
+    require('./file2.test.js');
 });

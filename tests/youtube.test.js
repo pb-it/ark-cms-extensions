@@ -6,7 +6,7 @@ const webdriver = require('selenium-webdriver');
 const config = require('./config/test-config.js');
 const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
 
-describe('Testsuit - WebClient', function () {
+describe('Testsuit - Youtube', function () {
 
     let driver;
 
