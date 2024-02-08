@@ -100,63 +100,78 @@ async function runFaceDetection() {
 class FaceRecognition {
 
     static async init() {
+        const entry = new ContextMenuEntry("Face Recognition", async function (event, target) {
+            const controller = app.getController();
+            try {
+                controller.setLoadingState(true);
+                var selected = controller.getSelected();
+                if (!selected || selected.length == 0 || (selected.length == 1 && selected[0] == target)) {
+                    if (typeof faceapi === 'undefined')
+                        await loadScript("https://cdn.jsdelivr.net/npm/face-api.js/dist/face-api.js");
+
+                    const obj = target.getObject();
+                    const model = obj.getModel();
+                    const media = model.getMedia(obj);
+
+                    const $div = $('<div/>')
+                        .css({
+                            'position': 'relative'
+                        });
+                    const $img = $('<img/>')
+                        .attr({
+                            'id': 'refImg',
+                            'src': media.getThumbnail(),
+                            'crossorigin': 'anonymous'
+                        });
+                    $div.append($img);
+                    const $canvas = $('<canvas/>')
+                        .attr({
+                            'id': 'refImgOverlay',
+                            'class': 'overlay'
+                        })
+                        .css({
+                            'position': 'absolute',
+                            'top': '0px',
+                            'left': '0px'
+                        });
+                    $div.append($canvas);
+
+                    var modal = controller.getModalController().addModal();
+                    modal.open($div);
+
+                    await runFaceDetection();
+                }
+            } catch (error) {
+                controller.showError(error);
+            } finally {
+                controller.setLoadingState(false);
+            }
+            return Promise.resolve();
+        });
+        entry.setVisibilityFunction(function (target) {
+            const obj = target.getObject();
+            const model = obj.getModel();
+            return model.getMedia(obj);
+        });
+
         const controller = app.getController();
         const models = controller.getModelController().getModels();
+        var entries;
+        var extGroup;
         for (var model of models) {
-            if (model.getMedia && !model._contextMenuExtensionAction) {
-                model._contextMenuExtensionAction = function (panel) {
-                    var entries = [];
-
-                    entries.push(new ContextMenuEntry("Face Recognition", async function () {
-                        const controller = app.getController();
-                        try {
-                            controller.setLoadingState(true);
-                            var selected = controller.getSelected();
-                            if (!selected || selected.length == 0 || (selected.length == 1 && selected[0] == this)) {
-                                if (typeof faceapi === 'undefined')
-                                    await loadScript("https://cdn.jsdelivr.net/npm/face-api.js/dist/face-api.js");
-
-                                const obj = this.getObject();
-                                const model = obj.getModel();
-                                const media = model.getMedia(obj);
-
-                                const $div = $('<div/>')
-                                    .css({
-                                        'position': 'relative'
-                                    });
-                                const $img = $('<img/>')
-                                    .attr({
-                                        'id': 'refImg',
-                                        'src': media.getThumbnail(),
-                                        'crossorigin': 'anonymous'
-                                    });
-                                $div.append($img);
-                                const $canvas = $('<canvas/>')
-                                    .attr({
-                                        'id': 'refImgOverlay',
-                                        'class': 'overlay'
-                                    })
-                                    .css({
-                                        'position': 'absolute',
-                                        'top': '0px',
-                                        'left': '0px'
-                                    });
-                                $div.append($canvas);
-
-                                var modal = controller.getModalController().addModal();
-                                modal.open($div);
-
-                                await runFaceDetection();
-                            }
-                        } catch (error) {
-                            controller.showError(error);
-                        } finally {
-                            controller.setLoadingState(false);
-                        }
-                        return Promise.resolve();
-                    }.bind(panel)));
-
-                    return entries;
+            entries = model.getContextMenuEntries();
+            if (entries) {
+                extGroup = null;
+                for (var e of entries) {
+                    if (e.getName() === 'Extensions >') {
+                        extGroup = e;
+                        break;
+                    }
+                }
+                if (extGroup)
+                    extGroup.entries.push(entry);
+                else {
+                    entries.unshift(new ContextMenuEntry("Extensions >", null, [entry]));
                 }
             }
         }
