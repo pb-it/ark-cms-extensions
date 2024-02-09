@@ -121,7 +121,7 @@ class FaceRecognition {
                         .attr({
                             'id': 'refImg',
                             'src': media.getThumbnail(),
-                            'crossorigin': 'anonymous'
+                            'crossorigin': 'use-credentials'
                         });
                     $div.append($img);
                     const $canvas = $('<canvas/>')

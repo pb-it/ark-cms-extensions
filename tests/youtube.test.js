@@ -96,11 +96,12 @@ describe('Testsuit - Youtube', function () {
             await TestHelper.delay(1000);
 
         var i = 0;
-        while (display == 'block' && i < 10) {
+        while (display == 'block' && i < 30) {
             await TestHelper.delay(1000);
             display = await overlay.getCssValue('display');
             i++;
         }
+        assert.equal(await overlay.getCssValue('display'), 'none');
 
         const url = await driver.getCurrentUrl();
         assert.equal(url, config['host'] + '/data/youtube/1');
