@@ -12,6 +12,9 @@
         "test": "mocha --bail tests/root.test.js",
         "test:clear": "./build.sh && mocha tests/clear.test.js",
         "test:add-all": "./build.sh && mocha tests/add-all.test.js",
+        "test:test-helper": "./build.sh test-helper && mocha tests/test-helper.test.js",
+        "test:test-helper:sleep": "mocha tests/test-helper.test.js --grep \"#test sleep\"",
+        "test:test-helper:cluster": "mocha tests/test-helper.test.js --grep \"#test cluster\"",
         "test:proxy": "./build.sh http-proxy && mocha tests/http-proxy.test.js",
         "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\"",
         "test:proxy:formdata": "mocha tests/http-proxy.test.js --grep \"#test forward formdata\"",
@@ -38,7 +41,9 @@
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
         "@pb-it/ark-cms-selenium-test-helper": "^0.1.12-beta",
-        "mocha": "^10.2.0",
-        "selenium-webdriver": "^4.15.0"
+        "cross-fetch": "^4.0.0",
+        "mocha": "^10.3.0",
+        "selenium-webdriver": "^4.17.0",
+        "semver": "^7.6.0"
     }
 }

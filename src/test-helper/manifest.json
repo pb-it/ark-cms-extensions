@@ -1,0 +1,9 @@
+{
+    "name": "test-helper",
+    "version": "1.0.0",
+    "description": "Test Helper",
+    "app_version": "^0.6.2",
+    "ext_dependencies": {
+        "process": "^1.0.0"
+    }
+}
