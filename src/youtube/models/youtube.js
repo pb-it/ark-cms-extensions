@@ -30,6 +30,7 @@ const definition = {
     ],
     "defaults": {
         "title": "title",
+        "file": "file",
         "thumbnail": "thumbnail",
         "sort": "title:asc",
         "view": {

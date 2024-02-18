@@ -13,10 +13,12 @@ async function setup() {
     var mYoutube = shelf.getModel('youtube');
     var mPlaylist = shelf.getModel('playlist');
 
+    var p;
+    var resolved;
     var definition;
     if (!mYoutube) {
-        var p = path.join(__dirname, 'models/youtube.js');
-        var resolved = require.resolve(p);
+        p = path.join(__dirname, 'models/youtube.js');
+        resolved = require.resolve(p);
         if (resolved)
             delete require.cache[resolved];
         definition = require(p);
@@ -24,7 +26,11 @@ async function setup() {
         await mYoutube.initModel();
     }
     if (!mPlaylist) {
-        definition = JSON.parse(fs.readFileSync(path.join(__dirname, 'models/playlist.json'), 'utf8'));
+        p = path.join(__dirname, 'models/playlist.js');
+        resolved = require.resolve(p);
+        if (resolved)
+            delete require.cache[resolved];
+        definition = require(p);
         mPlaylist = await shelf.upsertModel(null, definition);
         await mPlaylist.initModel();
     }

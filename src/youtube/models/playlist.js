@@ -1,4 +1,4 @@
-{
+const definition = {
     "name": "playlist",
     "options": {
         "increments": true,
@@ -13,6 +13,12 @@
             "name": "list",
             "dataType": "string",
             "length": "2000"
+        },
+        {
+            "name": "subtype",
+            "dataType": "string",
+            "persistent": false,
+            "hidden": true
         }
     ],
     "defaults": {
@@ -22,5 +28,17 @@
             "panelType": "CollectionPanel",
             "details": "title"
         }
+    },
+    "extensions": {}
+}
+
+definition['extensions']['client'] = `function init() {
+    this._prepareDataAction = function (data) {
+        data['subtype'] = 'playlist';
+        return data;
     }
 }
+
+export { init };`;
+
+module.exports = definition;
