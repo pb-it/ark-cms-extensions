@@ -18,11 +18,6 @@
             "dataType": "relation"
         },
         {
-            "name": "description",
-            "size": "20",
-            "dataType": "text"
-        },
-        {
             "name": "severity",
             "view": "radio",
             "options": [
@@ -43,6 +38,36 @@
                 }
             ],
             "dataType": "enumeration"
+        },
+        {
+            "name": "assignee",
+            "dataType": "relation",
+            "model": "_user"
+        },
+        {
+            "name": "state",
+            "dataType": "enumeration",
+            "bUseString": true,
+            "options": [
+                {
+                    "value": "open"
+                },
+                {
+                    "value": "in progress"
+                },
+                {
+                    "value": "in review"
+                },
+                {
+                    "value": "closed"
+                }
+            ],
+            "view": "select"
+        },
+        {
+            "name": "description",
+            "size": "20",
+            "dataType": "text"
         }
     ]
 }

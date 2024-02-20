@@ -27,7 +27,9 @@
         "test:youtube:drop": "mocha tests/youtube.test.js --grep \"#test add to playlist\"",
         "test:youtube:delete": "mocha tests/youtube.test.js --grep \"#test delete extension\"",
         "test:file2": "./build.sh file2 && mocha tests/file2.test.js",
-        "test:file2:create": "mocha tests/file2.test.js --grep \"#test create file\""
+        "test:file2:create": "mocha tests/file2.test.js --grep \"#test create file\"",
+        "test:scrum": "./build.sh scrum && mocha tests/scrum.test.js",
+        "test:scrum:board": "mocha tests/scrum.test.js --grep \"#test kanban board\""
     },
     "repository": {
         "type": "git",

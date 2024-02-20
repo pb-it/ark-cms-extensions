@@ -66,8 +66,6 @@ describe('Testsuit - scraper', function () {
     it('#test scraper', async function () {
         this.timeout(30000);
 
-        await TestHelper.delay(5000);
-
         var response = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
 

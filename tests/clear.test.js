@@ -1,3 +1,6 @@
+const fs = require('fs');
+const path = require('path');
+
 const assert = require('assert');
 //const webdriver = require('selenium-webdriver');
 //const test = require('selenium-webdriver/testing');
@@ -56,6 +59,19 @@ describe('Testsuit', function () {
 
         const modal = await app.getTopModal();
         assert.equal(modal, null);
+
+        return Promise.resolve();
+    });
+
+    it('#clear CDN', async function () {
+        this.timeout(60000);
+
+        if (config['cdn']) {
+            for (const file of fs.readdirSync(config['cdn'])) {
+                fs.unlinkSync(path.join(config['cdn'], file));
+            }
+        } else
+            this.skip();
 
         return Promise.resolve();
     });

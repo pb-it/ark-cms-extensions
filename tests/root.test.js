@@ -25,7 +25,7 @@ describe("Root Suite", function () {
         return Promise.resolve();
     });
 
-    //require('./clear.test.js');
+    require('./clear.test.js');
     require('./add-all.test.js');
     require('./test-helper.test.js');
     require('./http-proxy.test.js');
@@ -33,4 +33,5 @@ describe("Root Suite", function () {
     require('./scraper.test.js');
     require('./youtube.test.js');
     require('./file2.test.js');
+    require('./scrum.test.js');
 });
