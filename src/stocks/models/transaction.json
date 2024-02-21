@@ -1,0 +1,68 @@
+{
+    "name": "transaction",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "datetime:desc",
+        "title": "title"
+    },
+    "attributes": [
+        {
+            "name": "datetime",
+            "dataType": "datetime",
+            "timeZone": "UTC"
+        },
+        {
+            "name": "type",
+            "view": "select",
+            "options": [
+                {
+                    "value": "deposit"
+                },
+                {
+                    "value": "withdrawal"
+                },
+                {
+                    "value": "buy"
+                },
+                {
+                    "value": "sell"
+                },
+                {
+                    "value": "dividend"
+                },
+                {
+                    "value": "bookkeeping"
+                },
+                {
+                    "value": "other"
+                }
+            ],
+            "dataType": "enumeration"
+        },
+        {
+            "name": "stock",
+            "model": "stock",
+            "dataType": "relation"
+        },
+        {
+            "name": "amount",
+            "dataType": "double"
+        },
+        {
+            "name": "total",
+            "dataType": "double"
+        },
+        {
+            "name": "comment",
+            "dataType": "text"
+        },
+        {
+            "name": "title",
+            "dataType": "string",
+            "persistent": false
+        }
+    ]
+}

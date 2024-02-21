@@ -69,7 +69,7 @@ describe('Testsuit - scraper', function () {
         var response = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
 
-            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
+            const url = 'https://www.finanzen.net/aktien/nvidia-aktie';
 
             const funcScrape = async function (url, doc, data) {
                 var data = {};
@@ -109,7 +109,7 @@ describe('Testsuit - scraper', function () {
                     }
                 };
                 const data = {
-                    'domain': 'www.finanzen.at',
+                    'domain': 'www.finanzen.net',
                     'options': options,
                     'funcScrape': str
                 };
@@ -126,7 +126,10 @@ describe('Testsuit - scraper', function () {
             callback(res);
         });
         var expect = JSON.stringify({
-            'name': 'NVIDIA'
+            'isin': 'US67066G1040',
+            'name': 'NVIDIA',
+            'symbol': 'NVDA',
+            'wkn': '918422'
         });
         assert.equal(JSON.stringify(response), expect);
 
@@ -134,7 +137,7 @@ describe('Testsuit - scraper', function () {
         var response = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
 
-            const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
+            const url = 'https://www.finanzen.net/aktien/nvidia-aktie';
             const controller = app.getController();
             try {
                 controller.setLoadingState(true);

@@ -6,7 +6,7 @@ const webdriver = require('selenium-webdriver');
 const config = require('./config/test-config.js');
 const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
 
-describe('Testsuit - scraper', function () {
+describe('Testsuit - scrum', function () {
 
     let driver;
 

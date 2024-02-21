@@ -1,0 +1,38 @@
+{
+    "name": "stock",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "name:asc",
+        "title": "name"
+    },
+    "attributes": [
+        {
+            "name": "name",
+            "dataType": "string"
+        },
+        {
+            "name": "url",
+            "dataType": "url"
+        },
+        {
+            "name": "wkn",
+            "dataType": "string"
+        },
+        {
+            "name": "isin",
+            "dataType": "string"
+        },
+        {
+            "name": "symbol",
+            "dataType": "string"
+        },
+        {
+            "name": "description",
+            "size": "15",
+            "dataType": "text"
+        }
+    ]
+}
