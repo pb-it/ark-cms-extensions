@@ -108,7 +108,7 @@ describe('Testsuit - scrum', function () {
         input = await helper.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('TestDefect');
-        await TestHelper.delay(100);
+        await TestHelper.delay(1000);
         button = await helper.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();

@@ -31,7 +31,9 @@
         "test:scrum": "./build.sh scrum && mocha tests/scrum.test.js",
         "test:scrum:board": "mocha tests/scrum.test.js --grep \"#test kanban board\"",
         "test:stocks": "./build.sh stocks && mocha tests/stocks.test.js",
-        "test:stocks:transaction": "mocha tests/stocks.test.js --grep \"#test create transaction\""
+        "test:stocks:transaction": "mocha tests/stocks.test.js --grep \"#test create transaction\"",
+        "test:gallery": "./build.sh gallery && mocha tests/gallery.test.js",
+        "test:gallery:create": "mocha tests/gallery.test.js --grep \"#test create gallery\""
     },
     "repository": {
         "type": "git",

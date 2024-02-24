@@ -1,0 +1,26 @@
+{
+    "name": "gallery",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "view": {
+            "details": "title",
+            "panelType": "CollectionPanel"
+        },
+        "collection": "list",
+        "collectionModel": "image"
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "list",
+            "length": "2000",
+            "dataType": "string"
+        }
+    ]
+}

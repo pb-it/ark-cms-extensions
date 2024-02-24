@@ -35,4 +35,5 @@ describe("Root Suite", function () {
     require('./file2.test.js');
     require('./scrum.test.js');
     require('./stocks.test.js');
+    require('./gallery.test.js');
 });
