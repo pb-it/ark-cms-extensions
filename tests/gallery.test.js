@@ -150,7 +150,7 @@ describe('Testsuit - gallery', function () {
             .keyUp(cmdCtrl)
             .perform();
         /*await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        var xpath = `/html/body/ul[@class="contextmenu"]/li[text()="Copy"]`;
+        var xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Copy"]`;
         var item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();*/
@@ -183,26 +183,26 @@ describe('Testsuit - gallery', function () {
         assert.equal(panels.length, 1);
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li[text()="Paste"]`;
+        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Paste"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
         await TestHelper.delay(1000);
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li[text()="Save"]`;
+        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Save"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
         await TestHelper.delay(1000);
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li[starts-with(text(),"Extensions")]`;
+        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Extensions"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
         await TestHelper.delay(1000);
-        xpath = `/html/body/ul[@class="contextmenu"]/li[starts-with(text(),"Extensions")]/div/ul[@class="contextmenu"]/li[text()="Gallery"]`;
+        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Extensions"]/following-sibling::div/ul[@class="contextmenu"]/li/div[1][text()="Gallery"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();

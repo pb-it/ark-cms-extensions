@@ -163,7 +163,7 @@ class FaceRecognition {
             if (entries) {
                 extGroup = null;
                 for (var e of entries) {
-                    if (e.getName() === 'Extensions >') {
+                    if (e.getName() === 'Extensions') {
                         extGroup = e;
                         break;
                     }
@@ -171,7 +171,7 @@ class FaceRecognition {
                 if (extGroup)
                     extGroup.entries.push(entry);
                 else {
-                    entries.unshift(new ContextMenuEntry("Extensions >", null, [entry]));
+                    entries.unshift(new ContextMenuEntry("Extensions", null, [entry]));
                 }
             }
         }

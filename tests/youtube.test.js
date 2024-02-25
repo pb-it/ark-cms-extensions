@@ -203,7 +203,7 @@ describe('Testsuit - Youtube', function () {
         assert.equal(response, 'OK', "DropEvent Failed!");
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        var xpath = `/html/body/ul[@class="contextmenu"]/li[starts-with(text(),"Save")]`;
+        var xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Save"]`;
         var item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
@@ -216,7 +216,7 @@ describe('Testsuit - Youtube', function () {
         assert.equal(panels.length, 1);
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li[starts-with(text(),"Details")]`;
+        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Details"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
