@@ -1,0 +1,6 @@
+{
+    "name": "panel-override",
+    "version": "1.0.0",
+    "description": "Overrides the standard CrudPanel and MediaPanel implementations",
+    "app_version": "^0.6.2"
+}

@@ -3,6 +3,10 @@
 ### build
 
 ```bash
-$ . build.sh
+$ npm run build <extension>
+```
+or
+```bash
+$ ./build.sh <extension>
 ```
 Generated ZIP files can be found in 'dist' folder
