@@ -17,6 +17,13 @@ class NotePanel extends CrudPanel {
         return NotePanel;
     }
 
+    async _init() {
+        this._bSelectable = false;
+        this._bContextMenu = false;
+
+        return super._init();
+    }
+
     async _renderContent() {
         var $div;
         switch (this._config.details) {
