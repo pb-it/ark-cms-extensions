@@ -162,7 +162,7 @@ class File2DataType extends DataType {
     }
 
     getHasChangedFunction() {
-        return function (attribute, olddata, newdata) {
+        return async function (attribute, olddata, newdata) {
             const property = attribute['name'];
             var newValue = newdata[property];
             var oldValue;
@@ -174,35 +174,35 @@ class File2DataType extends DataType {
                 if (attribute['storage'] == 'filesystem') {
                     if (typeof oldValue === 'string' || oldValue instanceof String) {
                         if ((newValue['filename'] || oldValue) && newValue['filename'] != oldValue)
-                            return true;
+                            return Promise.resolve(true);
                         if (newValue['base64'])
-                            return true;
+                            return Promise.resolve(true);
                     } else {
                         if ((newValue['filename'] || oldValue['filename']) && newValue['filename'] != oldValue['filename'])
-                            return true;
+                            return Promise.resolve(true);
                     }
                 } else if (attribute['storage'] == 'base64') {
                     if (typeof oldValue === 'string' || oldValue instanceof String) {
                         if (newValue['base64'] != oldValue)
-                            return true;
+                            return Promise.resolve(true);
                     } else {
                         if (newValue['base64'] != oldValue['base64'])
-                            return true;
+                            return Promise.resolve(true);
                     }
                 }
             } else {
                 if (newValue['filename'] || newValue['base64'])
-                    return true;
+                    return Promise.resolve(true);
             }
             if (newValue['url']) {
                 if (olddata && Object.keys(olddata).length > 0 && attribute['url_prop']) {
                     var val = olddata[attribute['url_prop']];
                     if (!val || val != newValue['url'])
-                        return true;
+                        return Promise.resolve(true);
                 } else
-                    return true;
+                    return Promise.resolve(true);
             }
-            return false;
+            return Promise.resolve(false);
         }
     }
 }

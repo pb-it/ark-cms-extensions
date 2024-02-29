@@ -32,10 +32,26 @@ async function init() {
     const table = {
         'tag': 'table',
         'add': function (model, table, attribute) {
-            var attr = { ...attribute };
-            attr['dataType'] = 'text';
+            const attr = { ...attribute };
+            const format = attr['format'];
+            if (!format || format === 'html')
+                attr['dataType'] = 'text';
+            else if (format === 'json')
+                attr['dataType'] = 'json';
             model._addColumn(table, attr);
             return;
+        },
+        'createForge': async function (attr, data, old, forge) {
+            const name = attr['name'];
+            const value = data[name];
+            if (value) {
+                const format = attr['format'];
+                if (!format || format === 'html')
+                    forge[name] = data[name];
+                else if (format === 'json')
+                    forge[name] = JSON.stringify(data[name]);
+            }
+            return Promise.resolve();
         }
     }
     dtc.addDataType(table);

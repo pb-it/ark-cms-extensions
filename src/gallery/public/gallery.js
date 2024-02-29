@@ -66,7 +66,9 @@ class Gallery {
                     if (extGroup)
                         extGroup.entries.push(entry);
                     else {
-                        entries.unshift(new ContextMenuEntry("Extensions", null, [entry]));
+                        extGroup = new ContextMenuEntry('Extensions', null, [entry]);
+                        extGroup.setIcon(new Icon('puzzle-piece'));
+                        entries.unshift(extGroup);
                     }
                 }
             }

@@ -1,24 +1,59 @@
 class TableFormEntry extends FormEntry {
 
-    static _edit() {
+    static _editCell() {
+        function close() {
+            const newText = this.find('input').val();
+            this.text(newText);
+            this.removeClass("cellEditing");
+        }
+
         const originalText = this.text();
         this.addClass("cellEditing");
         this.html("<input type='text' value='" + originalText + "' />");
         this.children().first().focus();
         this.children().first().keypress(function (e) {
-            if (e.which == 13) {
-                const newText = this.find('input').val();
-                this.text(newText);
-                this.removeClass("cellEditing");
-            }
+            if (e.which == 13)
+                close.call(this);
         }.bind(this));
         this.children().first().blur(function () {
-            this.text(originalText);
-            this.removeClass("cellEditing");
+            close.call(this);
         }.bind(this));
         this.find('input').dblclick(function (e) {
             e.stopPropagation();
         });
+    }
+
+    static _createTable(nColumns, nRows, data, bEditable) {
+        const $table = $('<table/>')
+            .addClass('value');
+        const $head = $('<thead/>');
+        var $row = $('<tr/>');
+        var $cell;
+        for (var j = 0; j < nColumns; j++) {
+            $cell = $('<th/>');
+            if (data && data['thead'])
+                $cell.text(data['thead'][j]);
+            if (bEditable)
+                $cell.dblclick(TableFormEntry._editCell.bind($cell));
+            $row.append($cell);
+        }
+        $head.append($row);
+        $table.append($head);
+        const $body = $('<tbody/>');
+        for (var i = 0; i < nRows; i++) {
+            $row = $('<tr/>');
+            for (var j = 0; j < nColumns; j++) {
+                $cell = $('<td/>');
+                if (data && data['tbody'])
+                    $cell.text(data['tbody'][i][j]);
+                if (bEditable)
+                    $cell.dblclick(TableFormEntry._editCell.bind($cell));
+                $row.append($cell);
+            }
+            $body.append($row);
+        }
+        $table.append($body);
+        return $table;
     }
 
     _$table;
@@ -35,15 +70,29 @@ class TableFormEntry extends FormEntry {
         else
             this._$value = $('<div/>').addClass('value');
 
-        if (this._value && (typeof (this._value) === 'string' || (this._value) instanceof String))
-            this._$table = $($.parseHTML(this._value));
+        const format = this._attribute['format'];
+        if (!format || format === 'html') {
+            if (this._value && (typeof (this._value) === 'string' || (this._value) instanceof String))
+                this._$table = $($.parseHTML(this._value));
+        } else if (format === 'json') {
+            if (this._value && (typeof (this._value) === 'object')) {
+                if (this._value['tbody']) {
+                    var nColumns;
+                    var nRows = this._value['tbody'].length;
+                    if (nRows > 0)
+                        nColumns = this._value['tbody'][0].length;
+                    if (nColumns > 0)
+                        this._$table = TableFormEntry._createTable(nColumns, nRows, this._value, true);
+                }
+            }
+        }
 
         if (this._$table) {
             const cells = this._$table.find('thead > tr > th, tbody > tr > td');
             var $cell;
             for (var cell of cells) {
                 $cell = $(cell);
-                $cell.dblclick(TableFormEntry._edit.bind($cell));
+                $cell.dblclick(TableFormEntry._editCell.bind($cell));
             }
             this._$value.append(this._$table);
             const $addRowButton = $('<button>')
@@ -60,7 +109,7 @@ class TableFormEntry extends FormEntry {
                         const $row = $('<tr/>');
                         for (var j = 0; j < nColumns; j++) {
                             $cell = $('<td/>');
-                            $cell.dblclick(TableFormEntry._edit.bind($cell));
+                            $cell.dblclick(TableFormEntry._editCell.bind($cell));
                             $row.append($cell);
                         }
                         $body.append($row);
@@ -101,29 +150,7 @@ class TableFormEntry extends FormEntry {
                         if (tmp)
                             nColumns = parseInt(tmp);
                         if (nRows > 0 && nColumns > 0) {
-                            this._$table = $('<table/>')
-                                .addClass('value');
-                            const $head = $('<thead/>');
-                            var $row = $('<tr/>');
-                            var $cell;
-                            for (var j = 0; j < nColumns; j++) {
-                                $cell = $('<th/>');
-                                $cell.dblclick(TableFormEntry._edit.bind($cell));
-                                $row.append($cell);
-                            }
-                            $head.append($row);
-                            this._$table.append($head);
-                            const $body = $('<tbody/>');
-                            for (var i = 0; i < nRows; i++) {
-                                $row = $('<tr/>');
-                                for (var j = 0; j < nColumns; j++) {
-                                    $cell = $('<td/>');
-                                    $cell.dblclick(TableFormEntry._edit.bind($cell));
-                                    $row.append($cell);
-                                }
-                                $body.append($row);
-                            }
-                            this._$table.append($body);
+                            this._$table = TableFormEntry._createTable(nColumns, nRows, true);
                             await this.renderValue();
                         } else
                             throw new Error('Invalid input');
@@ -142,8 +169,29 @@ class TableFormEntry extends FormEntry {
 
     async readValue() {
         var data;
-        if (this._$table)
-            data = this._$table[0].outerHTML;
+        if (this._$table) {
+            const format = this._attribute['format'];
+            if (!format || format === 'html')
+                data = this._$table[0].outerHTML;
+            else if (format === 'json') {
+                const obj = { 'tbody': [], 'thead': [] };
+                var cells = this._$table.find('thead > tr > th');
+                for (var cell of cells) {
+                    obj['thead'].push(cell.innerHTML);
+                }
+                const rows = this._$table.find('tbody > tr');
+                var arr;
+                for (var row of rows) {
+                    arr = [];
+                    cells = $(row).find('td');
+                    for (var cell of cells) {
+                        arr.push(cell.innerHTML);
+                    }
+                    obj['tbody'].push(arr);
+                }
+                data = obj; // JSON.stringify(obj);
+            }
+        }
         return Promise.resolve(data);
     }
 }
