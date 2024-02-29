@@ -108,7 +108,8 @@ class BulletinBoard extends Panel {
                             bNote = panelConfig.getPanelClass() === NotePanel;*/
 
                             const config = model.getModelDefaultsController().getDefaultPanelConfig();
-                            bNote = config[ModelDefaultsController.PANEL_TYPE_IDENT] === 'NotePanel';
+                            if (config)
+                                bNote = config[ModelDefaultsController.PANEL_TYPE_IDENT] === 'NotePanel';
                         }
 
                         if (bNote) {
