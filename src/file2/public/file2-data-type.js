@@ -41,18 +41,14 @@ class File2DataType extends DataType {
                 'view': 'select',
                 'required': true,
                 changeAction: async function (entry) {
-                    var fData = await entry._form.readForm(false, false);
-                    var cdn = entry._form.getFormEntry('cdn');
-                    var fn = entry._form.getFormEntry('filename_prop');
-                    if (fData['storage'] == 'filesystem') {
+                    const fData = await entry._form.readForm(false, false);
+                    const cdn = entry._form.getFormEntry('cdn');
+                    if (fData['storage'] == 'filesystem')
                         await cdn.show();
-                        fn.hide();
-                    } else {
+                    else
                         cdn.hide();
-                        await fn.show();
-                    }
                     return Promise.resolve();
-                },
+                }
             },
             {
                 'name': 'cdn',
@@ -70,7 +66,45 @@ class File2DataType extends DataType {
                 'tooltip': '**Info**: Attribute for storing the filename.',
                 'dataType': 'enumeration',
                 'options': options,
-                'view': 'select'
+                'view': 'select',
+                changeAction: async function (entry) {
+                    const fData = await entry._form.readForm(false, false);
+                    const cf = entry._form.getFormEntry('bCustomFilename');
+                    var attr = cf.getAttribute();
+                    attr['readonly'] = fData['filename_prop'] == undefined;
+                    await cf.renderEntry(fData['bCustomFilename']);
+                    const sf = entry._form.getFormEntry('bSuggestFilename');
+                    attr = sf.getAttribute();
+                    attr['readonly'] = (fData['filename_prop'] == undefined) || !fData['bCustomFilename'];
+                    await sf.renderEntry(fData['bSuggestFilename']);
+                    return Promise.resolve();
+                }
+            },
+            {
+                'name': 'bCustomFilename',
+                'label': 'Custom Filename',
+                'tooltip': '**Info**: Allow input of custom filename. Otherwise the backend will generate a name with a free unique identifier(UID).',
+                'dataType': 'boolean',
+                'required': true,
+                'defaultValue': true,
+                'readonly': true,
+                changeAction: async function (entry) {
+                    const fData = await entry._form.readForm(false, false);
+                    const sf = entry._form.getFormEntry('bSuggestFilename');
+                    const attr = sf.getAttribute();
+                    attr['readonly'] = !fData['bCustomFilename'];
+                    await sf.renderEntry(fData['bSuggestFilename']);
+                    return Promise.resolve();
+                }
+            },
+            {
+                'name': 'bSuggestFilename',
+                'label': 'Suggest Filename',
+                'tooltip': '**Info**: Suggest filename based on given URL or file.',
+                'dataType': 'boolean',
+                'required': true,
+                'defaultValue': true,
+                'readonly': true
             },
             {
                 'name': 'url_prop',

@@ -83,7 +83,7 @@ describe('Testsuit - gallery', function () {
         var data = {
             'title': 'Testbild',
             'file': {
-                'filename': 'Testbild.png',
+                'filename': 'Testbild_1.png',
                 'url': 'https://upload.wikimedia.org/wikipedia/commons/1/12/Testbild.png'
             }
         }

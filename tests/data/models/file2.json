@@ -32,7 +32,8 @@
             "unique": true,
             "storage": "filesystem",
             "dataType": "file2",
-            "url_prop": "url"
+            "url_prop": "url",
+            "bCustomFilename": false
         }
     ]
 }

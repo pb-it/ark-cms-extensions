@@ -131,25 +131,17 @@ describe('Testsuit - File2', function () {
             input = null;
         assert.notEqual(input, null);
         await input.sendKeys('https://www.w3schools.com/html/mov_bbb.mp4');
-        await TestHelper.delay(100);
+        await TestHelper.delay(1000);
+        input = inputs[5];
+        if (await input.getAttribute('readonly')) {
+            await input.clear();
+            await TestHelper.delay(1000);
+        }
 
         button = await helper.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
-
-        const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
-        var display = await overlay.getCssValue('display');
-        if (display == 'none')
-            await TestHelper.delay(1000);
-
-        var i = 0;
-        while (display == 'block' && i < 10) {
-            await TestHelper.delay(1000);
-            display = await overlay.getCssValue('display');
-            i++;
-        }
-
-        await TestHelper.delay(1000);
+        await app.waitLoadingFinished(10);
 
         const modal = await app.getTopModal();
         assert.equal(modal, null);

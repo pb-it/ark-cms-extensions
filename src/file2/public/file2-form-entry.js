@@ -36,15 +36,15 @@ class File2FormEntry extends FormEntry {
         if (this._attribute.size)
             size = this._attribute.size;
         else
-            size = "100";
+            size = 100;
 
         if (this._value) {
             var str = this._value['base64'];
             if (str) {
                 if (str.length > size)
-                    this._$value.append(str.substr(0, size) + "...<br/>");
+                    this._$value.append(str.substr(0, size) + '...<br/>');
                 else
-                    this._$value.append(str + "<br/>");
+                    this._$value.append(str + '<br/>');
             }
         }
 
@@ -60,18 +60,19 @@ class File2FormEntry extends FormEntry {
             $label.append(this._$delete);
             $label.append('Delete');
             this._$value.append($label);
-            this._$value.append("<br/>");
-            this._$value.append('filename: ');
+            this._$value.append('<br/>');
+            this._$value.append('filename:<br/>');
             this._$inputFilename = $('<input/>')
                 .attr('type', 'text')
-                .attr('size', size);
+                .attr('size', size)
+                .prop('disabled', this._attribute['bCustomFilename'] === false);
             if (this._value && this._value['filename'])
                 this._$inputFilename.val(this._value['filename']);
             this._$value.append(this._$inputFilename);
-            this._$value.append("<br/>");
+            this._$value.append('<br/>');
         }
 
-        this._$value.append('URL: ');
+        this._$value.append('URL:<br/>');
         this._$inputUrl = $('<input/>')
             .attr('type', 'text')
             .attr('size', size)
@@ -81,8 +82,10 @@ class File2FormEntry extends FormEntry {
                     try {
                         var pathname = new URL(val).pathname;
                         var index = pathname.lastIndexOf('/');
-                        if (index !== -1)
-                            this._$inputFilename.val(pathname.substring(index + 1));
+                        if (index !== -1) {
+                            if (this._attribute['bCustomFilename'] !== false && this._attribute['bSuggestFilename'] !== false)
+                                this._$inputFilename.val(pathname.substring(index + 1));
+                        }
                     } catch (error) {
                         ;
                     }
@@ -91,7 +94,7 @@ class File2FormEntry extends FormEntry {
         if (this._value && this._value['url'])
             this._$inputUrl.val(this._value['url']);
         this._$value.append(this._$inputUrl);
-        this._$value.append("<br/>");
+        this._$value.append('<br/>');
 
         this._$inputFile = $('<input/>').attr({ 'type': 'file', 'id': this._id, 'name': this._attribute.name, 'value': '', 'multiple': false })
             .on('change', function () {
@@ -99,13 +102,15 @@ class File2FormEntry extends FormEntry {
                 var input = this._$inputFile[0];
                 if (input.files && input.files.length > 0)
                     file = input.files[0];
-                if (file)
-                    this._$inputFilename.val(file.name);
+                if (file) {
+                    if (this._attribute['bCustomFilename'] !== false && this._attribute['bSuggestFilename'] !== false)
+                        this._$inputFilename.val(file.name);
+                }
             }.bind(this));
         this._$value.append(this._$inputFile);
 
         if ((this._value && this._value['base64']) || (this._$inputFile && this._$inputFile[0] && this._$inputFile[0].files && this._$inputFile[0].length > 0)) {
-            this._$value.append("<br/>");
+            this._$value.append('<br/>');
 
             var $remove = $('<button>')
                 .text('Remove')
