@@ -25,10 +25,10 @@ describe('Testsuit - WebClient', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
-        const tools = await helper.getApiController().getTools();
+        const tools = await app.getApiController().getTools();
         const client = 'fetch';
         const cmd = `async function test() {
     const registry = controller.getRegistry();
@@ -58,9 +58,9 @@ module.exports = test;`
         const ext = 'axios-webclient';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.getExtensionController().addExtension(ext, file, true);
-
         const app = helper.getApp();
+        await app.getExtensionController().addExtension(ext, file, true);
+
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -69,7 +69,7 @@ module.exports = test;`
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();

@@ -26,7 +26,7 @@ describe('Testsuit - stocks', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -46,12 +46,12 @@ describe('Testsuit - stocks', function () {
 
         var ext = 'stocks';
         var file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
-        await helper.getExtensionController().addExtension(ext, file, true);
+        const app = helper.getApp();
+        await app.getExtensionController().addExtension(ext, file, true);
         /*ext = 'scraper';
         file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
-        await helper.getExtensionController().addExtension(ext, file, true);*/
+        await app.getExtensionController().addExtension(ext, file, true);*/
 
-        const app = helper.getApp();
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -60,7 +60,7 @@ describe('Testsuit - stocks', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -71,7 +71,8 @@ describe('Testsuit - stocks', function () {
 
         var bScraper;
         const app = helper.getApp();
-        var data = await app.read('_extension');
+        const ds = app.getDataService();
+        var data = await ds.read('_extension');
         for (var ext of data) {
             if (ext['name'] == 'scraper') {
                 bScraper = true;
@@ -79,12 +80,13 @@ describe('Testsuit - stocks', function () {
             }
         }
         if (bScraper) {
-            data = await app.read('scraper', null, 'domain=www.finanzen.net');
+            data = await ds.read('scraper', null, 'domain=www.finanzen.net');
             if (!data || data.length != 1)
                 bScraper = false;
         }
 
-        var sidemenu = app.getSideMenu();
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         await sidemenu.click('stocks');
@@ -97,15 +99,15 @@ describe('Testsuit - stocks', function () {
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
         assert.notEqual(panel, undefined);
-        var form = await helper.getForm(panel);
+        var form = await window.getForm(panel);
         var input;
         var button;
         if (bScraper) {
-            input = await helper.getFormInput(form, 'url');
+            input = await window.getFormInput(form, 'url');
             assert.notEqual(input, undefined);
             await input.sendKeys('https://www.finanzen.net/aktien/nvidia-aktie');
             await TestHelper.delay(100);
-            button = await helper.getButton(panel, 'Check');
+            button = await window.getButton(panel, 'Check');
             assert.notEqual(button, undefined);
             await button.click();
 
@@ -122,26 +124,26 @@ describe('Testsuit - stocks', function () {
             }
             assert.equal(await overlay.getCssValue('display'), 'none');
 
-            form = await helper.getForm(panel);
-            input = await helper.getFormInput(form, 'name');
+            form = await window.getForm(panel);
+            input = await window.getFormInput(form, 'name');
             var str = await input.getAttribute('value');
             assert.equal(str, 'NVIDIA');
-            input = await helper.getFormInput(form, 'wkn');
+            input = await window.getFormInput(form, 'wkn');
             str = await input.getAttribute('value');
             assert.equal(str, '918422');
-            input = await helper.getFormInput(form, 'isin');
+            input = await window.getFormInput(form, 'isin');
             str = await input.getAttribute('value');
             assert.equal(str, 'US67066G1040');
-            input = await helper.getFormInput(form, 'symbol');
+            input = await window.getFormInput(form, 'symbol');
             str = await input.getAttribute('value');
             assert.equal(str, 'NVDA');
         } else {
-            input = await helper.getFormInput(form, 'name');
+            input = await window.getFormInput(form, 'name');
             assert.notEqual(input, undefined);
             await input.sendKeys('NVIDIA');
             await TestHelper.delay(100);
         }
-        button = await helper.getButton(panel, 'Create');
+        button = await window.getButton(panel, 'Create');
         assert.notEqual(button, undefined);
         await button.click();
 
@@ -157,7 +159,8 @@ describe('Testsuit - stocks', function () {
         this.timeout(30000);
 
         const app = helper.getApp();
-        var sidemenu = app.getSideMenu();
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         await sidemenu.click('stocks');
@@ -170,7 +173,7 @@ describe('Testsuit - stocks', function () {
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
         assert.notEqual(panel, undefined);
-        var form = await helper.getForm(panel);
+        var form = await window.getForm(panel);
 
         var elem = await form.findElement(webdriver.By.css('select#type > option[value="buy"]'));
         assert.notEqual(elem, null, 'Option not found!');
@@ -186,17 +189,17 @@ describe('Testsuit - stocks', function () {
         await input.sendKeys(webdriver.Key.ENTER);
         await TestHelper.delay(100);
 
-        input = await helper.getFormInput(form, 'amount');
+        input = await window.getFormInput(form, 'amount');
         assert.notEqual(input, undefined);
         await input.sendKeys('1');
         await TestHelper.delay(100);
 
-        input = await helper.getFormInput(form, 'total');
+        input = await window.getFormInput(form, 'total');
         assert.notEqual(input, undefined);
         await input.sendKeys('6.50');
         await TestHelper.delay(100);
 
-        var button = await helper.getButton(panel, 'Create');
+        var button = await window.getButton(panel, 'Create');
         assert.notEqual(button, undefined);
         await button.click();
 
@@ -212,7 +215,8 @@ describe('Testsuit - stocks', function () {
         this.timeout(30000);
 
         const app = helper.getApp();
-        var sidemenu = app.getSideMenu();
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         await sidemenu.click('stocks');

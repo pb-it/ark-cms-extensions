@@ -25,7 +25,7 @@ describe('Testsuit - scraper', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -46,9 +46,9 @@ describe('Testsuit - scraper', function () {
         const ext = 'scraper';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.getExtensionController().addExtension(ext, file, true);
-
         const app = helper.getApp();
+        await app.getExtensionController().addExtension(ext, file, true);
+
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -57,7 +57,7 @@ describe('Testsuit - scraper', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -160,12 +160,13 @@ describe('Testsuit - scraper', function () {
         });
 
         const app = helper.getApp();
-        modal = await app.getTopModal();
+        const window = app.getWindow();
+        modal = await window.getTopModal();
         assert.notEqual(modal, null);
 
         await modal.closeModal();
 
-        modal = await app.getTopModal();
+        modal = await window.getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();

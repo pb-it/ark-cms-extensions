@@ -28,7 +28,7 @@ describe('Testsuit', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -47,7 +47,7 @@ describe('Testsuit', function () {
         this.timeout(60000);
 
         const app = helper.getApp();
-        const ac = helper.getApiController();
+        const ac = app.getApiController();
         await app.resetLocalStorage();
         await ac.clearDatabase();
 
@@ -57,7 +57,7 @@ describe('Testsuit', function () {
         await app.prepare(helper.getConfig()['api']);
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();

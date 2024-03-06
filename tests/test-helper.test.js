@@ -33,7 +33,7 @@ describe('Testsuit - Test Helper', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -54,9 +54,9 @@ describe('Testsuit - Test Helper', function () {
         const ext = 'test-helper';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.getExtensionController().addExtension(ext, file, true);
-
         const app = helper.getApp();
+        await app.getExtensionController().addExtension(ext, file, true);
+
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -65,7 +65,7 @@ describe('Testsuit - Test Helper', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();

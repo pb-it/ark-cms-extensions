@@ -26,7 +26,7 @@ describe('Testsuit - scrum', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -47,9 +47,9 @@ describe('Testsuit - scrum', function () {
         const ext = 'scrum';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.getExtensionController().addExtension(ext, file, true);
-
         const app = helper.getApp();
+        await app.getExtensionController().addExtension(ext, file, true);
+
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -58,7 +58,7 @@ describe('Testsuit - scrum', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -68,7 +68,8 @@ describe('Testsuit - scrum', function () {
         this.timeout(30000);
 
         const app = helper.getApp();
-        var sidemenu = app.getSideMenu();
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         await sidemenu.click('scrum');
@@ -81,18 +82,18 @@ describe('Testsuit - scrum', function () {
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
         assert.notEqual(panel, null);
-        var form = await helper.getForm(panel);
-        var input = await helper.getFormInput(form, 'title');
+        var form = await window.getForm(panel);
+        var input = await window.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('TestTask');
         await TestHelper.delay(100);
-        button = await helper.getButton(panel, 'Create');
+        button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
 
         await TestHelper.delay(1000);
 
-        sidemenu = app.getSideMenu();
+        sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         await sidemenu.click('scrum');
@@ -104,12 +105,12 @@ describe('Testsuit - scrum', function () {
 
         panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
         assert.notEqual(panel, null);
-        form = await helper.getForm(panel);
-        input = await helper.getFormInput(form, 'title');
+        form = await window.getForm(panel);
+        input = await window.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('TestDefect');
         await TestHelper.delay(1000);
-        button = await helper.getButton(panel, 'Create');
+        button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
 
@@ -122,13 +123,15 @@ describe('Testsuit - scrum', function () {
         this.timeout(30000);
 
         const app = helper.getApp();
-        var data = await app.read('tasks');
+        const ds = app.getDataService();
+        var data = await ds.read('tasks');
         assert.equal(data.length, 1);
         const task = data[0];
         assert.equal(task['title'], 'TestTask');
         assert.equal(task['state'], undefined);
 
-        var sidemenu = app.getSideMenu();
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         await sidemenu.click('scrum');
@@ -163,7 +166,7 @@ describe('Testsuit - scrum', function () {
         panels = await driver.findElements(webdriver.By.xpath(xpathOpenItem));
         assert.equal(panels.length, 1);
 
-        data = await app.read('tasks', task['id']);
+        data = await ds.read('tasks', task['id']);
         assert.equal(data['state'], 'open');
 
         const xpathDoneColumn = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]/div/table[@class="kanban-board"]/tr[2]/td[5]/div[@class="kanban-board-column"]`;
@@ -179,7 +182,7 @@ describe('Testsuit - scrum', function () {
         panels = await driver.findElements(webdriver.By.xpath(xpathDoneItem));
         assert.equal(panels.length, 1);
 
-        data = await app.read('tasks', task['id']);
+        data = await ds.read('tasks', task['id']);
         assert.equal(data['state'], 'closed');
 
         return Promise.resolve();

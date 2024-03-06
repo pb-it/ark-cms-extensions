@@ -28,7 +28,7 @@ describe('Testsuit - File2', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -49,9 +49,9 @@ describe('Testsuit - File2', function () {
         const ext = 'file2';
         const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
 
-        await helper.getExtensionController().addExtension(ext, file, true);
-
         const app = helper.getApp();
+        await app.getExtensionController().addExtension(ext, file, true);
+
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -60,7 +60,8 @@ describe('Testsuit - File2', function () {
 
         await TestHelper.delay(1000);
 
-        const modal = await app.getTopModal();
+        const window = app.getWindow();
+        const modal = await window.getTopModal();
         assert.equal(modal, null);
 
         return Promise.resolve();
@@ -71,10 +72,10 @@ describe('Testsuit - File2', function () {
 
         const str = fs.readFileSync(path.join(__dirname, './data/models/file2.json'), 'utf8');
         const model = JSON.parse(str);
-        const id = await helper.getModelController().addModel(model);
+        const app = helper.getApp();
+        const id = await app.getModelController().addModel(model);
         console.log(id);
 
-        const app = helper.getApp();
         await app.reload();
         await TestHelper.delay(1000);
         await app.login();
@@ -94,7 +95,8 @@ describe('Testsuit - File2', function () {
         }
 
         const app = helper.getApp();
-        await app.create('file2', data);
+        const ds = app.getDataService();
+        await ds.create('file2', data);
 
         return Promise.resolve();
     });
@@ -103,7 +105,8 @@ describe('Testsuit - File2', function () {
         this.timeout(60000);
 
         const app = helper.getApp();
-        const sidemenu = app.getSideMenu();
+        const window = app.getWindow();
+        const sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
         await TestHelper.delay(1000);
         var menu = await sidemenu.getEntry('other');
@@ -118,8 +121,8 @@ describe('Testsuit - File2', function () {
 
         const xpath = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         const panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        const form = await helper.getForm(panel);
-        var input = await helper.getFormInput(form, 'title');
+        const form = await window.getForm(panel);
+        var input = await window.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('bbb');
         await TestHelper.delay(100);
@@ -138,12 +141,12 @@ describe('Testsuit - File2', function () {
             await TestHelper.delay(1000);
         }
 
-        button = await helper.getButton(panel, 'Create');
+        button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
         await app.waitLoadingFinished(10);
 
-        const modal = await app.getTopModal();
+        const modal = await window.getTopModal();
         assert.equal(modal, null);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;

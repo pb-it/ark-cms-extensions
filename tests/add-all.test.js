@@ -27,7 +27,7 @@ describe('Testsuit - Add all', function () {
 
             await TestHelper.delay(1000);
 
-            const modal = await app.getTopModal();
+            const modal = await app.getWindow().getTopModal();
             assert.equal(modal, null);
         } catch (error) {
             global.allPassed = false;
@@ -50,17 +50,17 @@ describe('Testsuit - Add all', function () {
         this.timeout(300000);
 
         const extensions = ['mime-text', 'process', 'formatter', 'http-proxy', 'axios-webclient', 'scraper', 'console', 'chat'];
-        const ec = helper.getExtensionController();
+        const app = helper.getApp();
+        const ec = app.getExtensionController();
         var file;
         for (var ext of extensions) {
             file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
             assert.equal(fs.existsSync(file), true, "File '" + file + "' not found!");
             await ec.addExtension(ext, file);
         }
-        const ac = helper.getApiController();
+        const ac = app.getApiController();
         await ac.processOpenRestartRequest();
 
-        const app = helper.getApp();
         await app.reload();
 
         await TestHelper.delay(1000);
@@ -69,7 +69,8 @@ describe('Testsuit - Add all', function () {
 
         await TestHelper.delay(1000);
 
-        var modal = await app.getTopModal();
+        const window = await app.getWindow();
+        var modal = await window.getTopModal();
         assert.equal(modal, null);
 
         //prevent race condition within express webserver, caused by calling listen() and then immediately calling close()
