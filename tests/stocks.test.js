@@ -4,7 +4,7 @@ const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - stocks', function () {
 
@@ -14,17 +14,15 @@ describe('Testsuit - stocks', function () {
         this.timeout(10000);
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -45,20 +43,18 @@ describe('Testsuit - stocks', function () {
         this.timeout(120000);
 
         var ext = 'stocks';
-        var file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        var file = path.resolve(__dirname, "../dist/" + ext + ".zip");
         const app = helper.getApp();
         await app.getExtensionController().addExtension(ext, file, true);
         /*ext = 'scraper';
-        file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        file = path.resolve(__dirname, "../dist/" + ext + ".zip");
         await app.getExtensionController().addExtension(ext, file, true);*/
 
         await app.reload();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.login();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -88,13 +84,13 @@ describe('Testsuit - stocks', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('stocks');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('stock');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
@@ -106,7 +102,7 @@ describe('Testsuit - stocks', function () {
             input = await window.getFormInput(form, 'url');
             assert.notEqual(input, undefined);
             await input.sendKeys('https://www.finanzen.net/aktien/nvidia-aktie');
-            await TestHelper.delay(100);
+            await ExtendedTestHelper.delay(100);
             button = await window.getButton(panel, 'Check');
             assert.notEqual(button, undefined);
             await button.click();
@@ -114,11 +110,11 @@ describe('Testsuit - stocks', function () {
             const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
             var display = await overlay.getCssValue('display');
             if (display == 'none')
-                await TestHelper.delay(1000);
+                await ExtendedTestHelper.delay(1000);
 
             var i = 0;
             while (display == 'block' && i < 30) {
-                await TestHelper.delay(1000);
+                await ExtendedTestHelper.delay(1000);
                 display = await overlay.getCssValue('display');
                 i++;
             }
@@ -141,13 +137,13 @@ describe('Testsuit - stocks', function () {
             input = await window.getFormInput(form, 'name');
             assert.notEqual(input, undefined);
             await input.sendKeys('NVIDIA');
-            await TestHelper.delay(100);
+            await ExtendedTestHelper.delay(100);
         }
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, undefined);
         await button.click();
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
         assert.equal(panels.length, 1);
@@ -162,13 +158,13 @@ describe('Testsuit - stocks', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('stocks');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('transaction');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
@@ -178,7 +174,7 @@ describe('Testsuit - stocks', function () {
         var elem = await form.findElement(webdriver.By.css('select#type > option[value="buy"]'));
         assert.notEqual(elem, null, 'Option not found!');
         await elem.click();
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
 
         var input = await form.findElement(webdriver.By.xpath('//div[@class="select"]/input[starts-with(@list,"stock")]'));
         assert.notEqual(input, null);
@@ -187,23 +183,23 @@ describe('Testsuit - stocks', function () {
         var value = await option.getAttribute('value');
         await input.sendKeys(value);
         await input.sendKeys(webdriver.Key.ENTER);
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
 
         input = await window.getFormInput(form, 'amount');
         assert.notEqual(input, undefined);
         await input.sendKeys('1');
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
 
         input = await window.getFormInput(form, 'total');
         assert.notEqual(input, undefined);
         await input.sendKeys('6.50');
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
 
         var button = await window.getButton(panel, 'Create');
         assert.notEqual(button, undefined);
         await button.click();
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
         assert.equal(panels.length, 1);
@@ -218,11 +214,11 @@ describe('Testsuit - stocks', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('stocks');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Balance');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);

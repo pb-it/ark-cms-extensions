@@ -4,7 +4,7 @@ const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - scrum', function () {
 
@@ -14,17 +14,15 @@ describe('Testsuit - scrum', function () {
         this.timeout(10000);
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -45,18 +43,16 @@ describe('Testsuit - scrum', function () {
         this.timeout(120000);
 
         const ext = 'scrum';
-        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        const file = path.resolve(__dirname, "../dist/" + ext + ".zip");
 
         const app = helper.getApp();
         await app.getExtensionController().addExtension(ext, file, true);
 
         await app.reload();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.login();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -71,13 +67,13 @@ describe('Testsuit - scrum', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('scrum');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('tasks');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
@@ -86,22 +82,22 @@ describe('Testsuit - scrum', function () {
         var input = await window.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('TestTask');
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('scrum');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('defects');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
         assert.notEqual(panel, null);
@@ -109,12 +105,12 @@ describe('Testsuit - scrum', function () {
         input = await window.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('TestDefect');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         return Promise.resolve();
     });
@@ -133,11 +129,11 @@ describe('Testsuit - scrum', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('scrum');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Kanban-Board');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
@@ -157,7 +153,7 @@ describe('Testsuit - scrum', function () {
         assert.notEqual(openColumn, null);
 
         await driver.actions().dragAndDrop(panel, openColumn).perform();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         panels = await driver.findElements(webdriver.By.xpath(xpathBacklogItem));
         assert.equal(panels.length, 1);
@@ -173,7 +169,7 @@ describe('Testsuit - scrum', function () {
         const doneColumn = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathDoneColumn }), 1000);
 
         await driver.actions().dragAndDrop(panels[0], doneColumn).perform();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         panels = await driver.findElements(webdriver.By.xpath(xpathOpenItem));
         assert.equal(panels.length, 0);

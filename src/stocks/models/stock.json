@@ -30,6 +30,12 @@
             "dataType": "string"
         },
         {
+            "name": "delisted",
+            "dataType": "boolean",
+            "required": true,
+            "defaultValue": false
+        },
+        {
             "name": "description",
             "size": "15",
             "dataType": "text"

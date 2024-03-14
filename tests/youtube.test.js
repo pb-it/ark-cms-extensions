@@ -4,7 +4,7 @@ const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - Youtube', function () {
 
@@ -14,18 +14,16 @@ describe('Testsuit - Youtube', function () {
         this.timeout(10000);
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.resetLocalStorage();
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -46,18 +44,16 @@ describe('Testsuit - Youtube', function () {
         this.timeout(120000);
 
         const ext = 'youtube';
-        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        const file = path.resolve(__dirname, "../dist/" + ext + ".zip");
 
         const app = helper.getApp();
         await app.getExtensionController().addExtension(ext, file, true);
 
         await app.reload();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.login();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -72,13 +68,13 @@ describe('Testsuit - Youtube', function () {
         const window = app.getWindow();
         const sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('youtube');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('youtube');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpath = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         const panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
@@ -86,7 +82,7 @@ describe('Testsuit - Youtube', function () {
         var input = await window.getFormInput(form, 'youtube_id');
         assert.notEqual(input, null);
         await input.sendKeys('blA7epJJaR4');
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
@@ -94,11 +90,11 @@ describe('Testsuit - Youtube', function () {
         const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
         var display = await overlay.getCssValue('display');
         if (display == 'none')
-            await TestHelper.delay(1000);
+            await ExtendedTestHelper.delay(1000);
 
         var i = 0;
         while (display == 'block' && i < 30) {
-            await TestHelper.delay(1000);
+            await ExtendedTestHelper.delay(1000);
             display = await overlay.getCssValue('display');
             i++;
         }
@@ -124,13 +120,13 @@ describe('Testsuit - Youtube', function () {
         const window = app.getWindow();
         const sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('youtube');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('playlist');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpath = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         const panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
@@ -138,7 +134,7 @@ describe('Testsuit - Youtube', function () {
         var input = await window.getFormInput(form, 'title');
         assert.notEqual(input, null);
         await input.sendKeys('Playlist');
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
@@ -146,16 +142,16 @@ describe('Testsuit - Youtube', function () {
         const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
         var display = await overlay.getCssValue('display');
         if (display == 'none')
-            await TestHelper.delay(1000);
+            await ExtendedTestHelper.delay(1000);
 
         var i = 0;
         while (display == 'block' && i < 10) {
-            await TestHelper.delay(1000);
+            await ExtendedTestHelper.delay(1000);
             display = await overlay.getCssValue('display');
             i++;
         }
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const url = await driver.getCurrentUrl();
         assert.equal(url, config['host'] + '/data/playlist/1');
@@ -167,7 +163,7 @@ describe('Testsuit - Youtube', function () {
         const panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
         assert.equal(panels.length, 1);
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         return Promise.resolve();
     });
@@ -177,7 +173,7 @@ describe('Testsuit - Youtube', function () {
 
         const app = helper.getApp();
         await app.navigate('/data/playlist/1');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
         assert.equal(panels.length, 1);
@@ -209,10 +205,10 @@ describe('Testsuit - Youtube', function () {
         var item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.reload();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
         assert.equal(panels.length, 1);
@@ -222,7 +218,7 @@ describe('Testsuit - Youtube', function () {
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const window = app.getWindow();
         modal = await window.getTopModal();
@@ -238,24 +234,24 @@ describe('Testsuit - Youtube', function () {
     });
 
     it('#test delete extension', async function () {
-        this.timeout(120000);
+        this.timeout(10000);
 
         const app = helper.getApp();
         const window = app.getWindow();
         const sidemenu = window.getSideMenu();
         await sidemenu.click('Extensions');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('youtube');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Delete');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
-        await driver.wait(webdriver.until.alertIsPresent());
+        await driver.wait(webdriver.until.alertIsPresent(), 1000);
         var alert = await driver.switchTo().alert();
         var text = await alert.getText();
         assert.equal(text, 'Delete extension \'youtube\'?');
         await alert.accept();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await driver.wait(webdriver.until.alertIsPresent());
         alert = await driver.switchTo().alert();

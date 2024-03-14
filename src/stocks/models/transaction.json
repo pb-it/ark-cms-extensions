@@ -62,7 +62,8 @@
         {
             "name": "title",
             "dataType": "string",
-            "persistent": false
+            "persistent": false,
+            "hidden": true
         }
     ]
 }

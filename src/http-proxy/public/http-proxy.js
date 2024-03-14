@@ -28,7 +28,7 @@ class HttpProxy {
 
             const ac = app.getController().getApiController();
             const client = ac.getApiClient();
-            const response = JSON.parse(await client.request('POST', '/api/ext/http-proxy/forward', data));
+            const response = JSON.parse(await client.request('POST', '/api/ext/http-proxy/forward', null, data));
             if (response && response['status'] == 200)
                 res = response['body'];
             else

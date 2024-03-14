@@ -22,6 +22,16 @@ async function setup() {
         mStock = await shelf.upsertModel(null, definition);
         await mStock.initModel();
     }
+    var mQuote = shelf.getModel('quote');
+    if (!mQuote) {
+        p = path.join(__dirname, 'models/quote.json');
+        resolved = require.resolve(p);
+        if (resolved)
+            delete require.cache[resolved];
+        definition = require(p);
+        mQuote = await shelf.upsertModel(null, definition);
+        await mQuote.initModel();
+    }
     var mTransaction = shelf.getModel('transaction');
     if (!mTransaction) {
         p = path.join(__dirname, 'models/transaction.json');
@@ -85,17 +95,30 @@ async function setup() {
         }
     }
 
+    const registry = controller.getRegistry();
+    var str = await registry.get('defaultStockAPI');
+    if (!str)
+        await registry.upsert('defaultStockAPI', 'AlphaVantage');
+    str = await registry.get('availableStockAPI');
+    if (!str) {
+        const conf = [{
+            'name': 'AlphaVantage',
+            'key': 'xxxxxxdemoxxxx'
+        }];
+        await registry.upsert('availableStockAPI', JSON.stringify(conf));
+    }
+
     const profile = {
         "name": "stocks",
         "menu": [
             "Balance",
             "stock",
+            "quote",
             "transaction"
         ]
     };
     var profiles;
     var bUpdate;
-    const registry = controller.getRegistry();
     var str = await registry.get('profiles');
     if (str) {
         profiles = JSON.parse(str);

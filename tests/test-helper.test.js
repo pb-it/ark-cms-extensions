@@ -8,7 +8,7 @@ const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - Test Helper', function () {
 
@@ -20,18 +20,16 @@ describe('Testsuit - Test Helper', function () {
         https.globalAgent.options.rejectUnauthorized = false;
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.resetLocalStorage();
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -52,18 +50,16 @@ describe('Testsuit - Test Helper', function () {
         this.timeout(30000);
 
         const ext = 'test-helper';
-        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        const file = path.resolve(__dirname, "../dist/" + ext + ".zip");
 
         const app = helper.getApp();
         await app.getExtensionController().addExtension(ext, file, true);
 
         await app.reload();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.login();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -140,7 +136,7 @@ describe('Testsuit - Test Helper', function () {
             //console.log(batch);
             assert.equal(batch['state'], 'running');
 
-            await TestHelper.delay(100);
+            await ExtendedTestHelper.delay(100);
 
             url = api + '/api/ext/test-helper/echo?message=hello world';
             var err;

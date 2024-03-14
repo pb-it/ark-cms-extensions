@@ -3,7 +3,7 @@ const path = require('path');
 const assert = require('assert');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - HttpProxy', function () {
 
@@ -13,17 +13,15 @@ describe('Testsuit - HttpProxy', function () {
         this.timeout(10000);
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const window = app.getWindow();
         const modal = await window.getTopModal();
@@ -36,7 +34,7 @@ describe('Testsuit - HttpProxy', function () {
     await registry.upsert('defaultWebClient', '${client}');
     controller.getWebClientController().setDefaultWebClient('${client}');
     return Promise.resolve('OK');
-};        
+};
 module.exports = test;`
         const res = await tools.serverEval(cmd);
         assert.equal(res, 'OK', "Setting WebClient Failed!");
@@ -57,21 +55,19 @@ module.exports = test;`
         this.timeout(120000);
 
         const ext = 'http-proxy';
-        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        const file = path.resolve(__dirname, "../dist/" + ext + ".zip");
 
         const app = helper.getApp();
         await app.getExtensionController().addExtension(ext, file, true);
-        //await TestHelper.delay(2000); //TODO: why does this extension need such a long delay?
+        //await ExtendedTestHelper.delay(2000); //TODO: why does this extension need such a long delay?
         //const ac = app.getApiController();
         //await ac.processOpenRestartRequest();
 
         await app.reload();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.login();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);

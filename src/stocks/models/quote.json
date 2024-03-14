@@ -1,0 +1,75 @@
+{
+    "name": "quote",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "t:desc",
+        "title": "title"
+    },
+    "attributes": [
+        {
+            "name": "t",
+            "label": "timestamp",
+            "dataType": "timestamp",
+            "required": true
+        },
+        {
+            "name": "otc",
+            "label": "OTC",
+            "dataType": "boolean",
+            "required": true,
+            "defaultValue": false
+        },
+        {
+            "name": "s",
+            "label": "stock",
+            "model": "stock",
+            "dataType": "relation",
+            "required": true
+        },
+        {
+            "name": "o",
+            "label": "open",
+            "dataType": "double"
+        },
+        {
+            "name": "c",
+            "label": "close",
+            "dataType": "double"
+        },
+        {
+            "name": "h",
+            "label": "high",
+            "dataType": "double"
+        },
+        {
+            "name": "l",
+            "label": "low",
+            "dataType": "double"
+        },
+        {
+            "name": "v",
+            "label": "volume",
+            "dataType": "double"
+        },
+        {
+            "name": "vw",
+            "tooltip": "volume weighted average price",
+            "dataType": "double"
+        },
+        {
+            "name": "n",
+            "label": "number",
+            "tooltip": "number of transactions",
+            "dataType": "double"
+        },
+        {
+            "name": "title",
+            "dataType": "string",
+            "persistent": false,
+            "hidden": true
+        }
+    ]
+}

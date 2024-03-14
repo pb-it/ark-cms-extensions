@@ -21,13 +21,103 @@ class Stock {
         };
         model._crudDialogActions.push(checkAction);
 
-        const entry = new ContextMenuEntry("Last Price", async function (event, target) {
+        const lastPriceEntry = new ContextMenuEntry("Last Price", async function (event, target) {
             const controller = app.getController();
             controller.setLoadingState(true);
             try {
-                var value = await Stock.getLastPrice(target.getObject().getData());
+                const stock = target.getObject().getData();
+                if (stock['symbol']) {
+                    var value = await stockController.getLastPrice(target.getObject().getData());
+                    controller.setLoadingState(false);
+                    alert(value);
+                } else
+                    throw new Error('Missing stock symbol');
+            } catch (error) {
                 controller.setLoadingState(false);
-                alert(value);
+                controller.showError(error);
+            }
+            return Promise.resolve();
+        });
+
+        const downloadEntry = new ContextMenuEntry("Download", async function (event, target) {
+            const controller = app.getController();
+            controller.setLoadingState(true);
+            try {
+                const stock = target.getObject().getData();
+                if (stock['symbol']) {
+                    var body;
+                    /*var api = stockController.getDefaultApi();
+                    if (api == 'Finnhub')
+                        api = 'AlphaVantage';*/
+                    const key = stockController.getKey('AlphaVantage');
+                    if (key)
+                        body = await StockController.getTimeSeriesAlphaVantage(stock, key);
+                    else
+                        body = await stockController.getTimeSeries(stock);
+                    if (body) {
+                        const values = body["Time Series (Daily)"];
+                        if (values) {
+                            var last;
+                            var tmp = await controller.getDataService().fetchData('quote', null, 's=' + stock['id'], 't:desc', 1);
+                            if (tmp && tmp.length == 1)
+                                last = tmp[0]['t'];
+
+                            var data;
+                            var obj;
+                            var datetime;
+                            for (const [key, value] of Object.entries(values).reverse()) {
+                                datetime = new Date(key).toISOString(); // key + 'T00:00:00.000Z';
+                                if (!last || datetime > last) {
+                                    data = {
+                                        't': datetime,
+                                        's': stock['id'],
+                                        'o': value["1. open"],
+                                        'h': value["2. high"],
+                                        'l': value["3. low"],
+                                        'c': value["4. close"],
+                                        'v': value["5. volume"]
+                                    };
+                                    obj = new CrudObject('quote', data);
+                                    await obj.create();
+                                }
+                            }
+                        }
+                    }
+                    controller.setLoadingState(false);
+                } else
+                    throw new Error('Missing stock symbol');
+            } catch (error) {
+                controller.setLoadingState(false);
+                controller.showError(error);
+            }
+            return Promise.resolve();
+        });
+
+        const compareEntry = new ContextMenuEntry("Compare", async function (event, target) {
+            const controller = app.getController();
+            controller.setLoadingState(true);
+            try {
+                const stock = target.getObject().getData();
+                await StockController.compare(stock);
+                controller.setLoadingState(false);
+            } catch (error) {
+                controller.setLoadingState(false);
+                controller.showError(error);
+            }
+            return Promise.resolve();
+        });
+        compareEntry.setEnabledFunction(async function (target) {
+            const key = stockController.getKey('Polygon');
+            return Promise.resolve(key != null);
+        });
+
+        const chartEntry = new ContextMenuEntry("Show Card", async function (event, target) {
+            const controller = app.getController();
+            controller.setLoadingState(true);
+            try {
+                const stock = target.getObject().getData();
+                await StockController.showCard(stock);
+                controller.setLoadingState(false);
             } catch (error) {
                 controller.setLoadingState(false);
                 controller.showError(error);
@@ -44,10 +134,13 @@ class Stock {
                     break;
                 }
             }
-            if (extGroup)
-                extGroup.entries.push(entry);
-            else {
-                extGroup = new ContextMenuEntry('Extensions', null, [entry]);
+            if (extGroup) {
+                extGroup.entries.push(lastPriceEntry);
+                extGroup.entries.push(downloadEntry);
+                extGroup.entries.push(compareEntry);
+                extGroup.entries.push(chartEntry);
+            } else {
+                extGroup = new ContextMenuEntry('Extensions', null, [lastPriceEntry, downloadEntry, compareEntry, chartEntry]);
                 extGroup.setIcon(new Icon('puzzle-piece'));
                 entries.unshift(extGroup);
             }
@@ -87,21 +180,5 @@ class Stock {
                 alert("Stock already exists");
         }
         return Promise.resolve(data);
-    }
-
-    static async getLastPrice(stock) {
-        var value;
-        if (stock['symbol']) {
-            const key = "xxxxxxdemoxxxx";
-            const url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=" + stock['symbol'] + "&apikey=" + key;
-
-            const info = await HttpProxy.request(url);
-            const values = info["Time Series (Daily)"];
-            //const values = info["Time Series (5min)"];
-            const last = Object.keys(values)[0];
-
-            value = values[last]["4. close"];
-        }
-        return Promise.resolve(value);
     }
 }

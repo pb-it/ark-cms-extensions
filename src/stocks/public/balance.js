@@ -67,7 +67,8 @@ class Balance extends Panel {
         const arr = [...map.entries()].filter(function (x) { return x[1]['stock'] != undefined });
         const mapAlph = new Map(arr.sort((a, b) => (a[1]['stock']['name'] > b[1]['stock']['name']) ? 1 : ((b[1]['stock']['name'] > a[1]['stock']['name']) ? -1 : 0)));
         var lastPrice;
-        for (const [key, value] of mapAlph.entries()) {
+        var $button;
+        for (let [key, value] of mapAlph.entries()) {
             if (value.amount != 0) {
                 i++;
                 $row = $('<tr>');
@@ -78,15 +79,35 @@ class Balance extends Panel {
                 $col = $('<td>').text(value.amount);
                 $row.append($col);
                 lastPrice = undefined;
-                try {
-                    lastPrice = await Stock.getLastPrice(value.stock);
+                /*try {
+                    lastPrice = await stockController.getLastPrice(value.stock);
                 } catch (err) {
                     if (err)
                         console.log(err);
                 }
                 if (!lastPrice)
-                    lastPrice = 'n/a';
-                $col = $('<td>').text(lastPrice);
+                    lastPrice = 'n/a';*/
+                if (lastPrice)
+                    $col = $('<td>').text(lastPrice);
+                else {
+                    $button = $('<button>')
+                        .text('Details')
+                        .click(async function (event) {
+                            event.stopPropagation();
+
+                            const controller = app.getController();
+                            controller.setLoadingState(true);
+                            try {
+                                await StockController.showCard(value['stock']);
+                                controller.setLoadingState(false);
+                            } catch (error) {
+                                controller.setLoadingState(false);
+                                controller.showError(error);
+                            }
+                            return Promise.resolve();
+                        }.bind(this));
+                    $col = $('<td>').append($button);
+                }
                 $row.append($col);
                 $table.append($row);
             }

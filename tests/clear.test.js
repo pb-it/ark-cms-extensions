@@ -6,9 +6,9 @@ const assert = require('assert');
 //const test = require('selenium-webdriver/testing');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
-describe('Testsuit', function () {
+describe('Testsuit - clear', function () {
 
     let driver;
 
@@ -16,17 +16,15 @@ describe('Testsuit', function () {
         this.timeout(10000);
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -53,12 +51,47 @@ describe('Testsuit', function () {
 
         await ac.restart(true);
         await app.reload();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await app.prepare(helper.getConfig()['api']);
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
+
+        return Promise.resolve();
+    });
+
+    it('#truncate extension table', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+        const ac = app.getApiController();
+        const tools = ac.getTools();
+        const cmd = `async function test() {
+            var knex = controller.getKnex();
+            var rs = await knex.raw("TRUNCATE TABLE _extension;");
+            return Promise.resolve('OK');
+        };
+        module.exports = test;`
+        const res = await tools.serverEval(cmd);
+        assert.equal(res, 'OK', 'Truncating table failed');
+
+        return Promise.resolve();
+    });
+
+    it('#clear extensions directory', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+        const ac = app.getApiController();
+        const tools = ac.getTools();
+        const cmd = `async function test() {
+    await controller.getExtensionController().clearExtensionsDirectory();
+    return Promise.resolve('OK');
+};
+module.exports = test;`
+        const res = await tools.serverEval(cmd);
+        assert.equal(res, 'OK', 'Deleting old extension failed');
 
         return Promise.resolve();
     });
@@ -68,7 +101,7 @@ describe('Testsuit', function () {
 
         if (config['cdn']) {
             for (const file of fs.readdirSync(config['cdn'])) {
-                fs.unlinkSync(path.join(config['cdn'], file));
+                fs.rmSync(path.join(config['cdn'], file), { recursive: true, force: true });
             }
         } else
             this.skip();

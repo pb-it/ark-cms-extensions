@@ -6,7 +6,7 @@ const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
-const { TestHelper } = require('@pb-it/ark-cms-selenium-test-helper');
+const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - gallery', function () {
 
@@ -16,17 +16,15 @@ describe('Testsuit - gallery', function () {
         this.timeout(10000);
 
         if (!global.helper) {
-            global.helper = new TestHelper();
+            global.helper = new ExtendedTestHelper();
             await helper.setup(config);
         }
         driver = helper.getBrowser().getDriver();
         const app = helper.getApp();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.prepare(config['api'], config['username'], config['password']);
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
@@ -47,18 +45,16 @@ describe('Testsuit - gallery', function () {
         this.timeout(120000);
 
         const ext = 'gallery';
-        const file = path.resolve(__dirname, "../dist/" + ext + "@1.0.0.zip");
+        const file = path.resolve(__dirname, "../dist/" + ext + ".zip");
 
         const app = helper.getApp();
         await app.getExtensionController().addExtension(ext, file, true);
 
         await app.reload();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await app.login();
-
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const window = app.getWindow();
         const modal = await window.getTopModal();
@@ -78,9 +74,9 @@ describe('Testsuit - gallery', function () {
         console.log(id);
 
         await app.reload();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await app.login();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const ds = app.getDataService();
         var data = {
@@ -114,22 +110,22 @@ describe('Testsuit - gallery', function () {
         console.log(id);
 
         await app.reload();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await app.login();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('other');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('image');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Show');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('All');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
         var panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
@@ -147,7 +143,7 @@ describe('Testsuit - gallery', function () {
             .click(panels[1])
             .keyUp(cmdCtrl)
             .perform();*/
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await driver.actions().keyDown(cmdCtrl)
             .sendKeys('c')
@@ -158,17 +154,17 @@ describe('Testsuit - gallery', function () {
         var item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();*/
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('other');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('gallery');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
         assert.notEqual(panel, undefined);
@@ -176,12 +172,12 @@ describe('Testsuit - gallery', function () {
         var input = await window.getFormInput(form, 'title');
         assert.notEqual(input, undefined);
         await input.sendKeys('TestGallery');
-        await TestHelper.delay(100);
+        await ExtendedTestHelper.delay(100);
         var button = await window.getButton(panel, 'Create');
         assert.notEqual(button, undefined);
         await button.click();
 
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
         assert.equal(panels.length, 1);
@@ -191,31 +187,31 @@ describe('Testsuit - gallery', function () {
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
         xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Save"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
         xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Extensions"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
         xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Extensions"]/following-sibling::div/ul[@class="contextmenu"]/li/div[1][text()="Gallery"]`;
         item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
         assert.notEqual(item, null);
         await item.click();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         await driver.actions()
             .sendKeys(webdriver.Key.ESCAPE)
             .perform();
-        await TestHelper.delay(1000);
+        await ExtendedTestHelper.delay(1000);
 
         return Promise.resolve();
     });

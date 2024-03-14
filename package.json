@@ -11,6 +11,7 @@
         "pretest": "node build.js",
         "test": "mocha --bail tests/root.test.js",
         "test:clear": "./build.sh && mocha tests/clear.test.js",
+        "test:common": "./build.sh echo && mocha tests/common.test.js",
         "test:add-all": "./build.sh && mocha tests/add-all.test.js",
         "test:test-helper": "./build.sh test-helper && mocha tests/test-helper.test.js",
         "test:test-helper:sleep": "mocha tests/test-helper.test.js --grep \"#test sleep\"",
@@ -46,7 +47,7 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "0.1.16-beta",
+        "@pb-it/ark-cms-selenium-test-helper": "0.1.18-beta",
         "cross-fetch": "^4.0.0",
         "mocha": "^10.3.0",
         "selenium-webdriver": "^4.18.1",

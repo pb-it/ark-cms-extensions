@@ -15,40 +15,19 @@ class HttpProxy {
 
     static async forward(req, res, next) {
         var url;
-        var bCache;
         var options;
         if (req.method == 'GET') {
             url = req.query['url'];
-            if (req.query['_cache'])
-                bCache = req.query['_cache'] === 'true';
+            if (req.query['_cache'] && req.query['_cache'] === 'true')
+                options = { 'bCache': true };
         } else if (req.method == 'POST') {
             const body = req.body;
             url = body['url'];
             options = body['options'];
-            if (options && options.hasOwnProperty('bCache')) {
-                bCache = options['bCache'];
-                delete options['bCache'];
-            }
         }
         if (url) {
-            log(url);
-            if (debug.enabled('app:http-proxy')) {
-                var str;
-                if (options)
-                    str = JSON.stringify(options, null, '\t');
-                else
-                    str = 'null';
-                Logger.info('[app:http-proxy] options:\n' + str);
-            }
             try {
                 const response = await HttpProxy.request(url, options);
-                if (response && bCache) {
-                    if (response['status'] == 200 && response['body']) {
-                        const model = controller.getShelf().getModel('http-proxy-cache');
-                        if (model)
-                            await model.create({ 'url': url, 'body': response['body'] });
-                    }
-                }
                 res.json(response);
             } catch (error) {
                 Logger.parseError(error);
@@ -80,9 +59,24 @@ class HttpProxy {
      */
     static async request(url, options) {
         var res;
+        log(url);
+        if (debug.enabled('app:http-proxy')) {
+            var str;
+            if (options)
+                str = JSON.stringify(options, null, '\t');
+            else
+                str = 'null';
+            Logger.info('[app:http-proxy] options:\n' + str);
+        }
         var client;
-        if (options)
+        var bCache;
+        if (options) {
             client = options['client'];
+            if (options.hasOwnProperty('bCache')) {
+                bCache = options['bCache'];
+                delete options['bCache'];
+            }
+        }
         const webclient = controller.getWebClientController().getWebClient(client);
         if (webclient) {
             if (!client)
@@ -138,6 +132,13 @@ class HttpProxy {
                 method = 'GET';
 
             res = await webclient.request(url, method, data, options); // await fetch(url, options);
+            if (res && bCache) {
+                if (res['status'] == 200 && res['body']) {
+                    const model = controller.getShelf().getModel('http-proxy-cache');
+                    if (model)
+                        await model.create({ 'url': url, 'body': res['body'] });
+                }
+            }
         } else
             throw new Error('WebClient not found');
         return Promise.resolve(res);
