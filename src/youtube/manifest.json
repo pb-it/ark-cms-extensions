@@ -1,6 +1,6 @@
 {
     "name": "Youtube",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Youtube Playlist Appliction/Models",
     "app_version": "^0.5.7",
     "npm_dependencies": {

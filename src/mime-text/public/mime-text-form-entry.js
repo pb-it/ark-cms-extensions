@@ -46,10 +46,12 @@ class MimeTextFormEntry extends FormEntry {
 
         var syntax;
         if (this._attribute['bSyntaxPrefix']) {
-            var index = value.indexOf(','); //data:text/plain;charset=utf-8,
-            if (index > -1) {
-                syntax = DataView.getSyntax(value.substr(0, index));
-                value = value.substr(index + 1);
+            if (value.startsWith('data:')) {
+                var index = value.indexOf(','); //data:text/plain;charset=utf-8,
+                if (index > -1) {
+                    syntax = DataView.getSyntax(value.substr(0, index));
+                    value = value.substr(index + 1);
+                }
             }
             if (!syntax)
                 syntax = 'plain';
@@ -78,16 +80,21 @@ class MimeTextFormEntry extends FormEntry {
                 .click(async function (event) {
                     event.stopPropagation();
 
-                    var syntax;
-                    if (this._$syntax)
-                        syntax = this._$syntax.val();
-                    else
-                        syntax = this._attribute['view'];
-                    if (syntax) {
-                        var val = this._$input.val();
-                        var formatter = app.getController().getFormatter();
-                        val = await formatter.formatText(val, syntax);
-                        this._$input.val(val);
+                    const controller = app.getController();
+                    try {
+                        var syntax;
+                        if (this._$syntax)
+                            syntax = this._$syntax.val();
+                        else
+                            syntax = this._attribute['view'];
+                        if (syntax) {
+                            var val = this._$input.val();
+                            const formatter = controller.getFormatter();
+                            val = await formatter.formatText(val, syntax);
+                            this._$input.val(val);
+                        }
+                    } catch (error) {
+                        controller.showError(error);
                     }
 
                     return Promise.resolve();

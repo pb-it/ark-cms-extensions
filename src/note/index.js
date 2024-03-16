@@ -30,9 +30,14 @@ async function setup() {
     };
     var profiles;
     var bUpdate;
+    var bPrefix;
     const registry = controller.getRegistry();
     var str = await registry.get('profiles');
     if (str) {
+        if (str.startsWith('data:text/javascript;charset=utf-8,')) {
+            str = str.substring('data:text/javascript;charset=utf-8,'.length);
+            bPrefix = true;
+        }
         profiles = JSON.parse(str);
         if (profiles['available']) {
             var bFound;
@@ -53,8 +58,13 @@ async function setup() {
         };
         bUpdate = true;
     }
-    if (bUpdate)
-        await registry.upsert('profiles', JSON.stringify(profiles));
+    if (bUpdate) {
+        if (bPrefix)
+            str = 'data:text/javascript;charset=utf-8,' + JSON.stringify(profiles, null, '\t');
+        else
+            str = JSON.stringify(profiles);
+        await registry.upsert('profiles', str);
+    }
 
     return Promise.resolve(data);
 }

@@ -1,0 +1,30 @@
+{
+    "name": "star",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "attributes": [
+        {
+            "name": "name",
+            "dataType": "string"
+        },
+        {
+            "name": "gender",
+            "dataType": "enumeration",
+            "options": [
+                {
+                    "value": "male"
+                },
+                {
+                    "value": "female"
+                },
+                {
+                    "value": "other"
+                }
+            ],
+            "view": "select",
+            "bUseString": true
+        }
+    ]
+}

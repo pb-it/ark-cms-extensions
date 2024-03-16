@@ -5,8 +5,17 @@ const appRoot = controller.getAppRoot();
 const common = require(path.join(appRoot, './src/common/common.js'));
 
 async function setup() {
-    const dir = path.join(appRoot, './extensions/face-recognition');
-    await common.exec('cd ' + dir + ' && git clone https://github.com/justadudewhohacks/face-api.js && ln -s ' + path.join(dir, './face-api.js/weights') + ' ./public/weights');
+    var dir;
+    const appDataDir = controller.getAppDataDir();
+    if (fs.existsSync(path.join(appDataDir)))
+        dir = appDataDir;
+    else
+        dir = __dirname;
+    if (!fs.existsSync(path.join(dir, './face-api.js')))
+        await common.exec('cd ' + dir + ' && git clone https://github.com/justadudewhohacks/face-api.js');
+    const wDir = path.join(__dirname, './public/weights');
+    if (!fs.existsSync(wDir))
+        await common.exec('ln -s ' + path.join(dir, './face-api.js/weights') + ' ' + path.join(__dirname, './public/weights'));
 
     const data = {};
     data['client-extension'] = fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8');

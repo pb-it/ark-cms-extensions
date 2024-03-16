@@ -4,14 +4,12 @@ const fs = require('fs');
 const HttpProxy = require("./server/http-proxy.js");
 
 async function setup() {
-    var data = {};
-    data['client-extension'] = fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8');
+    await _createModels();
+    const data = { 'client-extension': fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8') };
     return Promise.resolve(data);
 }
 
 async function init() {
-    await _createModels();
-
     const ws = controller.getWebServer();
     ws.addExtensionRoute(
         {
@@ -65,9 +63,14 @@ async function _createModels() {
 
         var profiles;
         var bUpdate;
+        var bPrefix;
         const registry = controller.getRegistry();
         var str = await registry.get('profiles');
         if (str) {
+            if (str.startsWith('data:text/javascript;charset=utf-8,')) {
+                str = str.substring('data:text/javascript;charset=utf-8,'.length);
+                bPrefix = true;
+            }
             profiles = JSON.parse(str);
             if (profiles['available']) {
                 var bFound;
@@ -88,8 +91,13 @@ async function _createModels() {
             };
             bUpdate = true;
         }
-        if (bUpdate)
-            await registry.upsert('profiles', JSON.stringify(profiles));
+        if (bUpdate) {
+            if (bPrefix)
+                str = 'data:text/javascript;charset=utf-8,' + JSON.stringify(profiles, null, '\t');
+            else
+                str = JSON.stringify(profiles);
+            await registry.upsert('profiles', str);
+        }
     }
     return Promise.resolve();
 }

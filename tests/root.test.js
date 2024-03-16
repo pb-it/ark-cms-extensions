@@ -29,6 +29,7 @@ describe("Root Suite", function () {
     require('./common.test.js');
     require('./add-all.test.js');
     require('./test-helper.test.js');
+    require('./mime-text.test.js');
     require('./http-proxy.test.js');
     require('./webclient.test.js');
     require('./scraper.test.js');

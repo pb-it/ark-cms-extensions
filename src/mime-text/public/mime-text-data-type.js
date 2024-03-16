@@ -16,7 +16,7 @@ class MimeTextDataType extends DataType {
         var skeleton = [
             { 'name': 'length', 'dataType': 'string', 'tooltip': '**Info**: Constraints depend on database and character encoding. Default is 255 for \'string\' and 65,535 for \'text\'' }
         ];
-        var info = controller.getApiController().getApiInfo();
+        var info = app.getController().getApiController().getApiInfo();
         var client = info['db']['client'];
         if (client === 'mysql' || client === 'mysql2') {
             skeleton.push(
@@ -137,5 +137,17 @@ You will not see this information in forms, but it is stored with your actual st
             app.getController().showError(error);
         }
         return Promise.resolve();
+    }
+
+    getHasChangedFunction() {
+        return async function (attribute, olddata, newdata) {
+            const property = attribute['name'];
+            const oldValue = olddata[property];
+            const newValue = newdata[property];
+            if (oldValue !== newValue && 'data:text/plain;charset=utf-8,' + oldValue !== newValue)
+                return Promise.resolve(true);
+            else
+                return Promise.resolve(false);
+        }
     }
 }
