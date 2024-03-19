@@ -66,7 +66,7 @@ describe('Testsuit - mime-text', function () {
         const app = helper.getApp();
         const ds = app.getDataService();
         const models = await ds.read('_model');
-        if (models.filter(function (x) { return x['name'] === 'star' }).length == 0) {
+        if (models.filter(function (x) { return x['definition']['name'] === 'star' }).length == 0) {
             await helper.setupModel(path.join(__dirname, './data/models/star.json'));
 
             await app.reload();
@@ -77,11 +77,6 @@ describe('Testsuit - mime-text', function () {
         const sidemenu = window.getSideMenu();
         await sidemenu.click('Models');
         await ExtendedTestHelper.delay(1000);
-        var menu = await sidemenu.getEntry('other');
-        if (menu) {
-            await sidemenu.click('other');
-            await ExtendedTestHelper.delay(1000);
-        }
         await sidemenu.click('star');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Edit');
@@ -114,7 +109,7 @@ describe('Testsuit - mime-text', function () {
         assert.notEqual(panel, null);
         form = await panel.getForm();
         assert.notEqual(form, null);
-        var elem = await panel.getElement().findElement(webdriver.By.xpath('.//input[@name="bSyntaxPrefix"]'));
+        var elem = await panel.getElement().findElement(webdriver.By.xpath('.//fieldset/input[@type="checkbox" and @name="bSyntaxPrefix"]'));
         assert.notEqual(elem, null, 'Input not found!');
         await elem.click();
         button = await modal.findElement(webdriver.By.xpath('//button[text()="Apply"]'));

@@ -15,8 +15,28 @@ class HttpProxy {
         if (options && options['bCache']) {
             var tmp = await HttpProxy.lookup(url);
             if (tmp) {
-                if (confirm("Use cached response?"))
-                    res = tmp['body'];
+                if (confirm("Use cached response?")) {
+                    if (tmp['body'])
+                        res = tmp['body'];
+                    else if (tmp['file']) {
+                        /*const obj = new CrudObject('http-proxy-cache', tmp);
+                        const url = obj.getAttributeValue('file');*/
+                        var url;
+                        const controller = app.getController();
+                        const model = controller.getModelController().getModel('http-proxy-cache');
+                        if (model) {
+                            const attr = model.getModelAttributesController().getAttribute('file');
+                            if (attr)
+                                url = CrudObject._buildUrl(attr['cdn'], tmp['file']);
+                        }
+                        if (url) {
+                            /*const ac = controller.getApiController();
+                            const client = ac.getApiClient();
+                            res = await client.request('GET', url);*/
+                            res = await HttpClient.request('GET', url, { 'withCredentials': true });
+                        }
+                    }
+                }
             }
         }
         if (!res) {

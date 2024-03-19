@@ -50,6 +50,19 @@ async function _createModels() {
         if (resolved)
             delete require.cache[resolved];
         var definition = require(p);
+        const file2 = controller.getExtensionController().getExtension('file2');
+        if (file2) {
+            definition['attributes'].push({
+                "name": "file",
+                "dataType": "file2",
+                "storage": "filesystem",
+                "cdn": "/cdn",
+                "length": "250",
+                "unique": true,
+                "url_prop": "url",
+                "bCustomFilename": false
+            });
+        }
         model = await shelf.upsertModel(null, definition);
         await model.initModel();
     }

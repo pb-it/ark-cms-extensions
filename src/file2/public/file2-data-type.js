@@ -41,12 +41,29 @@ class File2DataType extends DataType {
                 'view': 'select',
                 'required': true,
                 changeAction: async function (entry) {
-                    const fData = await entry._form.readForm(false, false);
+                    const fData = await entry._form.readForm({ bSkipNullValues: false, bValidate: false });
                     const cdn = entry._form.getFormEntry('cdn');
-                    if (fData['storage'] == 'filesystem')
+                    const fn = entry._form.getFormEntry('filename_prop');
+                    const cf = entry._form.getFormEntry('bCustomFilename');
+                    const sf = entry._form.getFormEntry('bSuggestFilename');
+                    if (fData['storage'] == 'filesystem') {
                         await cdn.show();
-                    else
-                        cdn.hide();
+                        await fn.hide();
+                        await cf.enable();
+                        if (fData['bCustomFilename'])
+                            await sf.enable();
+                    } else {
+                        await cdn.hide();
+                        await fn.show();
+                        if (fData['filename_prop'] == undefined) {
+                            await cf.disable();
+                            await sf.disable();
+                        } else {
+                            await cf.enable();
+                            if (fData['bCustomFilename'])
+                                await sf.enable();
+                        }
+                    }
                     return Promise.resolve();
                 }
             },
@@ -67,16 +84,19 @@ class File2DataType extends DataType {
                 'dataType': 'enumeration',
                 'options': options,
                 'view': 'select',
+                'hidden': true,
                 changeAction: async function (entry) {
-                    const fData = await entry._form.readForm(false, false);
+                    const fData = await entry._form.readForm({ bSkipNullValues: false, bValidate: false });
                     const cf = entry._form.getFormEntry('bCustomFilename');
-                    var attr = cf.getAttribute();
-                    attr['readonly'] = fData['filename_prop'] == undefined;
-                    await cf.renderEntry(fData['bCustomFilename']);
+                    if (fData['filename_prop'] == undefined)
+                        await cf.disable();
+                    else
+                        await cf.enable();
                     const sf = entry._form.getFormEntry('bSuggestFilename');
-                    attr = sf.getAttribute();
-                    attr['readonly'] = (fData['filename_prop'] == undefined) || !fData['bCustomFilename'];
-                    await sf.renderEntry(fData['bSuggestFilename']);
+                    if ((fData['filename_prop'] == undefined) || !fData['bCustomFilename'])
+                        await sf.disable();
+                    else
+                        await sf.enable();
                     return Promise.resolve();
                 }
             },
@@ -89,11 +109,12 @@ class File2DataType extends DataType {
                 'defaultValue': true,
                 'readonly': true,
                 changeAction: async function (entry) {
-                    const fData = await entry._form.readForm(false, false);
+                    const fData = await entry._form.readForm({ bSkipNullValues: false, bValidate: false });
                     const sf = entry._form.getFormEntry('bSuggestFilename');
-                    const attr = sf.getAttribute();
-                    attr['readonly'] = !fData['bCustomFilename'];
-                    await sf.renderEntry(fData['bSuggestFilename']);
+                    if (fData['bCustomFilename'])
+                        await sf.enable();
+                    else
+                        await sf.disable();
                     return Promise.resolve();
                 }
             },
@@ -116,6 +137,21 @@ class File2DataType extends DataType {
             }
         ];
         return skeleton;
+    }
+
+    applySkeleton(current, add) {
+        const merged = { ...current, ...add };
+        if (merged['storage'] == 'filesystem') {
+            if (!merged.hasOwnProperty('unique'))
+                merged['unique'] = true;
+            if (merged['unique']) {
+                if (!merged.hasOwnProperty('length'))
+                    merged['length'] = 250;
+                else if (merged['length'] > 250)
+                    throw new Error('Length of unique properties must not be exceed 250 character');
+            }
+        }
+        return merged;
     }
 
     getFormEntryClass() {

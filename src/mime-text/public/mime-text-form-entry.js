@@ -216,7 +216,7 @@ class MimeTextFormEntry extends FormEntry {
 
 
         if (this._$input) {
-            if (this._attribute['readonly']) //editable
+            if (!this.isEditable())
                 this._$input.attr('disabled', true);
 
             if (this._attribute['changeAction'])
@@ -242,7 +242,7 @@ class MimeTextFormEntry extends FormEntry {
             }
         }
 
-        if (bValidate && this._attribute['required'] && !(this._attribute['readonly'])) {
+        if (bValidate && this._attribute['required'] && this.isEditable()) {
             if (!data) {
                 this._$input.focus();
                 throw new Error("Field '" + this._attribute['name'] + "' is required");

@@ -1,6 +1,7 @@
 const path = require('path');
 
 const assert = require('assert');
+const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
 const ExtendedTestHelper = require('./helper/extended-test-helper.js');
@@ -123,6 +124,114 @@ module.exports = test;`
         this.timeout(10000);
 
         //TODO:
+
+        return Promise.resolve();
+    });
+
+    it('#test file dump', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+        const ds = app.getDataService();
+        const models = await ds.read('_model');
+        var model;
+        var bOk;
+        var tmp = models.filter(function (x) { return x['definition']['name'] === 'http-proxy-cache' });
+        if (tmp.length == 1)
+            model = tmp[0];
+        if (model) {
+            tmp = model['definition']['attributes'].filter(function (x) { return x['name'] === 'file' });
+            if (tmp.length == 1)
+                bOk = true;
+            else
+                await ds.delete('_model', model['id']);
+        }
+        if (!bOk) {
+            tmp = models.filter(function (x) { return x['definition']['name'] === 'file2' });
+            var ext;
+            var file;
+            if (tmp.length == 0) {
+                ext = 'file2';
+                file = path.resolve(__dirname, "../dist/" + ext + ".zip");
+                await app.getExtensionController().addExtension(ext, file);
+            }
+            ext = 'http-proxy';
+            file = path.resolve(__dirname, "../dist/" + ext + ".zip");
+            await app.getExtensionController().addExtension(ext, file, true);
+
+            await app.reload();
+            await ExtendedTestHelper.delay(1000);
+
+            await app.login();
+            await ExtendedTestHelper.delay(1000);
+        }
+
+        var response = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const url = 'https://example.com/';
+            var res;
+            try {
+                await HttpProxy.request(url, { 'bCache': true });
+                res = 'OK';
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        });
+        assert.equal(response, 'OK');
+
+        const window = app.getWindow();
+        const sidemenu = window.getSideMenu();
+        await sidemenu.click('Data');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('http-proxy');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('http-proxy-cache');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('Show');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('All');
+        await ExtendedTestHelper.delay(1000);
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
+        assert.equal(panels.length, 1);
+
+        var contextmenu = await panels[0].openContextMenu();
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Extensions');
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Dump to file');
+        await ExtendedTestHelper.delay(1000);
+
+        response = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const url = 'https://example.com/';
+            var res;
+            try {
+                //res = await HttpProxy.request(url, { 'bCache': true });
+                HttpProxy.request(url, { 'bCache': true }).then((result) => {
+                    console.log(result);
+                });
+                res = 'OK';
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        });
+        assert.equal(response, 'OK');
+
+        await driver.wait(webdriver.until.alertIsPresent(), 1000);
+        var alert = await driver.switchTo().alert();
+        var text = await alert.getText();
+        assert.equal(text, 'Use cached response?');
+        await alert.accept();
+        await ExtendedTestHelper.delay(1000);
+
+        //TODO: check browser log
 
         return Promise.resolve();
     });
