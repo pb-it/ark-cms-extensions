@@ -17,11 +17,11 @@ async function configure() {
     var defaultApi;
     tmp = await ds.fetchData('_registry', null, 'key=defaultStockAPI');
     if (tmp && tmp.length == 1)
-        defaultApi = JSON.parse(tmp[0]['value']);
+        defaultApi = tmp[0]['value'];
     if (defaultApi)
-        data['api'] = defaultApi;
+        data['default'] = defaultApi;
     else
-        data['api'] = '';
+        data['default'] = '';
 
     const panel = new FormPanel(null, skeleton, data);
     panel.setApplyAction(async function () {
