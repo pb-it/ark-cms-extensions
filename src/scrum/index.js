@@ -8,6 +8,8 @@ async function setup() {
     const data = {};
     data['client-extension'] = fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8');
 
+    const manifest = require(path.join(__dirname, 'manifest.json'));
+    const version = 'scrum@' + manifest['version'];
     const shelf = controller.getShelf();
     var mProject = shelf.getModel('projects');
     var mUserStories = shelf.getModel('user-stories');
@@ -21,16 +23,25 @@ async function setup() {
         if (resolved)
             delete require.cache[resolved];
         definition = require(p);
+        definition['version'] = version;
         mProject = await shelf.upsertModel(null, definition);
-        await mProject.initModel();
+        await mProject.initTables(false);
         definition = JSON.parse(fs.readFileSync(path.join(__dirname, 'models/user-stories.json'), 'utf8'));
+        definition['version'] = version;
         mUserStories = await shelf.upsertModel(null, definition);
-        await mUserStories.initModel();
+        await mUserStories.initTables(false);
         definition = JSON.parse(fs.readFileSync(path.join(__dirname, 'models/tasks.json'), 'utf8'));
+        definition['version'] = version;
         mTasks = await shelf.upsertModel(null, definition);
-        await mTasks.initModel();
+        await mTasks.initTables(false);
         definition = JSON.parse(fs.readFileSync(path.join(__dirname, 'models/defects.json'), 'utf8'));
+        definition['version'] = version;
         mDefects = await shelf.upsertModel(null, definition);
+        await mDefects.initTables(false);
+
+        await mProject.initModel();
+        await mUserStories.initModel();
+        await mTasks.initModel();
         await mDefects.initModel();
     }
 

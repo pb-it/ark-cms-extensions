@@ -1,5 +1,10 @@
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
+
+const appRoot = controller.getAppRoot();
+const common = require(path.join(appRoot, "./src/common/common.js"));
+const base64 = require(path.join(appRoot, "./src/common/base64.js"));
 
 const HttpProxy = require("./server/http-proxy.js");
 
@@ -10,6 +15,32 @@ async function setup() {
 }
 
 async function init() {
+    const cacheModel = controller.getShelf().getModel('http-proxy-cache');
+    if (cacheModel) {
+        const definition = cacheModel.getDefinition();
+        const attr = definition['attributes'].filter(function (x) { return x['name'] === 'file' });
+        if (attr.length == 1) {
+            attr[0]['funcFileName'] = async function (data) {
+                var fileName;
+                const fdata = data['file'];
+                if (fdata) {
+                    const uid = crypto.randomBytes(16).toString('hex');
+                    var ext;
+                    if (fdata['url'] || fdata['base64']) {
+                        if (fdata['filename'])
+                            ext = fdata['filename'].substring(fdata['filename'].lastIndexOf('.') + 1);
+                        if (!ext && fdata['url'])
+                            ext = common.getFileExtensionFromUrl(fdata['url']);
+                        if (!ext && fdata['base64'])
+                            ext = base64.getFileExtension(fdata['base64']);
+                    }
+                    fileName = `${cacheModel.getName()}/${new Date().getFullYear().toString()}/${uid}.${ext}`;
+                }
+                return Promise.resolve(fileName);
+            };
+        }
+    }
+
     const ws = controller.getWebServer();
     ws.addExtensionRoute(
         {

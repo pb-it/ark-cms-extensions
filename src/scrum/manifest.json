@@ -1,6 +1,6 @@
 {
     "name": "scrum",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Scrum Appliction/Models",
-    "app_version": "^0.5.3"
+    "app_version": "^0.6.5"
 }

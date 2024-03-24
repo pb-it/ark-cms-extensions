@@ -1,0 +1,26 @@
+[
+    {
+        "id": 1,
+        "name": "Iron Man",
+        "studio": 1
+    },
+    {
+        "id": 2,
+        "name": "Thor",
+        "studio": 1
+    },
+    {
+        "id": 3,
+        "name": "Avengers",
+        "studio": 1
+    },
+    {
+        "id": 4,
+        "name": "Pirates of the Caribbean",
+        "studio": 3
+    },
+    {
+        "id": 5,
+        "name": "Harry Potter"
+    }
+]

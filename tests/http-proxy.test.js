@@ -147,9 +147,9 @@ module.exports = test;`
                 await ds.delete('_model', model['id']);
         }
         if (!bOk) {
-            tmp = models.filter(function (x) { return x['definition']['name'] === 'file2' });
             var ext;
             var file;
+            var tmp = await ds.read('_extension', null, 'name=file2');
             if (tmp.length == 0) {
                 ext = 'file2';
                 file = path.resolve(__dirname, "../dist/" + ext + ".zip");

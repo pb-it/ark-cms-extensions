@@ -1,5 +1,11 @@
 class KanbanBoard extends Panel {
 
+    _data;
+    _projects;
+    _optionsProjects;
+    _users;
+    _optionsAssignee;
+    _form;
     _items;
 
     _backlogColumn;
@@ -8,22 +14,110 @@ class KanbanBoard extends Panel {
     _reviewColumn;
     _doneColumn;
 
-    constructor(items) {
+    constructor(data) {
         super();
-
-        if (items)
-            this._items = items;
-        else
-            this._items = [];
+        if (data)
+            this._data = data;
     }
 
-    /*async _init() {
+    async _init() {
         await super._init();
+        const controller = app.getController();
+        try {
+            const ds = controller.getDataService();
+            if (!this._projects)
+                this._projects = await ds.fetchData('projects');
+            if (!this._optionsProjects) {
+                this._optionsProjects = [];
+                if (this._projects && this._projects.length > 0) {
+                    for (var project of this._projects) {
+                        this._optionsProjects.push({ 'value': project['name'] });
+                    }
+                }
+            }
+            if (!this._users)
+                this._users = await ds.fetchData('_user');
+            if (!this._optionsAssignee) {
+                this._optionsAssignee = [];
+                if (this._users && this._users.length > 0) {
+                    for (var u of this._users) {
+                        this._optionsAssignee.push({ 'value': u['username'] });
+                    }
+                }
+            }
+
+            this._items = [];
+            var project;
+            var userStoryIds;
+            if (this._data && this._data['project']) {
+                for (var p of this._projects) {
+                    if (p['name'] == this._data['project']) {
+                        project = p;
+                        break;
+                    }
+                }
+                if (project) {
+                    if (!this._data || !this._data['artifacts'] || this._data['artifacts'].includes('tasks')) {
+                        const us = await ds.fetchData('user-stories', null, 'project=' + project['id'], null, null, null, null, true);
+                        userStoryIds = us.map(function (x) { return x['id'] });
+                    }
+                }
+            }
+            var assignee;
+            if (this._data && this._data['assignee']) {
+                for (var user of this._users) {
+                    if (user['username'] == this._data['assignee']) {
+                        assignee = user;
+                        break;
+                    }
+                }
+            }
+
+            var where;
+            if (!this._data || !this._data['artifacts'] || this._data['artifacts'].includes('tasks')) {
+                if (userStoryIds)
+                    where = 'user-story_in=' + userStoryIds.join(',');
+                else
+                    where = null;
+                if (assignee) {
+                    if (where)
+                        where += '&assignee=' + assignee['id'];
+                    else
+                        where = 'assignee=' + assignee['id'];
+                }
+                var tasks = await ds.fetchData('tasks', null, where, null, null, null, null, true);
+                if (tasks && tasks.length > 0) {
+                    for (var task of tasks) {
+                        this._items.push(new KanbanBoardItem({ 'bSelectable': true, 'bContextMenu': true }, new CrudObject('tasks', task)));
+                    }
+                }
+            }
+            if (!this._data || !this._data['artifacts'] || this._data['artifacts'].includes('defects')) {
+                if (project)
+                    where = 'project=' + project['id'];
+                else
+                    where = null;
+                if (assignee) {
+                    if (where)
+                        where += '&assignee=' + assignee['id'];
+                    else
+                        where = 'assignee=' + assignee['id'];
+                }
+                const defects = await ds.fetchData('defects', null, where, null, null, null, null, true);
+                if (defects && defects.length > 0) {
+                    for (var defect of defects) {
+                        this._items.push(new KanbanBoardItem({ 'bSelectable': true, 'bContextMenu': true }, new CrudObject('defects', defect)));
+                    }
+                }
+            }
+        } catch (error) {
+            controller.showError(error);
+        }
         return Promise.resolve();
-    }*/
+    }
 
     async _renderContent() {
-        var $div = $('<div/>')
+        const $div = $('<div/>')
             .css({ 'padding': '10' });
 
         for (var item of this._items) {
@@ -33,9 +127,55 @@ class KanbanBoard extends Panel {
                 .hide();
         }
 
+        $div.append('<h2>Filter</h2>');
+
+        if (!this._form) {
+            const skeleton = [
+                {
+                    name: 'project',
+                    dataType: 'enumeration',
+                    options: this._optionsProjects,
+                    changeAction: async function (entry) {
+                        this._data = await this._form.readForm();
+                        this.render();
+                        return Promise.resolve();
+                    }.bind(this)
+                },
+                {
+                    name: 'artifacts',
+                    dataType: 'list',
+                    options: [
+                        { 'value': 'defects' },
+                        { 'value': 'tasks' }
+                    ],
+                    changeAction: async function (entry) {
+                        this._data = await this._form.readForm();
+                        this.render();
+                        return Promise.resolve();
+                    }.bind(this)
+                },
+                {
+                    name: 'assignee',
+                    dataType: 'enumeration',
+                    options: this._optionsAssignee,
+                    changeAction: async function (entry) {
+                        this._data = await this._form.readForm();
+                        this.render();
+                        return Promise.resolve();
+                    }.bind(this)
+                },
+            ];
+            if (!this._data)
+                this._data = { 'artifacts': ['defects', 'tasks'] };
+            this._form = new Form(skeleton, this._data);
+        } else
+            this._form.setFormData(this._data);
+        const $form = await this._form.renderForm();
+        $div.append($form);
+
         $div.append('<h2>Kanban-Board</h2>');
 
-        var $table = $('<table>').addClass('kanban-board');
+        const $table = $('<table>').addClass('kanban-board');
         var $row = $('<tr>');
         $row.append($('<th>').text('Backlog'));
         $row.append($('<th>').text('Open / To Do'));
@@ -67,7 +207,7 @@ class KanbanBoard extends Panel {
         $table.append($row);
         $div.append($table);
 
-        var $footer = $('<div/>')
+        const $footer = $('<div/>')
             .addClass('clear');
         $div.append($footer);
 

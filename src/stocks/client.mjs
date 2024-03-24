@@ -1,3 +1,50 @@
+async function configure() {
+    const controller = app.getController();
+    const ds = controller.getDataService();
+    const skeleton = [
+        { name: 'api', dataType: 'json' },
+        { name: 'default', dataType: 'string' }
+    ];
+    const data = {};
+    var api;
+    var tmp = await ds.fetchData('_registry', null, 'key=availableStockAPI');
+    if (tmp && tmp.length == 1)
+        api = JSON.parse(tmp[0]['value']);
+    if (api)
+        data['api'] = api;
+    else
+        data['api'] = [];
+    var defaultApi;
+    tmp = await ds.fetchData('_registry', null, 'key=defaultStockAPI');
+    if (tmp && tmp.length == 1)
+        defaultApi = JSON.parse(tmp[0]['value']);
+    if (defaultApi)
+        data['api'] = defaultApi;
+    else
+        data['api'] = '';
+
+    const panel = new FormPanel(null, skeleton, data);
+    panel.setApplyAction(async function () {
+        try {
+            controller.setLoadingState(true);
+            const changed = await panel.getChanges();
+            if (changed) {
+                if (changed['api'])
+                    await ds.request('_registry', ActionEnum.update, null, { 'key': 'availableStockAPI', 'value': changed['api'] });
+                if (changed['default'])
+                    await ds.request('_registry', ActionEnum.update, null, { 'key': 'defaultStockAPI', 'value': changed['default'] });
+            }
+            panel.dispose();
+            controller.setLoadingState(false);
+        } catch (error) {
+            controller.setLoadingState(false);
+            controller.showError(error);
+        }
+        return Promise.resolve();
+    });
+    return controller.getModalController().openPanelInModal(panel);
+}
+
 async function init() {
     const controller = app.getController();
 
@@ -60,4 +107,4 @@ async function init() {
     return Promise.resolve();
 }
 
-export { init };
+export { init, configure };

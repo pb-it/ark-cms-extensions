@@ -1,5 +1,14 @@
-async function init() {
+async function teardown() {
+    const controller = app.getController();
+    const model = controller.getModelController().getModel('http-proxy-cache');
+    if (model) {
+        if (confirm("Delete model 'http-proxy-cache'?"))
+            await model.deleteModel();
+    }
+    return Promise.resolve(true);
+}
 
+async function init() {
     const controller = app.getController();
 
     if (typeof HttpProxy === 'undefined') {
@@ -11,8 +20,8 @@ async function init() {
     if (model) {
         const attr = model.getModelAttributesController().getAttribute('file');
         if (attr) {
-            const file2 = controller.getExtensionController().getExtension('file2');
-            if (file2) {
+            var tmp = await controller.getDataService().fetchData('_extension', null, 'name=file2');
+            if (tmp.length == 1) {
                 const dumpEntry = new ContextMenuEntry("Dump to file", async function (event, target) {
                     const controller = app.getController();
                     controller.setLoadingState(true);
@@ -53,4 +62,4 @@ async function init() {
     return Promise.resolve();
 }
 
-export { init };
+export { teardown, init };

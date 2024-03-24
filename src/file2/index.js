@@ -172,6 +172,15 @@ async function init() {
                 }
             }
             return Promise.resolve();
+        },
+        'destroy': async function (attr, data, value) {
+            const localPath = controller.getPathForFile(attr);
+            if (localPath) {
+                const file = path.join(localPath, value);
+                if (fs.existsSync(file))
+                    fs.unlinkSync(file);
+            }
+            return Promise.resolve();
         }
     }
     dtc.addDataType(file2);

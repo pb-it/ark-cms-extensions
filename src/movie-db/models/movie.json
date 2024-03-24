@@ -1,0 +1,25 @@
+{
+    "name": "movie",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "attributes": [
+        {
+            "name": "name",
+            "dataType": "string"
+        },
+        {
+            "name": "studio",
+            "dataType": "relation",
+            "model": "studio",
+            "multiple": false
+        },
+        {
+            "name": "stars",
+            "dataType": "relation",
+            "model": "star",
+            "multiple": true
+        }
+    ]
+}

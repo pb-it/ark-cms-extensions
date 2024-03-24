@@ -3,149 +3,150 @@ class Stock {
     static async initModel() {
         const controller = app.getController();
         const model = controller.getModelController().getModel('stock');
+        if (model) {
+            const checkAction = {
+                'name': 'Check',
+                'fn': async function (data) {
+                    const controller = app.getController();
+                    controller.setLoadingState(true);
+                    try {
+                        data = await Stock.checkData(data);
+                        controller.setLoadingState(false);
+                    } catch (error) {
+                        controller.setLoadingState(false);
+                        app.getController().showError(error);
+                    }
+                    return Promise.resolve(data);
+                }
+            };
+            model._crudDialogActions.push(checkAction);
 
-        const checkAction = {
-            'name': 'Check',
-            'fn': async function (data) {
+            const lastPriceEntry = new ContextMenuEntry("Last Price", async function (event, target) {
                 const controller = app.getController();
                 controller.setLoadingState(true);
                 try {
-                    data = await Stock.checkData(data);
-                    controller.setLoadingState(false);
+                    const stock = target.getObject().getData();
+                    if (stock['symbol']) {
+                        var value = await stockController.getLastPrice(target.getObject().getData());
+                        controller.setLoadingState(false);
+                        alert(value);
+                    } else
+                        throw new Error('Missing stock symbol');
                 } catch (error) {
                     controller.setLoadingState(false);
-                    app.getController().showError(error);
+                    controller.showError(error);
                 }
-                return Promise.resolve(data);
-            }
-        };
-        model._crudDialogActions.push(checkAction);
+                return Promise.resolve();
+            });
 
-        const lastPriceEntry = new ContextMenuEntry("Last Price", async function (event, target) {
-            const controller = app.getController();
-            controller.setLoadingState(true);
-            try {
-                const stock = target.getObject().getData();
-                if (stock['symbol']) {
-                    var value = await stockController.getLastPrice(target.getObject().getData());
-                    controller.setLoadingState(false);
-                    alert(value);
-                } else
-                    throw new Error('Missing stock symbol');
-            } catch (error) {
-                controller.setLoadingState(false);
-                controller.showError(error);
-            }
-            return Promise.resolve();
-        });
+            const downloadEntry = new ContextMenuEntry("Download", async function (event, target) {
+                const controller = app.getController();
+                controller.setLoadingState(true);
+                try {
+                    const stock = target.getObject().getData();
+                    if (stock['symbol']) {
+                        var body;
+                        /*var api = stockController.getDefaultApi();
+                        if (api == 'Finnhub')
+                            api = 'AlphaVantage';*/
+                        const key = stockController.getKey('AlphaVantage');
+                        if (key)
+                            body = await StockController.getTimeSeriesAlphaVantage(stock, key);
+                        else
+                            body = await stockController.getTimeSeries(stock);
+                        if (body) {
+                            const values = body["Time Series (Daily)"];
+                            if (values) {
+                                var last;
+                                var tmp = await controller.getDataService().fetchData('quote', null, 's=' + stock['id'], 't:desc', 1);
+                                if (tmp && tmp.length == 1)
+                                    last = tmp[0]['t'];
 
-        const downloadEntry = new ContextMenuEntry("Download", async function (event, target) {
-            const controller = app.getController();
-            controller.setLoadingState(true);
-            try {
-                const stock = target.getObject().getData();
-                if (stock['symbol']) {
-                    var body;
-                    /*var api = stockController.getDefaultApi();
-                    if (api == 'Finnhub')
-                        api = 'AlphaVantage';*/
-                    const key = stockController.getKey('AlphaVantage');
-                    if (key)
-                        body = await StockController.getTimeSeriesAlphaVantage(stock, key);
-                    else
-                        body = await stockController.getTimeSeries(stock);
-                    if (body) {
-                        const values = body["Time Series (Daily)"];
-                        if (values) {
-                            var last;
-                            var tmp = await controller.getDataService().fetchData('quote', null, 's=' + stock['id'], 't:desc', 1);
-                            if (tmp && tmp.length == 1)
-                                last = tmp[0]['t'];
-
-                            var data;
-                            var obj;
-                            var datetime;
-                            for (const [key, value] of Object.entries(values).reverse()) {
-                                datetime = new Date(key).toISOString(); // key + 'T00:00:00.000Z';
-                                if (!last || datetime > last) {
-                                    data = {
-                                        't': datetime,
-                                        's': stock['id'],
-                                        'o': value["1. open"],
-                                        'h': value["2. high"],
-                                        'l': value["3. low"],
-                                        'c': value["4. close"],
-                                        'v': value["5. volume"]
-                                    };
-                                    obj = new CrudObject('quote', data);
-                                    await obj.create();
+                                var data;
+                                var obj;
+                                var datetime;
+                                for (const [key, value] of Object.entries(values).reverse()) {
+                                    datetime = new Date(key).toISOString(); // key + 'T00:00:00.000Z';
+                                    if (!last || datetime > last) {
+                                        data = {
+                                            't': datetime,
+                                            's': stock['id'],
+                                            'o': value["1. open"],
+                                            'h': value["2. high"],
+                                            'l': value["3. low"],
+                                            'c': value["4. close"],
+                                            'v': value["5. volume"]
+                                        };
+                                        obj = new CrudObject('quote', data);
+                                        await obj.create();
+                                    }
                                 }
                             }
                         }
-                    }
+                        controller.setLoadingState(false);
+                    } else
+                        throw new Error('Missing stock symbol');
+                } catch (error) {
                     controller.setLoadingState(false);
-                } else
-                    throw new Error('Missing stock symbol');
-            } catch (error) {
-                controller.setLoadingState(false);
-                controller.showError(error);
-            }
-            return Promise.resolve();
-        });
+                    controller.showError(error);
+                }
+                return Promise.resolve();
+            });
 
-        const compareEntry = new ContextMenuEntry("Compare", async function (event, target) {
-            const controller = app.getController();
-            controller.setLoadingState(true);
-            try {
-                const stock = target.getObject().getData();
-                await StockController.compare(stock);
-                controller.setLoadingState(false);
-            } catch (error) {
-                controller.setLoadingState(false);
-                controller.showError(error);
-            }
-            return Promise.resolve();
-        });
-        compareEntry.setEnabledFunction(async function (target) {
-            const key = stockController.getKey('Polygon');
-            return Promise.resolve(key != null);
-        });
+            const compareEntry = new ContextMenuEntry("Compare", async function (event, target) {
+                const controller = app.getController();
+                controller.setLoadingState(true);
+                try {
+                    const stock = target.getObject().getData();
+                    await StockController.compare(stock);
+                    controller.setLoadingState(false);
+                } catch (error) {
+                    controller.setLoadingState(false);
+                    controller.showError(error);
+                }
+                return Promise.resolve();
+            });
+            compareEntry.setEnabledFunction(async function (target) {
+                const key = stockController.getKey('Polygon');
+                return Promise.resolve(key != null);
+            });
 
-        const chartEntry = new ContextMenuEntry("Show Card", async function (event, target) {
-            const controller = app.getController();
-            controller.setLoadingState(true);
-            try {
-                const stock = target.getObject().getData();
-                await StockController.showCard(stock);
-                controller.setLoadingState(false);
-            } catch (error) {
-                controller.setLoadingState(false);
-                controller.showError(error);
-            }
-            return Promise.resolve();
-        });
+            const chartEntry = new ContextMenuEntry("Show Card", async function (event, target) {
+                const controller = app.getController();
+                controller.setLoadingState(true);
+                try {
+                    const stock = target.getObject().getData();
+                    await StockController.showCard(stock);
+                    controller.setLoadingState(false);
+                } catch (error) {
+                    controller.setLoadingState(false);
+                    controller.showError(error);
+                }
+                return Promise.resolve();
+            });
 
-        const entries = model.getContextMenuEntries();
-        if (entries) {
-            var extGroup = null;
-            for (var e of entries) {
-                if (e.getName() === 'Extensions') {
-                    extGroup = e;
-                    break;
+            const entries = model.getContextMenuEntries();
+            if (entries) {
+                var extGroup = null;
+                for (var e of entries) {
+                    if (e.getName() === 'Extensions') {
+                        extGroup = e;
+                        break;
+                    }
+                }
+                if (extGroup) {
+                    extGroup.entries.push(lastPriceEntry);
+                    extGroup.entries.push(downloadEntry);
+                    extGroup.entries.push(compareEntry);
+                    extGroup.entries.push(chartEntry);
+                } else {
+                    extGroup = new ContextMenuEntry('Extensions', null, [lastPriceEntry, downloadEntry, compareEntry, chartEntry]);
+                    extGroup.setIcon(new Icon('puzzle-piece'));
+                    entries.unshift(extGroup);
                 }
             }
-            if (extGroup) {
-                extGroup.entries.push(lastPriceEntry);
-                extGroup.entries.push(downloadEntry);
-                extGroup.entries.push(compareEntry);
-                extGroup.entries.push(chartEntry);
-            } else {
-                extGroup = new ContextMenuEntry('Extensions', null, [lastPriceEntry, downloadEntry, compareEntry, chartEntry]);
-                extGroup.setIcon(new Icon('puzzle-piece'));
-                entries.unshift(extGroup);
-            }
-        }
-
+        } else
+            throw new Error('Model \'stock\' not found');
         return Promise.resolve();
     }
 
