@@ -34,11 +34,33 @@ async function init() {
 
     const route = {
         "regex": "^/kanban-board$",
-        "fn": async function () {
+        "fn": async function (path) {
             const controller = app.getController();
             try {
                 controller.setLoadingState(true);
-                const board = new KanbanBoard();
+                var data;
+                var index = path.indexOf('?');
+                if (index != -1) {
+                    data = {};
+                    var tmp = path.substring(index);
+                    const urlParams = new URLSearchParams(tmp);
+                    tmp = urlParams.getAll('project');
+                    if (tmp.length == 1)
+                        data['project'] = tmp[0];
+                    tmp = urlParams.getAll('artifacts');
+                    if (tmp.length == 1)
+                        data['artifacts'] = tmp[0].split(',');
+                    else if (tmp.length > 1)
+                        data['artifacts'] = tmp;
+                    tmp = urlParams.getAll('assignee');
+                    if (tmp.length == 1)
+                        data['assignee'] = tmp[0];
+                } else {
+                    var tmp = controller.getStorageController().loadLocal('scrumFilter');
+                    if (tmp)
+                        data = JSON.parse(tmp);
+                }
+                const board = new KanbanBoard(data);
                 controller.getView().getCanvas().showPanels([board]);
                 controller.setLoadingState(false);
             } catch (error) {
