@@ -1,0 +1,10 @@
+{
+    "name": "chat-gpt",
+    "version": "0.1.0",
+    "description": "ChatGPT",
+    "app_version": "^0.6.5",
+    "npm_dependencies": {
+        "openai": "",
+        "socket.io": ""
+    }
+}
