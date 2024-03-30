@@ -14,23 +14,26 @@ async function init() {
     };
     controller.getRouteController().addRoute(route);
 
-    controller.getView().getSideNavigationBar().addIconBarItem(() => {
-        var conf;
-        if (controller.hasConnection()) {
-            conf = {
-                'style': 'iconbar',
-                'icon': 'comments',
-                'tooltip': 'Chat',
-                'click': function (event, icon) {
-                    const controller = app.getController();
-                    controller.getView().getSideNavigationBar().close();
+    controller.getView().getSideNavigationBar().addIconBarItem({
+        name: 'chat',
+        func: () => {
+            var conf;
+            if (controller.hasConnection()) {
+                conf = {
+                    'style': 'iconbar',
+                    'icon': new Icon('comments'),
+                    'tooltip': 'Chat',
+                    'click': function (event, icon) {
+                        const controller = app.getController();
+                        controller.getView().getSideNavigationBar().close();
 
-                    var win = window.open(url, '_blank');
-                    win.focus();
-                }
-            };
+                        var win = window.open(url, '_blank');
+                        win.focus();
+                    }
+                };
+            }
+            return conf;
         }
-        return conf;
     }, false);
 
     return Promise.resolve();

@@ -1,7 +1,10 @@
 class Balance extends Panel {
 
-    constructor() {
+    _date;
+
+    constructor(date) {
         super();
+        this._date = date;
     }
 
     /*async _init() {
@@ -20,7 +23,10 @@ class Balance extends Panel {
         for (var data of stocks) {
             stockDict[data.id] = data;
         }
-        const transactions = await ds.fetchData('transaction');
+        var where;
+        if (this._date)
+            where = 'datetime_lte=' + this._date;
+        const transactions = await ds.fetchData('transaction', null, where);
 
         var deposit = 0;
         var balance = 0;
@@ -68,11 +74,19 @@ class Balance extends Panel {
         const mapAlph = new Map(arr.sort((a, b) => (a[1]['stock']['name'] > b[1]['stock']['name']) ? 1 : ((b[1]['stock']['name'] > a[1]['stock']['name']) ? -1 : 0)));
         var lastPrice;
         var $button;
+        const model = controller.getModelController().getModel('stock');
+        const mpcc = model.getModelPanelConfigController();
+        const panelConfig = mpcc.getPanelConfig(ActionEnum.read, DetailsEnum.title);
+        var obj, panel;
         for (let [key, value] of mapAlph.entries()) {
             if (value.amount != 0) {
                 i++;
                 $row = $('<tr>');
-                $col = $('<td>').text(value.stock.name);
+                $col = $('<td>');
+                //$col.text(value.stock.name);
+                obj = new CrudObject('stock', value.stock);
+                panel = new CrudPanel(panelConfig, obj);
+                $col.append(await panel.render());
                 $row.append($col);
                 $col = $('<td>').text(value.stock.symbol);
                 $row.append($col);

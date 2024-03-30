@@ -12,7 +12,8 @@
         {
             "name": "datetime",
             "dataType": "datetime",
-            "timeZone": "UTC"
+            "timeZone": "UTC",
+            "required": true
         },
         {
             "name": "type",
@@ -40,7 +41,8 @@
                     "value": "other"
                 }
             ],
-            "dataType": "enumeration"
+            "dataType": "enumeration",
+            "required": true
         },
         {
             "name": "stock",

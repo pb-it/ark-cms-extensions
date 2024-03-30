@@ -171,12 +171,19 @@ describe('Testsuit - stocks', function () {
         assert.notEqual(panel, undefined);
         var form = await window.getForm(panel);
 
+        var input = await window.getFormInput(form, 'datetime');
+        assert.notEqual(input, undefined);
+        const date = new Date();
+        const isoString = date.toISOString().replace('T', ' ').split('.')[0];
+        await input.sendKeys(isoString);
+        await ExtendedTestHelper.delay(100);
+
         var elem = await form.findElement(webdriver.By.css('select#type > option[value="buy"]'));
         assert.notEqual(elem, null, 'Option not found!');
         await elem.click();
         await ExtendedTestHelper.delay(100);
 
-        var input = await form.findElement(webdriver.By.xpath('//div[@class="select"]/input[starts-with(@list,"stock")]'));
+        input = await form.findElement(webdriver.By.xpath('//div[@class="select"]/input[starts-with(@list,"stock")]'));
         assert.notEqual(input, null);
         var option = await form.findElement(webdriver.By.xpath('//div[@class="select"]/datalist[starts-with(@id,"stock")]/option[text()="NVIDIA"]'));
         assert.notEqual(option, null);

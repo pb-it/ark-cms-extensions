@@ -1,8 +1,7 @@
 {
     "name": "console",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Console",
-    "app_version": "^0.5.0",
-    "npm_dependencies": {
-    }
+    "app_version": "^0.6.5",
+    "npm_dependencies": {}
 }

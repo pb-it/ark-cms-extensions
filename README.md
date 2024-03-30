@@ -26,5 +26,6 @@ Generated ZIP files can be found in 'dist' folder
 
 ## Ideas/Roadmap for future implementation
 
+- [ ] Calendar
 - [ ] CRM
 - [ ] Mind Mapping App

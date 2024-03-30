@@ -29,9 +29,9 @@ async function configure() {
             controller.setLoadingState(true);
             const changed = await panel.getChanges();
             if (changed) {
-                if (changed['api'])
+                if (changed.hasOwnProperty('api'))
                     await ds.request('_registry', ActionEnum.update, null, { 'key': 'availableStockAPI', 'value': changed['api'] });
-                if (changed['default'])
+                if (changed.hasOwnProperty('default'))
                     await ds.request('_registry', ActionEnum.update, null, { 'key': 'defaultStockAPI', 'value': changed['default'] });
             }
             panel.dispose();
@@ -88,11 +88,20 @@ async function init() {
 
     const route = {
         "regex": "^/balance$",
-        "fn": async function () {
+        "fn": async function (path) {
             const controller = app.getController();
             try {
                 controller.setLoadingState(true);
-                const balance = new Balance();
+                var date;
+                var index = path.indexOf('?');
+                if (index != -1) {
+                    var tmp = path.substring(index);
+                    const urlParams = new URLSearchParams(tmp);
+                    tmp = urlParams.getAll('date');
+                    if (tmp.length == 1)
+                        date = tmp[0];
+                }
+                const balance = new Balance(date);
                 controller.getView().getCanvas().showPanels([balance]);
                 controller.setLoadingState(false);
             } catch (error) {
