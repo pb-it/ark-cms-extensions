@@ -110,7 +110,7 @@ class EditScraperPanel extends Panel {
                     if (data['domain']) {
                         var oldData = this._scraper.getData();
                         if (oldData['id']) {
-                            var changes = CrudObject.getChanges(this._scraper.getSkeleton(), oldData, data);
+                            var changes = await CrudObject.getChanges(this._scraper.getSkeleton(), oldData, data);
                             if (changes && Object.keys(changes).length > 0) {
                                 await this._scraper.update(changes);
                                 alert('updated');
