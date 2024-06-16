@@ -1,11 +1,14 @@
 async function teardown() {
-    const controller = app.getController();
-    const model = controller.getModelController().getModel('http-proxy-cache');
-    if (model) {
-        if (confirm("Delete model 'http-proxy-cache'?"))
-            await model.deleteModel();
+    var bConfirm = confirm("Delete extension 'http-proxy'?");
+    if (bConfirm) {
+        const controller = app.getController();
+        const model = controller.getModelController().getModel('http-proxy-cache');
+        if (model) {
+            if (confirm("Delete model 'http-proxy-cache'?"))
+                await model.deleteModel();
+        }
     }
-    return Promise.resolve(true);
+    return Promise.resolve(bConfirm);
 }
 
 async function init() {

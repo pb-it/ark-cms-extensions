@@ -1,6 +1,7 @@
 async function teardown() {
-    const controller = app.getController();
-    if (confirm("Also delete models?")) {
+    var bConfirm = confirm("Delete extension 'scrum'?");
+    if (bConfirm && confirm("Also delete models?")) {
+        const controller = app.getController();
         var model = controller.getModelController().getModel('projects');
         if (model)
             await model.deleteModel();
@@ -14,7 +15,7 @@ async function teardown() {
         if (model)
             await model.deleteModel();
     }
-    return Promise.resolve(true);
+    return Promise.resolve(bConfirm);
 }
 
 async function init() {
