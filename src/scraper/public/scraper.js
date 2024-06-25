@@ -74,8 +74,15 @@ class Scraper {
         var data;
         if (rule && rule['funcScrape']) {
             const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
-            var fn = new AsyncFunction('url', 'doc', 'options', rule['funcScrape']);
-            data = await fn(url, doc, options);
+            var fn;
+            if (options && options['console']) {
+                fn = new AsyncFunction('console', 'url', 'doc', 'options', rule['funcScrape']);
+                data = await fn(options['console'], url, doc, options);
+            } else {
+                fn = new AsyncFunction('url', 'doc', 'options', rule['funcScrape']);
+                data = await fn(url, doc, options);
+            }
+
         }
         return Promise.resolve(data);
     }
