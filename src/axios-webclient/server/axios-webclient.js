@@ -165,12 +165,19 @@ class AxiosWebClient extends WebClient {
                 default:
                     throw new Error('Unsupported method');
             }
-        } catch (error) {
+        } catch (error) { // e.g. unable to verify the first certificate
             //console.log(error);
-            if (error.isAxiosError)
+            if (error.isAxiosError && error['response'])
                 response = error['response'];
-            else
+            else {
+                /*var msg;
+                if (error['response'] && error['response']['status'])
+                    msg = "[axios] download failed with error: " + error['response']['status'] + " - " + error['response']['statusText'];
+                else if (error['code'])
+                    msg = "[axios] " + error['code'] + " - " + error['message'];
+                Logger.parseError(error, msg);*/
                 throw error;
+            }
         }
         if (response) {
             //console.log(response);

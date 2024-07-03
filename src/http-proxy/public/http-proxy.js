@@ -48,11 +48,15 @@ class HttpProxy {
 
             const ac = app.getController().getApiController();
             const client = ac.getApiClient();
-            const response = JSON.parse(await client.request('POST', '/api/ext/http-proxy/forward', null, data));
-            if (response && response['status'] == 200)
-                res = response['body'];
-            else
-                throw new HttpError(null, response);
+            var tmp = await client.request('POST', '/api/ext/http-proxy/forward', null, data);
+            if (tmp && tmp.length > 0) {
+                const response = JSON.parse(tmp);
+                if (response && response['status'] == 200)
+                    res = response['body'];
+                else
+                    throw new HttpError(null, response);
+            } else
+                throw new Error('Empty HTTP Response');
         }
         return Promise.resolve(res);
     }
