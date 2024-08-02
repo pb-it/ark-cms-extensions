@@ -110,6 +110,8 @@ describe('Testsuit - scrum', function () {
         assert.notEqual(input, null);
         await input.sendKeys('TestDefect');
         await ExtendedTestHelper.delay(1000);
+
+        await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
