@@ -10,6 +10,30 @@ const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
 describe('Testsuit - backup', function () {
 
+    async function readJson(window, panel) {
+        var contextmenu = await panel.openContextMenu();
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Debug');
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('JSON');
+        await ExtendedTestHelper.delay(1000);
+
+        var modal = await window.getTopModal();
+        assert.notEqual(modal, null);
+        var jsonPanel = await modal.getPanel();
+        assert.notEqual(jsonPanel, null);
+        var div = await jsonPanel.getElement().findElement(webdriver.By.xpath('./div'));
+        assert.notEqual(div, null);
+        var text = await div.getText();
+        var obj = JSON.parse(text);
+        //console.log(obj);
+
+        await modal.closeModal();
+        modal = await window.getTopModal();
+        assert.equal(modal, null);
+        return Promise.resolve(obj);
+    }
+
     let driver;
 
     before('#setup', async function () {
@@ -71,7 +95,6 @@ describe('Testsuit - backup', function () {
         if (!bDebugMode)
             await app.setDebugMode(true);
 
-
         const window = app.getWindow();
         const sidemenu = window.getSideMenu();
         await sidemenu.click('Data');
@@ -81,6 +104,7 @@ describe('Testsuit - backup', function () {
         await sidemenu.click('backup');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         var canvas = await window.getCanvas();
@@ -95,21 +119,21 @@ describe('Testsuit - backup', function () {
         await input.sendKeys('bla');
         await ExtendedTestHelper.delay(1000);
 
+        bDebugMode = await app.isDebugModeActive();
         button = await window.getButton(panel.getElement(), 'Create');
         assert.notEqual(button, null);
         await button.click();
-        await ExtendedTestHelper.delay(1000);
+        await app.waitLoadingFinished(10);
         var modal;
-        bDebugMode = await app.isDebugModeActive();
         if (bDebugMode) {
             modal = await window.getTopModal();
             assert.notEqual(modal, null);
             button = await modal.findElement(webdriver.By.xpath('//button[text()="OK"]'));
             assert.notEqual(button, null);
             await button.click();
-            await ExtendedTestHelper.delay(1000);
+            await app.waitLoadingFinished(10);
         }
-        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
 
         modal = await window.getTopModal();
         assert.equal(modal, null);
@@ -119,31 +143,14 @@ describe('Testsuit - backup', function () {
         panels = await canvas.getPanels();
         assert.equal(panels.length, 1);
 
-        var contextmenu = await panels[0].openContextMenu();
-        await ExtendedTestHelper.delay(1000);
-        await contextmenu.click('Debug');
-        await ExtendedTestHelper.delay(1000);
-        await contextmenu.click('JSON');
-        await app.waitLoadingFinished(10);
-
-        var modal = await window.getTopModal();
-        assert.notEqual(modal, null);
-        panel = await modal.getPanel();
-        assert.notEqual(panel, null);
-        var div = await panel.getElement().findElement(webdriver.By.xpath('./div'));
-        assert.notEqual(div, null);
-        text = await div.getText();
-        var obj = JSON.parse(text);
-        //console.log(obj['id']);
-        var file = obj['file'];
-        assert.notEqual(file, null);
-        await modal.closeModal();
-        modal = await window.getTopModal();
-        assert.equal(modal, null);
+        var obj = await readJson(window, panels[0]);
+        assert.notEqual(obj, null);
+        var filename = obj['file'];
+        assert.notEqual(filename, null);
 
         var file;
         if (config['cdn'])
-            file = path.join(config['cdn'], file);
+            file = path.join(config['cdn'], filename);
         if (file)
             assert.ok(fs.existsSync(file));
 
