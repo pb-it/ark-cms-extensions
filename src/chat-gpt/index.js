@@ -44,7 +44,7 @@ async function teardown() {
     /*if (gpt)
         gpt.teardown();*/
 
-    const ws = controller.getWebServer(routePublic);
+    const ws = controller.getWebServer();
     ws.deleteExtensionRoute(routePublic);
 
     var p = './server/chat-gpt.js';

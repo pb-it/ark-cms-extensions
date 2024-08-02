@@ -18,7 +18,7 @@ async function init() {
 }
 
 async function teardown() {
-    const ws = controller.getWebServer(route);
+    const ws = controller.getWebServer();
     ws.deleteExtensionRoute(route);
     //controller.setRestartRequest();
     return Promise.resolve();

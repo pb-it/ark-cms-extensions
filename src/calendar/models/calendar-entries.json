@@ -1,0 +1,46 @@
+{
+    "name": "calendar-entries",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "sort": "datetime:desc",
+        "title": "title"
+    },
+    "tableName": "calendar_entries",
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "datetime",
+            "dataType": "datetime",
+            "timeZone": "UTC",
+            "required": true
+        },
+        {
+            "name": "type",
+            "dataType": "enumeration",
+            "options": [
+                {
+                    "value": "event"
+                },
+                {
+                    "value": "birthday"
+                },
+                {
+                    "value": "holiday"
+                }
+            ],
+            "view": "select",
+            "bUseString": true
+        },
+        {
+            "name": "info",
+            "size": "20",
+            "dataType": "text"
+        }
+    ]
+}

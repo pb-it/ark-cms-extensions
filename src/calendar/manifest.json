@@ -1,0 +1,6 @@
+{
+    "name": "calendar",
+    "version": "0.1.0",
+    "description": "Calendar application",
+    "app_version": "^0.6.7"
+}

@@ -1,7 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
-const ytdl = require('ytdl-core');
+//const ytdl = require('ytdl-core');
+const ytdl = require("@distube/ytdl-core");
 //const ytmux = require('ytdl-core-muxer');
 const ProgressBar = require('progress');
 

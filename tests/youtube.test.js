@@ -61,6 +61,30 @@ describe('Testsuit - Youtube', function () {
         return Promise.resolve();
     });
 
+    it('#test download', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+        const ac = app.getApiController();
+        const tools = ac.getTools();
+        const cmd = `async function test() {
+    const path = require('path');
+    const appRoot = controller.getAppRoot();
+    const Youtube = require(path.join(appRoot, './extensions/youtube/server/youtube.js'));
+
+    const yt = new Youtube('blA7epJJaR4');
+    await yt.init();
+    const title = yt.getTitle();
+
+    return Promise.resolve(title);
+};
+module.exports = test;`
+        const res = await tools.serverEval(cmd);
+        assert.equal(res, 'Tobu - Higher');
+
+        return Promise.resolve();
+    });
+
     it('#test create video', async function () {
         this.timeout(60000);
 

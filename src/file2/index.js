@@ -7,6 +7,19 @@ const appRoot = controller.getAppRoot();
 const common = require(path.join(appRoot, './src/common/common.js'));
 const base64 = require(path.join(appRoot, './src/common/base64.js'));
 
+const routePublic = {
+    'regex': '^/file2/public/(.*)$',
+    'fn': async function (req, res, next) {
+        var file = req.locals['match'][1];
+        var filePath = path.join(__dirname, 'public', file);
+        if (fs.existsSync(filePath))
+            res.sendFile(filePath);
+        else
+            next();
+        return Promise.resolve();
+    }.bind(this)
+};
+
 async function setup() {
     var data = {};
     data['client-extension'] = fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8');
@@ -16,20 +29,7 @@ async function setup() {
 async function init() {
 
     const ws = controller.getWebServer();
-    ws.addExtensionRoute(
-        {
-            'regex': '^/file2/public/(.*)$',
-            'fn': async function (req, res, next) {
-                var file = req.locals['match'][1];
-                var filePath = path.join(__dirname, 'public', file);
-                if (fs.existsSync(filePath))
-                    res.sendFile(filePath);
-                else
-                    next();
-                return Promise.resolve();
-            }.bind(this)
-        }
-    );
+    ws.addExtensionRoute(routePublic);
 
     const dtc = controller.getDataTypeController();
     const file2 = {
@@ -67,8 +67,8 @@ async function init() {
                                     tmpFilePath = path.join(tmpDir, path.basename(fileName));
                                     if (fs.existsSync(tmpFilePath))
                                         throw new Error("File already exists!");
-                                } else if (attr['funcFileName']) {
-                                    fileName = await attr['funcFileName'](data);
+                                } else if (typeof attr.funcFileName == 'function') {
+                                    fileName = await attr.funcFileName(data, old);
                                     tmpFilePath = path.join(tmpDir, path.basename(fileName));
                                 } else {
                                     var ext = base64.getFileExtension(data[str]['base64']);
@@ -85,8 +85,8 @@ async function init() {
                                 if (data[str]['force'] || !attr['url_prop'] || !old || !old[attr['url_prop']] || old[attr['url_prop']] != data[str]['url']) {
                                     if (fileName)
                                         tmpFilePath = path.join(tmpDir, path.basename(fileName));
-                                    else if (attr['funcFileName']) {
-                                        fileName = await attr['funcFileName'](data);
+                                    else if (typeof attr.funcFileName == 'function') {
+                                        fileName = await attr.funcFileName(data, old);
                                         tmpFilePath = path.join(tmpDir, path.basename(fileName));
                                     } else {
                                         var uid;
@@ -188,4 +188,17 @@ async function init() {
     return Promise.resolve();
 }
 
-module.exports = { setup, init };
+async function teardown() {
+    const ws = controller.getWebServer();
+    ws.deleteExtensionRoute(routePublic);
+
+    /*var p = './index.js';
+    var resolved = require.resolve(p);
+    if (resolved)
+        delete require.cache[p];*/
+
+    controller.setRestartRequest();
+    return Promise.resolve();
+}
+
+module.exports = { setup, init, teardown };

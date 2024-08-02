@@ -35,7 +35,9 @@
         "test:stocks": "./build.sh stocks && mocha tests/stocks.test.js",
         "test:stocks:transaction": "mocha tests/stocks.test.js --grep \"#test create transaction\"",
         "test:gallery": "./build.sh gallery && mocha tests/gallery.test.js",
-        "test:gallery:create": "mocha tests/gallery.test.js --grep \"#test create gallery\""
+        "test:gallery:create": "mocha tests/gallery.test.js --grep \"#test create gallery\"",
+        "test:backup": "./build.sh backup && mocha tests/backup.test.js",
+        "test:calendar": "./build.sh calendar && mocha tests/calendar.test.js"
     },
     "repository": {
         "type": "git",

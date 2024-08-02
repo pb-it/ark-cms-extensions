@@ -112,21 +112,28 @@ async function init() {
                         if (await yt.downloadThumbnail(thumbnail_file, uid))
                             data['thumbnail'] = { 'filename': poster };
                         else
-                            throw new Error("downloading thumbnail failed");
+                            throw new Error("Downloading thumbnail failed!");
                     } else
-                        throw new Error("File already exists");
+                        throw new Error("File '" + thumbnail_file + "' already exists!");
 
                     const mp4 = `${uid}.mp4`;
                     const webm = `${uid}.webm`;
                     attr = mYoutube.getAttribute('file');
                     cdn = controller.getPathForFile(attr);
-                    if (!fs.existsSync(`${cdn}${mp4}`) && !fs.existsSync(`${cdn}${webm}`)) {
+
+                    var file = `${cdn}${mp4}`;
+                    var bExist = fs.existsSync(file);
+                    if (!bExist) {
+                        file = `${cdn}${webm}`;
+                        bExist = fs.existsSync(file);
+                    }
+                    if (!bExist) {
                         const video_file = `${cdn}${mp4}`;
                         await yt.downloadVideo(video_file);
                         if (fs.existsSync(video_file))
                             data['file'] = { 'filename': mp4 };
                     } else
-                        throw new Error("File already exists");
+                        throw new Error("File '" + file + "' or already exists!");
                     return Promise.resolve(data);
                 } catch (err) {
                     return Promise.reject(err);

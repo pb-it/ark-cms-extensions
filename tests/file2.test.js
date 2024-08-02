@@ -460,7 +460,7 @@ describe('Testsuit - File2', function () {
 
         modal = await window.getTopModal();
         assert.notEqual(modal, null);
-        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="pre"]`));
+        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="panel"]/div[@class="pre"]`));
         assert.notEqual(modal, null);
         var text = await div.getText();
         assert.ok(text.startsWith('ERROR:\n404: Not Found'));
