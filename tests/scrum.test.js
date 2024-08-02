@@ -73,6 +73,7 @@ describe('Testsuit - scrum', function () {
         await sidemenu.click('tasks');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
@@ -83,10 +84,12 @@ describe('Testsuit - scrum', function () {
         assert.notEqual(input, null);
         await input.sendKeys('TestTask');
         await ExtendedTestHelper.delay(100);
+
+        await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
-
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         sidemenu = window.getSideMenu();
@@ -97,6 +100,7 @@ describe('Testsuit - scrum', function () {
         await sidemenu.click('defects');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
@@ -109,7 +113,7 @@ describe('Testsuit - scrum', function () {
         button = await window.getButton(panel, 'Create');
         assert.notEqual(button, null);
         await button.click();
-
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         return Promise.resolve();
@@ -133,6 +137,7 @@ describe('Testsuit - scrum', function () {
         await sidemenu.click('scrum');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Kanban-Board');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
