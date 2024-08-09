@@ -26,15 +26,17 @@ const definition = {
     "defaults": {
         "title": "title"
     },
-    "extensions": {}
-}
-
-definition['extensions']['client'] = `function init() {
+    "_sys": {
+        "modules": {
+            "client": `function init() {
     this._prepareDataAction = function (data) {
         data['title'] = data['profile'] + ' - ' + new Date(data['created_at']).toISOString().split('T')[0];
         return data;
     }
 }
-export { init };`;
+export { init };`
+        }
+    }
+}
 
 module.exports = definition;

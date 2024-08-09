@@ -29,16 +29,18 @@ const definition = {
             "details": "title"
         }
     },
-    "extensions": {}
-}
-
-definition['extensions']['client'] = `function init() {
+    "_sys": {
+        "modules": {
+            "client": `function init() {
     this._prepareDataAction = function (data) {
         data['subtype'] = 'playlist';
         return data;
     }
 }
 
-export { init };`;
+export { init };`
+        }
+    }
+}
 
 module.exports = definition;

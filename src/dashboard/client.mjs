@@ -44,7 +44,7 @@ async function init() {
     };
     controller.getRouteController().addRoute(route);
 
-    const models = controller.getModelController().getModels();
+    const models = controller.getModelController().getModels(true);
     for (var model of models) {
         await initModel(model);
     }

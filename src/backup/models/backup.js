@@ -39,11 +39,9 @@ const definition = {
             "dataType": "text"
         }
     ],
-    "extensions": {
-    }
-}
-
-definition['extensions']['client'] = `function init() {
+    "_sys": {
+        "modules": {
+            "client": `function init() {
     this._prepareDataAction = function (data) {
         const date = new Date(data['created_at']);
         var title = date.toLocaleString(app.getController().getLocale());
@@ -58,6 +56,9 @@ definition['extensions']['client'] = `function init() {
     }
 }
 
-export { init };`;
+export { init };`
+        }
+    }
+}
 
 module.exports = definition;

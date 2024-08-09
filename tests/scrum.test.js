@@ -64,6 +64,10 @@ describe('Testsuit - scrum', function () {
         this.timeout(30000);
 
         const app = helper.getApp();
+        var bDebugMode = await app.isDebugModeActive();
+        if (bDebugMode)
+            await app.setDebugMode(false);
+
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Data');

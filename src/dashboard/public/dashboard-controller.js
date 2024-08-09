@@ -25,8 +25,9 @@ class DashboardController {
 
     static getCode(definition) {
         var code;
-        if (definition.hasOwnProperty('extensions') && definition['extensions'].hasOwnProperty('dashboard') && definition['extensions']['dashboard'].hasOwnProperty('strDashboard'))
-            code = definition['extensions']['dashboard']['strDashboard'];
+        if (definition.hasOwnProperty('_ext') && definition['_ext'].hasOwnProperty('dashboard') &&
+            definition['_ext']['dashboard'].hasOwnProperty('strDashboard'))
+            code = definition['_ext']['dashboard']['strDashboard'];
         return code;
     }
 
@@ -55,13 +56,16 @@ class DashboardController {
     static updateDefinition(definition, code) {
         if (code) {
             const config = { 'strDashboard': code };
-            if (definition.hasOwnProperty('extensions'))
-                definition['extensions']['dashboard'] = config;
+            if (definition.hasOwnProperty('_ext'))
+                definition['_ext']['dashboard'] = config;
             else
-                definition['extensions'] = { 'dashboard': config };
-        } else if (definition.hasOwnProperty('extensions')) {
-            if (definition['extensions'].hasOwnProperty('dashboard'))
-                delete definition['extensions']['dashboard'];
+                definition['_ext'] = { 'dashboard': config };
+        } else if (definition.hasOwnProperty('_ext')) {
+            if (definition['_ext'].hasOwnProperty('dashboard')) {
+                delete definition['_ext']['dashboard'];
+                if (Object.keys(definition['_ext']).length == 0)
+                    delete definition['_ext'];
+            }
         }
     }
 }

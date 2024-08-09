@@ -26,11 +26,9 @@ const definition = {
         "title": "name",
         "sort": "name:asc"
     },
-    "extensions": {
-    }
-}
-
-definition['extensions']['client'] = `function init() {
+    "_sys": {
+        "modules": {
+            "client": `function init() {
     this._doubleClickAction = function (panel) {
         var id = panel.getObject().getData()['id'];
         
@@ -41,6 +39,9 @@ definition['extensions']['client'] = `function init() {
     }
 }
 
-export { init };`;
+export { init };`
+        }
+    }
+}
 
 module.exports = definition;

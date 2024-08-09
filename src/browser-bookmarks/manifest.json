@@ -1,6 +1,6 @@
 {
-    "name": "wiki",
-    "version": "1.0.0",
+    "name": "browser-bookmarks",
+    "version": "0.1.0",
     "description": "Browser Bookmarks",
-    "app_version": "^0.6.2"
+    "app_version": "^0.7.0"
 }

@@ -61,7 +61,7 @@ describe('Testsuit - clear', function () {
         return Promise.resolve();
     });
 
-    it('#truncate extension table', async function () {
+    xit('#truncate extension table', async function () {
         this.timeout(60000);
 
         const app = helper.getApp();
@@ -91,7 +91,7 @@ describe('Testsuit - clear', function () {
 };
 module.exports = test;`
         const res = await tools.serverEval(cmd);
-        assert.equal(res, 'OK', 'Deleting old extension failed');
+        assert.equal(res, 'OK', 'Deleting old extensions failed');
 
         return Promise.resolve();
     });

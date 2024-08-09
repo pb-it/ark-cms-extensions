@@ -1,8 +1,8 @@
 {
     "name": "Youtube",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Youtube Playlist Appliction/Models",
-    "app_version": "^0.5.7",
+    "app_version": "^0.7.0",
     "npm_dependencies": {
         "progress": "",
         "@distube/ytdl-core": ""

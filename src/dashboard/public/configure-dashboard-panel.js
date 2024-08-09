@@ -9,8 +9,9 @@ class ConfigureDashboardPanel extends Panel {
         super();
 
         const controller = app.getController();
-        this._models = controller.getModelController().getModels();
-        this._model = this._models[0];
+        this._models = controller.getModelController().getModels(true);
+        if (this._models && this._models.length > 0)
+            this._model = this._models[0];
     }
 
     async _init() {
@@ -22,7 +23,7 @@ class ConfigureDashboardPanel extends Panel {
         const $div = $('<div/>')
             .css({ 'padding': '10' });
 
-        var $input = $('<select/>');
+        const $select = $('<select/>');
         var name;
         var $option;
         for (var model of this._models) {
@@ -30,9 +31,9 @@ class ConfigureDashboardPanel extends Panel {
             $option = $('<option/>', { 'value': name }).text(name);
             if (this._model === model)
                 $option.prop('selected', true);
-            $input.append($option);
+            $select.append($option);
         }
-        $input.on('change', async function (event) {
+        $select.on('change', async function (event) {
             const select = event.target;
             const index = select['selectedIndex'];
             const options = select['options'];
@@ -42,10 +43,14 @@ class ConfigureDashboardPanel extends Panel {
                 this._model = tmp[0];
             return this.render();
         }.bind(this));
-        $div.append($input);
+        $div.append($select);
         $div.append('<br />');
 
-        const code = DashboardController.getCode(this._model.getDefinition());
+        var code;
+        if (this._model)
+            code = DashboardController.getCode(this._model.getDefinition());
+        else
+            code = '';
         this._$input = $('<textarea/>')
             .attr('rows', 40)
             .attr('cols', 100)
@@ -71,8 +76,9 @@ class ConfigureDashboardPanel extends Panel {
         $div.append(this._$input);
         $div.append('<br />');
 
-        var $save = $('<button>')
+        const $save = $('<button>')
             .text('Save')
+            .prop('disabled', !this._model)
             .click(async function (event) {
                 event.stopPropagation();
 

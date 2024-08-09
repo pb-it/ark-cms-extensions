@@ -1,8 +1,8 @@
 {
     "name": "backup",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Backup Extension",
-    "app_version": "^0.6.8",
+    "app_version": "^0.7.0",
     "ext_dependencies": {
         "file2": "^1.0.0"
     }

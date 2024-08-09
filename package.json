@@ -30,6 +30,7 @@
         "test:file2": "node build.js file2 && mocha tests/file2.test.js",
         "test:file2:add": "mocha tests/file2.test.js --grep \"#test add model\"",
         "test:file2:create": "mocha tests/file2.test.js --grep \"#test create file\"",
+        "test:dashboard": "node build.js dashboard && mocha tests/dashboard.test.js",
         "test:scrum": "node build.js scrum && mocha tests/scrum.test.js",
         "test:scrum:board": "mocha tests/scrum.test.js --grep \"#test kanban board\"",
         "test:stocks": "node build.js stocks && mocha tests/stocks.test.js",
