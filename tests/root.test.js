@@ -34,6 +34,7 @@ describe("Root Suite", function () {
     require('./webclient.test.js');
     require('./scraper.test.js');
     require('./youtube.test.js');
+    require('./string2.test.js');
     require('./file2.test.js');
     require('./dashboard.test.js');
     require('./scrum.test.js');

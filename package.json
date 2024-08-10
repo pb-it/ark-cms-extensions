@@ -27,6 +27,8 @@
         "test:youtube:playlist": "mocha tests/youtube.test.js --grep \"#test create playlist\"",
         "test:youtube:drop": "mocha tests/youtube.test.js --grep \"#test add to playlist\"",
         "test:youtube:delete": "mocha tests/youtube.test.js --grep \"#test delete extension\"",
+        "test:string2": "node build.js string2 && mocha tests/string2.test.js",
+        "test:string2:create": "mocha tests/string2.test.js --grep \"#test create entry\"",
         "test:file2": "node build.js file2 && mocha tests/file2.test.js",
         "test:file2:add": "mocha tests/file2.test.js --grep \"#test add model\"",
         "test:file2:create": "mocha tests/file2.test.js --grep \"#test create file\"",
