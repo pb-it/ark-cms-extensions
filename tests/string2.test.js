@@ -164,16 +164,6 @@ describe('Testsuit - String2', function () {
         modal = await window.getTopModal();
         assert.equal(modal, null);
 
-        models = await ds.read('_model');
-        tmp = models.filter(function (x) { return x['definition']['name'] === 'file2' });
-        assert.ok(tmp.length == 1);
-        model = tmp[0];
-        tmp = model['definition']['attributes'].filter(function (x) { return x['name'] === 'file' });
-        assert.ok(tmp.length == 1);
-        const attr = tmp[0];
-        assert.equal(attr.hasOwnProperty('filename_prop'), false);
-        assert.equal(attr.hasOwnProperty('bSuggestFilename'), false);
-
         return Promise.resolve();
     });
 

@@ -125,15 +125,17 @@ describe('Testsuit - gallery', function () {
         await sidemenu.click('Show');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('All');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        var panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
         assert.equal(panels.length, 2);
 
         const cmdCtrl = os.platform().includes('darwin') ? webdriver.Key.COMMAND : webdriver.Key.CONTROL;
         await driver.actions()
-            .click(panels[0])
+            .click(panels[0].getElement())
             .keyDown(cmdCtrl)
             .sendKeys('a')
             .keyUp(cmdCtrl)
@@ -164,49 +166,51 @@ describe('Testsuit - gallery', function () {
         await sidemenu.click('gallery');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
-        assert.notEqual(panel, undefined);
-        var form = await window.getForm(panel);
-        var input = await window.getFormInput(form, 'title');
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('title');
         assert.notEqual(input, undefined);
         await input.sendKeys('TestGallery');
         await ExtendedTestHelper.delay(100);
-        var button = await window.getButton(panel, 'Create');
+        var button = await panel.getButton('Create');
         assert.notEqual(button, undefined);
         await button.click();
-
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        panels = await canvas.getPanels();
         assert.equal(panels.length, 1);
 
-        await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Paste"]`;
-        item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        assert.notEqual(item, null);
-        await item.click();
+        var contextmenu = await panels[0].openContextMenu();
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Paste');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Save"]`;
-        item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        assert.notEqual(item, null);
-        await item.click();
+        contextmenu = await panels[0].openContextMenu();
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Save');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        await driver.actions({ bridge: true }).contextClick(panels[0], webdriver.Button.RIGHT).perform();
-        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Extensions"]`;
-        item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        assert.notEqual(item, null);
-        await item.click();
+        contextmenu = await panels[0].openContextMenu();
         await ExtendedTestHelper.delay(1000);
-        xpath = `/html/body/ul[@class="contextmenu"]/li/div[1][text()="Extensions"]/following-sibling::div/ul[@class="contextmenu"]/li/div[1][text()="Gallery"]`;
-        item = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        assert.notEqual(item, null);
-        await item.click();
+        await contextmenu.click('Extensions');
         await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Gallery');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        //TODO: check
 
         await driver.actions()
             .sendKeys(webdriver.Key.ESCAPE)

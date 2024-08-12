@@ -81,16 +81,19 @@ describe('Testsuit - scrum', function () {
         await ExtendedTestHelper.delay(1000);
 
         const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        var panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel();
         assert.notEqual(panel, null);
-        var form = await window.getForm(panel);
-        var input = await window.getFormInput(form, 'title');
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('title');
         assert.notEqual(input, null);
         await input.sendKeys('TestTask');
         await ExtendedTestHelper.delay(100);
 
         await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
-        button = await window.getButton(panel, 'Create');
+        var button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
         await app.waitLoadingFinished(10);
@@ -107,16 +110,19 @@ describe('Testsuit - scrum', function () {
         await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpathPanel }), 1000);
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        panel = await canvas.getPanel();
         assert.notEqual(panel, null);
-        form = await window.getForm(panel);
-        input = await window.getFormInput(form, 'title');
+        form = await panel.getForm();
+        assert.notEqual(form, null);
+        input = await form.getFormInput('title');
         assert.notEqual(input, null);
         await input.sendKeys('TestDefect');
         await ExtendedTestHelper.delay(1000);
 
         await driver.executeScript('window.scrollTo(0, document.body.scrollHeight)');
-        button = await window.getButton(panel, 'Create');
+        button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
         await app.waitLoadingFinished(10);

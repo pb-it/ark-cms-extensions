@@ -96,7 +96,7 @@ describe('Testsuit - calendar', function () {
         await input.sendKeys(isoString);
         await ExtendedTestHelper.delay(1000);
 
-        button = await window.getButton(panel.getElement(), 'Create');
+        button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
         await ExtendedTestHelper.delay(1000);

@@ -371,16 +371,20 @@ describe('Testsuit - File2', function () {
         await sidemenu.click('file2');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        const xpath = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        const panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        const form = await window.getForm(panel);
-        var input = await window.getFormInput(form, 'title');
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('title');
         assert.notEqual(input, null);
         await input.sendKeys('bbb');
         await ExtendedTestHelper.delay(100);
-        const inputs = await form.findElements(webdriver.By.xpath(`./div[@class="formentry"]/div[@class="value"]/input`));
+        const inputs = await form.getElement().findElements(webdriver.By.xpath(`./div[@class="formentry"]/div[@class="value"]/input`));
         if (inputs && inputs.length == 8)
             input = inputs[6];
         else
@@ -393,7 +397,7 @@ describe('Testsuit - File2', function () {
         //var value = await input.getAttribute('value');
         //assert.equal(value, 'mov_bbb.mp4');
 
-        button = await window.getButton(panel, 'Create');
+        button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
         await app.waitLoadingFinished(10);
@@ -401,8 +405,9 @@ describe('Testsuit - File2', function () {
         const modal = await window.getTopModal();
         assert.equal(modal, null);
 
-        const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        const panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
         assert.equal(panels.length, 1);
 
         return Promise.resolve();

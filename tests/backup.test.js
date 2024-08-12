@@ -120,7 +120,7 @@ describe('Testsuit - backup', function () {
         await ExtendedTestHelper.delay(1000);
 
         bDebugMode = await app.isDebugModeActive();
-        button = await window.getButton(panel.getElement(), 'Create');
+        button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
         await app.waitLoadingFinished(10);
@@ -161,8 +161,10 @@ describe('Testsuit - backup', function () {
 
         modal = await window.getTopModal();
         assert.notEqual(modal, null);
-        //button = await helper.getButton(modal, 'Confirm');
-        button = await modal.findElement(webdriver.By.xpath(`//input[@type="submit" and @name="confirm"]`));
+        panel = await modal.getPanel();
+        assert.notEqual(panel, null);
+        button = await panel.getButton('Confirm');
+        //button = await modal.findElement(webdriver.By.xpath(`//input[@type="submit" and @name="confirm"]`));
         assert.notEqual(button, null);
         await button.click();
         await app.waitLoadingFinished(10);

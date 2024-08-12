@@ -80,17 +80,22 @@ describe('Testsuit - mime-text', function () {
         await sidemenu.click('star');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Edit');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         const modelModal = await window.getTopModal();
-        var button = await window.getButton(modelModal, 'Add Attribute');
+        assert.notEqual(modelModal, null);
+        var panel = await modelModal.getPanel();
+        assert.notEqual(panel, null);
+        var button = await panel.getButton('Add Attribute');
         assert.notEqual(button, null, 'Button not found!');
         button.click();
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         var modal = await window.getTopModal();
         assert.notEqual(modal, null);
-        var panel = await modal.getPanel();
+        panel = await modal.getPanel();
         assert.notEqual(panel, null);
         var form = await panel.getForm();
         assert.notEqual(form, null);
@@ -171,7 +176,7 @@ describe('Testsuit - mime-text', function () {
         var option = await input.findElement(webdriver.By.xpath('../select/option[@value="javascript"]'));
         assert.notEqual(option, null, 'Option not found!');
         await option.click();
-        var button = await input.findElement(webdriver.By.xpath('../button[text()="format"]'));//await window.getButton(panel, 'format');
+        var button = await input.findElement(webdriver.By.xpath('../button[text()="format"]'));
         assert.notEqual(button, null);
         await button.click();
         await ExtendedTestHelper.delay(1000);

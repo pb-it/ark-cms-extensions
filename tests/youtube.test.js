@@ -98,31 +98,24 @@ module.exports = test;`
         await sidemenu.click('youtube');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        const xpath = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        const panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        const form = await window.getForm(panel);
-        var input = await window.getFormInput(form, 'youtube_id');
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('youtube_id');
         assert.notEqual(input, null);
         await input.sendKeys('blA7epJJaR4');
         await ExtendedTestHelper.delay(100);
-        button = await window.getButton(panel, 'Create');
+        button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
-
-        const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
-        var display = await overlay.getCssValue('display');
-        if (display == 'none')
-            await ExtendedTestHelper.delay(1000);
-
-        var i = 0;
-        while (display == 'block' && i < 30) {
-            await ExtendedTestHelper.delay(1000);
-            display = await overlay.getCssValue('display');
-            i++;
-        }
-        assert.equal(await overlay.getCssValue('display'), 'none');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
 
         const url = await driver.getCurrentUrl();
         assert.equal(url, config['host'] + '/data/youtube/1');
@@ -130,8 +123,9 @@ module.exports = test;`
         const modal = await window.getTopModal();
         assert.equal(modal, null);
 
-        const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        const panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
         assert.equal(panels.length, 1);
 
         return Promise.resolve();
@@ -150,31 +144,23 @@ module.exports = test;`
         await sidemenu.click('playlist');
         await ExtendedTestHelper.delay(1000);
         await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
-        const xpath = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        const panel = await driver.wait(webdriver.until.elementLocated({ 'xpath': xpath }), 1000);
-        const form = await window.getForm(panel);
-        var input = await window.getFormInput(form, 'title');
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('title');
         assert.notEqual(input, null);
         await input.sendKeys('Playlist');
         await ExtendedTestHelper.delay(100);
-        button = await window.getButton(panel, 'Create');
+        var button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
-
-        const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
-        var display = await overlay.getCssValue('display');
-        if (display == 'none')
-            await ExtendedTestHelper.delay(1000);
-
-        var i = 0;
-        while (display == 'block' && i < 10) {
-            await ExtendedTestHelper.delay(1000);
-            display = await overlay.getCssValue('display');
-            i++;
-        }
-
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         const url = await driver.getCurrentUrl();
@@ -183,8 +169,9 @@ module.exports = test;`
         const modal = await window.getTopModal();
         assert.equal(modal, null);
 
-        const xpathPanel = `//*[@id="canvas"]/ul/li/div[contains(@class, 'panel')]`;
-        const panels = await driver.findElements(webdriver.By.xpath(xpathPanel));
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
         assert.equal(panels.length, 1);
 
         await ExtendedTestHelper.delay(1000);
