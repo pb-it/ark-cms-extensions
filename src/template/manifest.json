@@ -1,0 +1,12 @@
+{
+    "name": "template",
+    "version": "0.1.0",
+    "description": "Template Extension",
+    "app_version": "^0.7.0",
+    "npm_dependencies": {
+        "jsdom": ""
+    },
+    "ext_dependencies": {
+        "process": "^1.0.0"
+    }
+}

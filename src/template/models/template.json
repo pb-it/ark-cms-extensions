@@ -1,0 +1,21 @@
+{
+    "name": "template",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        }
+    ],
+    "tableName": "template",
+    "defaults": {
+        "sort": "title:asc",
+        "view": {
+            "panelType": "CrudPanel",
+            "details": "title"
+        }
+    }
+}
