@@ -17,10 +17,22 @@ class ExtendedTestHelper extends TestHelper {
         return this.getApp().getModelController().addModel(model);
     }
 
-    async setupData(model, file) {
+    async setupData(model, file, bExlusive) {
         const str = fs.readFileSync(file, 'utf8');
         const data = JSON.parse(str);
+        return this._setupData(model, data, bExlusive);
+    }
+
+    async _setupData(model, data, bExlusive) {
         const ds = this.getApp().getDataService();
+        if (bExlusive) {
+            var tmp = await ds.read(model);
+            if (tmp.length > 0) {
+                for (var entry of tmp) {
+                    await ds.delete(model, entry['id']);
+                }
+            }
+        }
         var res;
         for (var entry of data) {
             res = await ds.create(model, entry);

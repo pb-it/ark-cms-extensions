@@ -87,6 +87,7 @@ describe('Testsuit - gallery', function () {
             }
         }
         var response = await ds.create('image', data);
+        assert.notEqual(Object.keys(response).length, 0);
 
         data = {
             'title': 'Testcard',
@@ -96,6 +97,7 @@ describe('Testsuit - gallery', function () {
             }
         }
         response = await ds.create('image', data);
+        assert.notEqual(Object.keys(response).length, 0);
 
         return Promise.resolve();
     });

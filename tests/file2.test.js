@@ -350,7 +350,8 @@ describe('Testsuit - File2', function () {
 
         const app = helper.getApp();
         const ds = app.getDataService();
-        await ds.create('file2', data);
+        const res = await ds.create('file2', data);
+        assert.notEqual(Object.keys(res).length, 0);
 
         return Promise.resolve();
     });

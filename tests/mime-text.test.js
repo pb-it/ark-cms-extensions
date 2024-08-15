@@ -169,7 +169,11 @@ describe('Testsuit - mime-text', function () {
         assert.notEqual(panel, null);
         var form = await panel.getForm();
         assert.notEqual(form, null);
-        var input = await form.getFormInput('mime-text');
+        var input = await form.getFormInput('name');
+        assert.notEqual(input, null);
+        await input.sendKeys('John Doe');
+        await ExtendedTestHelper.delay(1000);
+        input = await form.getFormInput('mime-text');
         assert.notEqual(input, null);
         await input.sendKeys('[{\'x\':\'y\'}]');
         await ExtendedTestHelper.delay(1000);
