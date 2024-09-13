@@ -1,0 +1,10 @@
+{
+    "name": "ssh-client",
+    "version": "0.1.0",
+    "description": "SSH Client",
+    "app_version": "^0.7.0",
+    "npm_dependencies": {
+        "ssh2": "",
+        "socket.io": ""
+    }
+}
