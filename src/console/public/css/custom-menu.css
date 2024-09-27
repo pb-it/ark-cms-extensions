@@ -1,0 +1,25 @@
+div.menuitem.custom-style:not(.root):not(.active) {
+    display: block;
+    position: relative;
+
+    color: black;
+    background-color: #f1f1f1;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+}
+
+div.menuitem.custom-style:not(.root):not(.active):hover {
+    background-color: #ddd;
+}
+
+div.menuitem.custom-style.active:hover,
+div.menuitem.custom-style.active:focus,
+div.menuitem.custom-style.root:hover,
+div.menuitem.custom-style.root:focus {
+    background-color: #5f1a6d;
+}
+
+div.menuitem.custom-style.root,
+div.menuitem.custom-style.active {
+    color: white;
+    background-color: #a129b9;
+}

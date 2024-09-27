@@ -1,7 +1,7 @@
 {
-    "name": "console",
+    "name": "snippets",
     "version": "0.1.0",
-    "description": "Console",
-    "app_version": "^0.6.5",
+    "description": "Snippets",
+    "app_version": "^0.7.2",
     "npm_dependencies": {}
 }

@@ -207,7 +207,8 @@ class ConsolePanel extends Panel {
         var $rightDiv = $('<div/>')
             .css({
                 'display': 'inline-block',
-                'vertical-align': 'top'
+                'vertical-align': 'top',
+                'margin-left': '5px'
             });
         $rightDiv.append('Console:<br>');
         this._$console = $('<textarea/>')
