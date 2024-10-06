@@ -52,4 +52,5 @@ describe("Root Suite", function () {
     require('./gallery.test.js');
     require('./backup.test.js');
     require('./calendar.test.js');
+    require('./snippets.test.js');
 });

@@ -47,7 +47,7 @@ describe('Testsuit - Add all', function () {
     it('#test add extensions', async function () {
         this.timeout(300000);
 
-        const extensions = ['mime-text', 'process', 'formatter', 'http-proxy', 'axios-webclient', 'scraper', 'console', 'chat'];
+        const extensions = ['mime-text', 'process', 'formatter', 'http-proxy', 'axios-webclient', 'scraper', 'chat'];
         const app = helper.getApp();
         const ec = app.getExtensionController();
         var file;

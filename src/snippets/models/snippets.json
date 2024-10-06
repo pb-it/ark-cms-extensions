@@ -1,0 +1,45 @@
+{
+    "name": "snippets",
+    "options": {
+        "increments": true,
+        "timestamps": true
+    },
+    "defaults": {
+        "title": "title",
+        "sort": "title:asc"
+    },
+    "attributes": [
+        {
+            "name": "title",
+            "dataType": "string"
+        },
+        {
+            "name": "model",
+            "dataType": "relation",
+            "model": "_model"
+        },
+        {
+            "name": "description",
+            "dataType": "text"
+        },
+        {
+            "name": "environment",
+            "view": "select",
+            "options": [
+                {
+                    "value": "browser"
+                },
+                {
+                    "value": "server"
+                }
+            ],
+            "dataType": "enumeration",
+            "bUseString": true
+        },
+        {
+            "name": "snippet",
+            "dataType": "mime-text",
+            "bSyntaxPrefix": "true"
+        }
+    ]
+}

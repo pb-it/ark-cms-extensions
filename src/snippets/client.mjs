@@ -4,9 +4,15 @@ async function init() {
     const resources = [];
     const apiController = controller.getApiController();
     const origin = apiController.getApiOrigin();
-    const publicDir = origin + '/api/ext/console/public';
+    const publicDir = origin + '/api/ext/snippets/public';
     if (typeof ConsolePanel === 'undefined')
-        resources.push(loadScript(publicDir + '/console-panel.js'));
+        resources.push(loadScript(publicDir + '/js/console-panel.js'));
+    if (typeof SnippetController === 'undefined')
+        resources.push(loadScript(publicDir + '/js/snippet-controller.js'));
+    if (typeof SelectSnippetPanel === 'undefined')
+        resources.push(loadScript(publicDir + '/js/select-snippet-panel.js'));
+    if (typeof CrudSnippetPanel === 'undefined')
+        resources.push(loadScript(publicDir + '/js/crud-snippet-panel.js'));
     resources.push(loadStyle(publicDir + '/css/custom-menu.css'));
     //if (resources.length > 0)
     await Promise.all(resources);
@@ -57,8 +63,17 @@ async function init() {
                         'icon': new Icon('code'),
                         'root': true,
                         'tooltip': 'Code',
-                        'click': function (event, icon) {
-                            alert('TODO');
+                        'click': async function (event, icon) {
+                            const controller = app.getController();
+                            try {
+                                controller.setLoadingState(true);
+                                await controller.getModalController().openPanelInModal(new SelectSnippetPanel(state.typeString));
+                                controller.setLoadingState(false);
+                            } catch (error) {
+                                controller.setLoadingState(false);
+                                controller.showError(error);
+                            }
+                            return Promise.resolve();
                         },
                         'style': 'custom-style'
                     };
@@ -69,7 +84,16 @@ async function init() {
     }
     extensions.push(menu);
 
+    const models = controller.getModelController().getModels(true);
+    for (var model of models) {
+        await initModel(model);
+    }
     return Promise.resolve();
 }
 
-export { init };
+async function initModel(model) {
+    SnippetController.initSideMenu(model);
+    return Promise.resolve();
+}
+
+export { init, initModel };

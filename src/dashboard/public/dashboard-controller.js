@@ -7,20 +7,25 @@ class DashboardController {
             model['createDashboard'] = new AsyncFunction(code);
         } else
             delete model['createDashboard'];
-        if (typeof model['createDashboard'] === 'function') {
-            const entries = model.getSideMenuEntries();
-            entries.push({
-                'name': 'Dashboard',
-                'click': function (event, item) {
-                    const state = new State();
-                    state['customRoute'] = '/dashboard/' + this.getName();
-                    app.getController().loadState(state, true);
-                }.bind(model)
-            });
-        }
+        if (typeof model['createDashboard'] === 'function')
+            DashboardController._addSideMenuEntry(model);
 
         const tabs = model.getConfigTabs();
         tabs.push(new DashboardConfigTab(model));
+    }
+
+    static _addSideMenuEntry(model) {
+        const conf = {
+            'name': 'Dashboard',
+            'click': function (event, item) {
+                const state = new State();
+                state['customRoute'] = '/dashboard/' + this.getName();
+                app.getController().loadState(state, true);
+            }.bind(model)
+        };
+        const menuItem = new MenuItem(conf);
+        const entries = model.getSideMenuEntries();
+        entries.push(menuItem);
     }
 
     static getCode(definition) {
@@ -39,17 +44,7 @@ class DashboardController {
         const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
         model['createDashboard'] = new AsyncFunction(code);
 
-        const entries = model.getSideMenuEntries();
-        if (entries.length == 0) {
-            entries.push({
-                'name': 'Dashboard',
-                'click': function (event, item) {
-                    const state = new State();
-                    state['customRoute'] = '/dashboard/' + this.getName();
-                    app.getController().loadState(state, true);
-                }.bind(model)
-            });
-        }
+        DashboardController._addSideMenuEntry(model);
         return Promise.resolve();
     }
 

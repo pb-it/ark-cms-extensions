@@ -2,6 +2,9 @@
     "name": "snippets",
     "version": "0.1.0",
     "description": "Snippets",
-    "app_version": "^0.7.2",
-    "npm_dependencies": {}
+    "app_version": "^0.7.3",
+    "npm_dependencies": {},
+    "ext_dependencies": {
+        "mime-text": "^1.0.0"
+    }
 }

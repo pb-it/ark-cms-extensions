@@ -28,3 +28,12 @@ Generated ZIP files can be found in 'dist' folder
 
 - [ ] CRM
 - [ ] Mind Mapping App
+
+
+## Disclaimer
+
+> [!IMPORTANT]
+>
+> These extensions are subject to change, including but not limited to breaking changes without prior notice.
+>
+> Because of this please don't rely on this in production environments.
