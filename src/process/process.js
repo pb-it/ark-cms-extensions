@@ -14,6 +14,7 @@ class Process {
 
     id;
     state;
+    signal;
     name;
     description;
 
@@ -59,6 +60,8 @@ class Process {
             id: this['id'],
             state: this['state']
         }
+        if (this['signal'])
+            data['signal'] = this['signal'];
         if (this['name'])
             data['name'] = this['name'];
         if (this['description'])

@@ -1,6 +1,6 @@
 {
     "name": "process",
-    "version": "1.0.0",
+    "version": "0.1.0",
     "description": "Process Controller",
     "app_version": "^0.5.0",
     "npm_dependencies": {

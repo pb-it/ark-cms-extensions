@@ -13,20 +13,34 @@
             State: <b>
                 <%= process['state'] %>
             </b><br>
-            Description: <%= process['description'] ? process['description'] : '<N/A>' %><br>
-                <% if (process['socket']) { %>
-                    Socket: <a href="<%= process['socket'] %>" target="_blank">
-                        <%= process['socket'] %>
-                    </a><br>
+            Signal: <b>
+                <%= process['signal'] ? process['signal'].toUpperCase() : '' %>
+            </b>
+            <% if (process['state']=='running' ) { %>
+                <form id="signalForm" action="/api/ext/process/<%= process['id'] %>" method="GET">
+                    <!--<input type="hidden" name="_method" value="PUT">-->
+                    <select id="signal" name="signal">
+                        <option value="sigint">SIGINT</option>
+                    </select>
+                    <input type="submit">
+                </form>
+                <% } else { %>
+                    <br>
                     <% } %>
-                        <% if (process['logfile']) { %>
-                            Logfile: <a href="<%= process['logfile'] %>" target="_blank">
-                                <%= process['logfile'] %>
-                            </a><br>
-                            <% } %>
-                                <% if (process['result']) { %>
-                                    Result: <%- process['result'] %>
+                        Description: <%= process['description'] ? process['description'] : '<N/A>' %><br>
+                            <% if (process['socket']) { %>
+                                Socket: <a href="<%= process['socket'] %>" target="_blank">
+                                    <%= process['socket'] %>
+                                </a><br>
+                                <% } %>
+                                    <% if (process['logfile']) { %>
+                                        Logfile: <a href="<%= process['logfile'] %>" target="_blank">
+                                            <%= process['logfile'] %>
+                                        </a><br>
                                         <% } %>
+                                            <% if (process['result']) { %>
+                                                Result: <%- process['result'] %>
+                                                    <% } %>
     </div>
 </body>
 

@@ -125,12 +125,15 @@ class ProcessController {
 
         app.get(rootPath + "/:uuid", async (req, res) => {
             try {
-                var format;
-                if (req.query)
-                    format = req.query['format'];
                 var process = JOBS[req.params.uuid];
                 if (process) {
-                    var data = process.getData();
+                    if (req.query && req.query['signal'])
+                        process['signal'] = req.query['signal'];
+
+                    const data = process.getData();
+                    var format;
+                    if (req.query)
+                        format = req.query['format'];
                     if (format == 'json') {
                         res.json(data);
                     } else {
@@ -140,6 +143,32 @@ class ProcessController {
                         res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
                         res.end(result);
                     }
+                } else {
+                    res.status(404); // Not Found
+                    res.send('Invalid process ID');
+                }
+            } catch (error) {
+                Logger.parseError(error);
+                if (!res.headersSent) {
+                    res.status(500); // Internal Server Error
+                    if (error['message'])
+                        res.send(error['message']);
+                    else
+                        res.send('An unexpected error has occurred');
+                }
+            }
+            return Promise.resolve();
+        });
+
+        app.put(rootPath + "/:uuid", async (req, res) => {
+            try {
+                var process = JOBS[req.params.uuid];
+                if (process) {
+                    if (req.query && req.query['signal'])
+                        process['signal'] = req.query['signal'];
+
+                    res.writeHead(200, { 'Content-Type': 'text/html;charset=utf-8' });
+                    res.end('OK');
                 } else {
                     res.status(404); // Not Found
                     res.send('Invalid process ID');
