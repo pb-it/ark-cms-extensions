@@ -401,7 +401,10 @@ describe('Testsuit - File2', function () {
         button = await panel.getButton('Create');
         assert.notEqual(button, null);
         await button.click();
-        await app.waitLoadingFinished(10);
+        await app.waitLoadingFinished(30);
+        const overlay = await driver.wait(webdriver.until.elementLocated({ 'xpath': '//div[@id="overlay"]' }), 1000);
+        const display = await overlay.getCssValue('display');
+        assert.equal(display, 'none');
 
         const modal = await window.getTopModal();
         assert.equal(modal, null);
@@ -483,6 +486,131 @@ describe('Testsuit - File2', function () {
 
         await app.navigate('/');
         await ExtendedTestHelper.delay(1000);
+
+        return Promise.resolve();
+    });
+
+    it('#test funcFileName', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+        var bDebugMode = await app.isDebugModeActive();
+        if (!bDebugMode)
+            await app.setDebugMode(true);
+
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
+        await sidemenu.click('Extensions');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('file2');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('Configure');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var modal = await window.getTopModal();
+        assert.notEqual(modal, null);
+        var panel = await modal.getPanel();
+        assert.notEqual(panel, null);
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('funcFileName');
+        assert.notEqual(input, null, 'Input not found!');
+        await input.sendKeys(`if (model)
+    console.log(model.getName());
+console.log(data);
+console.log(old);
+return Promise.resolve('test.png');`);
+        var button = await modal.findElement(webdriver.By.xpath(`.//button[text()="Apply"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        sidemenu = window.getSideMenu();
+        await sidemenu.click('Data');
+        await ExtendedTestHelper.delay(1000);
+        var menu = await sidemenu.getEntry('other');
+        if (menu) {
+            await sidemenu.click('other');
+            await ExtendedTestHelper.delay(1000);
+        }
+        await sidemenu.click('file2');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('Create');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        form = await panel.getForm();
+        assert.notEqual(form, null);
+        input = await form.getFormInput('title');
+        assert.notEqual(input, null, 'Input not found!');
+        await input.sendKeys('test');
+        var entry = await form.getFormEntry('file');
+        assert.notEqual(entry, null);
+        var inputs = await entry.findElements(webdriver.By.xpath(`./div[@class="value"]/input`));
+        assert.equal(inputs.length, 3);
+        input = inputs[1];
+        await input.sendKeys('https://upload.wikimedia.org/wikipedia/commons/1/12/Testbild.png');
+        await ExtendedTestHelper.delay(1000);
+        button = await panel.getButton('Create');
+        assert.notEqual(button, null);
+        await button.click();
+        bDebugMode = await app.isDebugModeActive();
+        if (bDebugMode) {
+            await ExtendedTestHelper.delay(1000);
+            var modal = await window.getTopModal();
+            assert.notEqual(modal, null);
+            button = await modal.findElement(webdriver.By.xpath('//button[text()="OK"]'));
+            assert.notEqual(button, null);
+            await button.click();
+        }
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        modal = await window.getTopModal();
+        assert.equal(modal, null);
+
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
+        assert.equal(panels.length, 1);
+
+        var obj = await ExtendedTestHelper.readJson(window, panels[0]);
+        assert.equal(obj['file'], 'test.png');
+
+        var contextmenu = await panels[0].openContextMenu();
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Delete');
+        await ExtendedTestHelper.delay(1000);
+
+        modal = await window.getTopModal();
+        assert.notEqual(modal, null);
+        var elements = await modal.findElements(webdriver.By.xpath(`//input[@type="submit" and @name="confirm"]`));
+        assert.equal(elements.length, 1);
+        button = elements[0];
+        assert.notEqual(button, null);
+        await button.click();
+        await ExtendedTestHelper.delay(1000);
+
+        modal = await window.getTopModal();
+        assert.notEqual(modal, null);
+        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="panel"]/div[@class="pre"]`));
+        assert.notEqual(modal, null);
+        var text = await div.getText();
+        assert.ok(text.startsWith('ERROR:\n404: Not Found'));
+        await modal.closeModal();
+
+        const ds = app.getDataService();
+        var tmp = await ds.delete('_registry', 'ext.file2.funcFileName');
+        assert.notEqual(Object.keys(tmp).length, 0);
+
+        tmp = await ds.request('GET', '/api/ext/file2/init');
+        assert.equal(tmp, 'OK');
 
         return Promise.resolve();
     });

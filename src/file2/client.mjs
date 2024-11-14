@@ -1,3 +1,52 @@
+async function configure() {
+    const controller = app.getController();
+    const ds = controller.getDataService();
+    const skeleton = [
+        {
+            name: 'funcFileName',
+            dataType: 'text',
+            size: '20'
+        }
+    ];
+    const data = {};
+    var funcFileName;
+    var tmp = await ds.fetchData('_registry', null, 'key=ext.file2.funcFileName');
+    if (tmp && tmp.length == 1)
+        funcFileName = tmp[0]['value'];
+    if (funcFileName)
+        data['funcFileName'] = funcFileName;
+    else
+        data['funcFileName'] = '';
+
+    const panel = new FormPanel(null, skeleton, data);
+    panel.setApplyAction(async function () {
+        try {
+            controller.setLoadingState(true);
+            const changed = await panel.getChanges();
+            if (changed) {
+                if (changed.hasOwnProperty('funcFileName')) {
+                    await ds.request('_registry', ActionEnum.update, null, { 'key': 'ext.file2.funcFileName', 'value': changed['funcFileName'] });
+
+                    const ac = app.getController().getApiController();
+                    const client = ac.getApiClient();
+                    const response = await client.request('GET', '/api/ext/file2/init');
+                    if (!response || response !== 'OK') {
+                        console.error(response);
+                        alert('ERROR');
+                    }
+                }
+            }
+            panel.dispose();
+            controller.setLoadingState(false);
+        } catch (error) {
+            controller.setLoadingState(false);
+            controller.showError(error);
+        }
+        return Promise.resolve();
+    });
+    return controller.getModalController().openPanelInModal(panel);
+}
+
 async function init() {
     const controller = app.getController();
     const apiController = controller.getApiController();
@@ -17,4 +66,4 @@ async function init() {
     return Promise.resolve();
 }
 
-export { init };
+export { init, configure };

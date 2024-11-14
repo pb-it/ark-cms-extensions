@@ -2,10 +2,35 @@ const path = require('path');
 const fs = require('fs');
 
 const assert = require('assert');
+const webdriver = require('selenium-webdriver');
 
 const { TestHelper } = require("@pb-it/ark-cms-selenium-test-helper");
 
 class ExtendedTestHelper extends TestHelper {
+
+    static async readJson(window, panel) {
+        var contextmenu = await panel.openContextMenu();
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('Debug');
+        await ExtendedTestHelper.delay(1000);
+        await contextmenu.click('JSON');
+        await ExtendedTestHelper.delay(1000);
+
+        var modal = await window.getTopModal();
+        assert.notEqual(modal, null);
+        var jsonPanel = await modal.getPanel();
+        assert.notEqual(jsonPanel, null);
+        var div = await jsonPanel.getElement().findElement(webdriver.By.xpath('./div'));
+        assert.notEqual(div, null);
+        var text = await div.getText();
+        var obj = JSON.parse(text);
+        //console.log(obj);
+
+        await modal.closeModal();
+        modal = await window.getTopModal();
+        assert.equal(modal, null);
+        return Promise.resolve(obj);
+    }
 
     constructor() {
         super();

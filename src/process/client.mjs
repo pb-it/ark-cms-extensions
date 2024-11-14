@@ -17,7 +17,12 @@ async function init() {
                     src: url, // 'about:blank'
                     frameborder: 0,
                     scrolling: 'no'
-                });
+                })
+                    .css({
+                        'display': 'block',
+                        'width': '100%',
+                        'height': '100%'
+                    });
                 /*$iframe.on('load', function () {
                     this.contents().find('body').append(response);
                 }.bind($iframe));*/

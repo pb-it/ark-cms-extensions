@@ -176,6 +176,7 @@ describe('Testsuit - mime-text', function () {
         input = await form.getFormInput('mime-text');
         assert.notEqual(input, null);
         await input.sendKeys('[{\'x\':\'y\'}]');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
         var option = await input.findElement(webdriver.By.xpath('../select/option[@value="javascript"]'));
         assert.notEqual(option, null, 'Option not found!');
