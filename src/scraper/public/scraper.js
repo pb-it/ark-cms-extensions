@@ -86,13 +86,4 @@ class Scraper {
         }
         return Promise.resolve(data);
     }
-
-    static async openEditScraperModal(url, body, doc, scraper, options) {
-        const controller = app.getController();
-        controller.setLoadingState(true);
-        var panel = new EditScraperPanel(url, body, doc, scraper, options);
-        var modal = await controller.getModalController().openPanelInModal(panel);
-        controller.setLoadingState(false);
-        return Promise.resolve(modal);
-    }
 }

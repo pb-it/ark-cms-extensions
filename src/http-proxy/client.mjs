@@ -1,23 +1,34 @@
-async function teardown() {
-    var bConfirm = confirm("Delete extension 'http-proxy'?");
-    if (bConfirm) {
-        const controller = app.getController();
-        const model = controller.getModelController().getModel('http-proxy-cache');
-        if (model) {
-            if (confirm("Delete model 'http-proxy-cache'?"))
-                await model.deleteModel();
-        }
-    }
-    return Promise.resolve(bConfirm);
-}
-
 async function init() {
     const controller = app.getController();
 
-    if (typeof HttpProxy === 'undefined') {
-        const apiController = controller.getApiController();
-        await loadScript(apiController.getApiOrigin() + "/api/ext/http-proxy/public/http-proxy.js");
-    }
+    const resources = [];
+    const apiController = controller.getApiController();
+    const origin = apiController.getApiOrigin();
+    const publicDir = origin + "/api/ext/http-proxy/public";
+    if (typeof HttpProxy === 'undefined')
+        resources.push(loadScript(publicDir + "/http-proxy.js"));
+    if (typeof TestHttpProxyPanel === 'undefined')
+        resources.push(loadScript(publicDir + "/test-http-proxy-panel.js"));
+    if (resources.length > 0)
+        await Promise.all(resources);
+
+    const route = {
+        "regex": "^/http-proxy$",
+        "fn": async function (path) {
+            const controller = app.getController();
+            try {
+                controller.setLoadingState(true);
+                const panel = new TestHttpProxyPanel();
+                controller.getView().getCanvas().showPanels([panel]);
+                controller.setLoadingState(false);
+            } catch (error) {
+                controller.setLoadingState(false);
+                controller.showError(error);
+            }
+            return Promise.resolve();
+        }
+    };
+    controller.getRouteController().addRoute(route);
 
     const model = controller.getModelController().getModel('http-proxy-cache');
     if (model) {
@@ -65,4 +76,17 @@ async function init() {
     return Promise.resolve();
 }
 
-export { teardown, init };
+async function teardown() {
+    var bConfirm = confirm("Delete extension 'http-proxy'?");
+    if (bConfirm) {
+        const controller = app.getController();
+        const model = controller.getModelController().getModel('http-proxy-cache');
+        if (model) {
+            if (confirm("Delete model 'http-proxy-cache'?"))
+                await model.deleteModel();
+        }
+    }
+    return Promise.resolve(bConfirm);
+}
+
+export { init, teardown };

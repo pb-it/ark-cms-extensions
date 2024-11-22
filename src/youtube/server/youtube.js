@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
-//const ytdl = require('ytdl-core');
-const ytdl = require("@distube/ytdl-core");
+const ytdl = require('ytdl-core');
+//const ytdl = require("@distube/ytdl-core");
 //const ytmux = require('ytdl-core-muxer');
 const ProgressBar = require('progress');
 
@@ -146,7 +146,11 @@ class Youtube {
                         })
                         .on('finish', function () {
                             console.log('\nDownload finished...');
-                        }).pipe(writer);
+                        })
+                        .on('error', function (error) {
+                            reject(error);
+                        })
+                        .pipe(writer);
                 }
             }.bind(this));
         } catch (error) {

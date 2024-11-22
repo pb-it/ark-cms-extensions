@@ -1,3 +1,9 @@
+> [!IMPORTANT]
+>
+> [https://github.com/fent/node-ytdl-core](https://github.com/fent/node-ytdl-core)
+>
+> Since core dependency added an deprecation notice this extension is prone to failure!
+
 ### Description
 
 Adds models for youtube playlist application.

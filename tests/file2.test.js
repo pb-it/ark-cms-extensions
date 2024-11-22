@@ -605,6 +605,9 @@ return Promise.resolve('test.png');`);
         assert.ok(text.startsWith('ERROR:\n404: Not Found'));
         await modal.closeModal();
 
+        await app.navigate('/');
+        await ExtendedTestHelper.delay(1000);
+
         const ds = app.getDataService();
         var tmp = await ds.delete('_registry', 'ext.file2.funcFileName');
         assert.notEqual(Object.keys(tmp).length, 0);

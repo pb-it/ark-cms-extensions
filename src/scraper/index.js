@@ -1,33 +1,25 @@
 const path = require('path');
 const fs = require('fs');
 
+const routePublic = {
+    'regex': '^/scraper/public/(.*)$',
+    'fn': async function (req, res, next) {
+        var file = req.locals['match'][1];
+        var filePath = path.join(__dirname, 'public', file);
+        if (fs.existsSync(filePath))
+            res.sendFile(filePath);
+        else
+            next();
+        return Promise.resolve();
+    }.bind(this)
+};
+
 async function setup() {
     await _createModels();
 
-    var data = {};
+    const data = {};
     data['client-extension'] = fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8');
     return Promise.resolve(data);
-}
-
-async function init() {
-
-    const ws = controller.getWebServer();
-    ws.addExtensionRoute(
-        {
-            'regex': '^/scraper/public/(.*)$',
-            'fn': async function (req, res, next) {
-                var file = req.locals['match'][1];
-                var filePath = path.join(__dirname, 'public', file);
-                if (fs.existsSync(filePath))
-                    res.sendFile(filePath);
-                else
-                    next();
-                return Promise.resolve();
-            }.bind(this)
-        }
-    );
-
-    return Promise.resolve();
 }
 
 async function _createModels() {
@@ -45,4 +37,20 @@ async function _createModels() {
     return Promise.resolve();
 }
 
-module.exports = { setup, init };
+async function init() {
+
+    const ws = controller.getWebServer();
+    ws.addExtensionRoute(routePublic);
+
+    return Promise.resolve();
+}
+
+async function teardown() {
+    const ws = controller.getWebServer();
+    ws.deleteExtensionRoute(routePublic);
+
+    controller.setRestartRequest();
+    return Promise.resolve();
+}
+
+module.exports = { setup, init, teardown };

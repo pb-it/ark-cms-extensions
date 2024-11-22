@@ -1,9 +1,12 @@
 const path = require('path');
 
 const assert = require('assert');
+const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
 const ExtendedTestHelper = require('./helper/extended-test-helper.js');
+
+const { Form } = require('@pb-it/ark-cms-selenium-test-helper');
 
 describe('Testsuit - scraper', function () {
 
@@ -129,41 +132,51 @@ describe('Testsuit - scraper', function () {
         });
         assert.equal(JSON.stringify(response), expect);
 
-        //edit-modal
-        var response = await driver.executeAsyncScript(async () => {
-            const callback = arguments[arguments.length - 1];
+        return Promise.resolve();
+    });
 
-            const url = 'https://www.finanzen.net/aktien/nvidia-aktie';
-            const controller = app.getController();
-            try {
-                controller.setLoadingState(true);
-                const rule = await Scraper.getRule(url);
-                if (rule) {
-                    const obj = new CrudObject('scraper', rule);
-                    const body = await HttpProxy.request(url, rule['options']);
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(body, 'text/html');
-
-                    controller.setLoadingState(false);
-                    await Scraper.openEditScraperModal(url, body, doc, obj);
-                } else
-                    throw new Error('No matching rule found!');
-            } catch (error) {
-                controller.setLoadingState(false);
-                controller.showError(error);
-            }
-            callback();
-        });
+    it('#test scraper route', async function () {
+        this.timeout(30000);
 
         const app = helper.getApp();
+        await app.navigate('/scraper');
+        await ExtendedTestHelper.delay(1000);
+
         const window = app.getWindow();
-        modal = await window.getTopModal();
-        assert.notEqual(modal, null);
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('url');
+        assert.notEqual(input, null);
+        await input.sendKeys('https://www.finanzen.net/aktien/nvidia-aktie');
+        await ExtendedTestHelper.delay(1000);
 
-        await modal.closeModal();
+        var button = await panel.getButton('Load Scraper');
+        assert.notEqual(button, null);
+        await button.click();
+        await app.waitLoadingFinished(10);
 
-        modal = await window.getTopModal();
-        assert.equal(modal, null);
+        button = await panel.getButton('Curl');
+        assert.notEqual(button, null);
+        await button.click();
+        await app.waitLoadingFinished(10);
+
+        button = await panel.getButton('Test');
+        assert.notEqual(button, null);
+        await button.click();
+        await app.waitLoadingFinished(10);
+
+        var forms = await panel.getElement().findElements(webdriver.By.xpath('./div/form[contains(@class, "crudform")]'));
+        assert.equal(forms.length, 4);
+        form = new Form(helper, forms[3]);
+
+        input = await form.getFormInput('result');
+        assert.notEqual(input, null);
+        var result = await input.getAttribute('value');
+        assert.equal(result, '{\n\t"name": "NVIDIA",\n\t"wkn": "918422",\n\t"isin": "US67066G1040",\n\t"symbol": "NVDA"\n}');
 
         return Promise.resolve();
     });
