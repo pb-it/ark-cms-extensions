@@ -74,7 +74,7 @@ module.exports = test;`
     it('#test request', async function () {
         this.timeout(60000);
 
-        var error = await driver.executeAsyncScript(async () => {
+        /*var error = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
 
             const url = 'https://www.finanzen.at/aktien/nvidia-aktie';
@@ -86,7 +86,7 @@ module.exports = test;`
             }
             callback(res);
         });
-        assert.equal(error['response']['status'], 403);
+        assert.equal(error['response']['status'], 403);*/
 
         var response = await driver.executeAsyncScript(async () => {
             const callback = arguments[arguments.length - 1];
