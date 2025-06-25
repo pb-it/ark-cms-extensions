@@ -1,0 +1,10 @@
+{
+    "name": "DownloadHelper",
+    "version": "0.1.0",
+    "description": "Download Helper",
+    "app_version": "^0.7.0",
+    "npm_dependencies": {
+        "progress": "",
+        "ytdl-core": ""
+    }
+}

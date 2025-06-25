@@ -25,6 +25,7 @@
         "test:scraper:scrape": "mocha tests/scraper.test.js --grep \"#test scrape\"",
         "test:webclient": "node build.js axios-webclient && mocha tests/webclient.test.js",
         "test:webclient:request": "mocha tests/webclient.test.js --grep \"#test request\"",
+        "test:dlh": "node build.js dlh && mocha tests/dlh.test.js",
         "test:youtube": "node build.js youtube && mocha tests/youtube.test.js",
         "test:youtube:playlist": "mocha tests/youtube.test.js --grep \"#test create playlist\"",
         "test:youtube:drop": "mocha tests/youtube.test.js --grep \"#test add to playlist\"",
@@ -60,7 +61,7 @@
         "@pb-it/ark-cms-selenium-test-helper": "0.1.26-beta",
         "cross-fetch": "^4.1.0",
         "mocha": "^10.8.2",
-        "selenium-webdriver": "^4.30.0",
-        "semver": "^7.7.1"
+        "selenium-webdriver": "^4.33.0",
+        "semver": "^7.7.2"
     }
 }

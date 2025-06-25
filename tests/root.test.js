@@ -43,6 +43,7 @@ describe("Root Suite", function () {
     require('./http-proxy.test.js');
     require('./webclient.test.js');
     require('./scraper.test.js');
+    require('./dlh.test.js');
     require('./youtube.test.js');
     require('./string2.test.js');
     require('./relation2.test.js');
