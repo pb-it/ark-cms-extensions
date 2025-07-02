@@ -176,4 +176,90 @@ describe('Testsuit - backup', function () {
             this.skip();
         return Promise.resolve();
     });
+
+    it.only('#test dlh ruleset', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+
+        var sidemenu;
+        var modal, panel, form, input;
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
+        await sidemenu.click('Extensions');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('dlh');
+        await ExtendedTestHelper.delay(1000);
+        await sidemenu.click('Configure');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        modal = await window.getTopModal();
+        assert.notEqual(modal, null);
+        panel = await modal.getPanel();
+        assert.notEqual(panel, null);
+        form = await panel.getForm();
+        assert.notEqual(form, null);
+        input = await panel.getElement().findElement(webdriver.By.xpath('.//fieldset/input[@type="checkbox" and @name="bNative"]'));
+        assert.notEqual(input, null, 'Input not found!');
+        var bDisabled = await input.getAttribute('disabled');
+        assert.equal(bDisabled, null);
+        //var value = await input.getAttribute('value'); // 'on'
+        var bSelected = await input.isSelected();
+        if (bSelected)
+            await input.click();
+        await ExtendedTestHelper.delay(1000);
+        assert.equal(await input.isSelected(), false);
+        await ExtendedTestHelper.delay(1000);
+        input = await form.getFormInput('funcRuleset');
+        assert.notEqual(input, null);
+        await input.sendKeys('return Promise.resolve([{ \'regex\': \'^.*$\', \'client\': \'yt-dlp-native\' }]);');
+        await ExtendedTestHelper.delay(1000);
+
+        var button = await modal.findElement(webdriver.By.xpath(`.//button[text()="Apply"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        if (bSelected) {
+            await driver.wait(webdriver.until.alertIsPresent(), 1000);
+            var alert = await driver.switchTo().alert();
+            var text = await alert.getText();
+            assert.equal(text, 'Changes applied successfully.');
+            await alert.accept();
+        }
+        await ExtendedTestHelper.delay(1000);
+        modal = await app.getWindow().getTopModal();
+        assert.equal(modal, null);
+
+        sidemenu = window.getSideMenu();
+        await sidemenu.click('DownloadHelper');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
+        assert.equal(panels.length, 1);
+        panel = panels[0];
+        button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Add"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await ExtendedTestHelper.delay(1000);
+        modal = await app.getWindow().getTopModal();
+        assert.notEqual(modal, null);
+        panel = await modal.getPanel();
+        assert.notEqual(panel, null);
+        form = await panel.getForm();
+        assert.notEqual(form, null);
+        input = await form.getFormInput('url');
+        assert.notEqual(input, null);
+        await input.sendKeys('https://www.youtube.com/watch?v=9Ht5RZpzPqw');
+        await ExtendedTestHelper.delay(1000);
+        button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Apply"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        return Promise.resolve();
+    });
 });
