@@ -1,6 +1,6 @@
 {
     "name": "gallery",
-    "version": "1.0.0",
+    "version": "0.1.1",
     "description": "PhotoSwipe Image Gallery",
-    "app_version": "^0.6.2"
+    "app_version": "^0.7.5"
 }

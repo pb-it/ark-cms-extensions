@@ -11,7 +11,10 @@ class Gallery {
                 if (model.isCollection())
                     objects = obj.getAllItems();
                 else {
-                    const selected = app.getController().getSelectedObjects();
+                    var selected;
+                    const sc = controller.getSelectionController();
+                    if (sc)
+                        selected = sc.getSelectedObjects();
                     if (selected && selected.length > 0)
                         objects = selected;
                     else

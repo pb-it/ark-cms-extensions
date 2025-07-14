@@ -104,7 +104,9 @@ class FaceRecognition {
             const controller = app.getController();
             try {
                 controller.setLoadingState(true);
-                var selected = controller.getSelected();
+                const sc = controller.getSelectionController();
+                if (sc)
+                    selected = sc.getSelected();
                 if (!selected || selected.length == 0 || (selected.length == 1 && selected[0] == target)) {
                     if (typeof faceapi === 'undefined')
                         await loadScript("https://cdn.jsdelivr.net/npm/face-api.js/dist/face-api.js");

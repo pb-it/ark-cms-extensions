@@ -177,7 +177,7 @@ describe('Testsuit - backup', function () {
         return Promise.resolve();
     });
 
-    it.only('#test dlh ruleset', async function () {
+    it('#test dlh ruleset', async function () {
         this.timeout(60000);
 
         const app = helper.getApp();
