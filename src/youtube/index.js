@@ -105,7 +105,7 @@ async function init() {
                     }
                     data['title'] = yt.getTitle();
                     var attr = mYoutube.getAttribute('thumbnail');
-                    var cdn = controller.getPathForFile(attr);
+                    var cdn = controller.getFileStorageController().getPathForFile(attr);
                     const poster = `${uid}.jpg`;
                     const thumbnail_file = `${cdn}${poster}`;
                     if (!fs.existsSync(thumbnail_file)) {
@@ -119,7 +119,7 @@ async function init() {
                     const mp4 = `${uid}.mp4`;
                     const webm = `${uid}.webm`;
                     attr = mYoutube.getAttribute('file');
-                    cdn = controller.getPathForFile(attr);
+                    cdn = controller.getFileStorageController().getPathForFile(attr);
 
                     var file = `${cdn}${mp4}`;
                     var bExist = fs.existsSync(file);

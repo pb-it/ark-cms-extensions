@@ -20,11 +20,11 @@ class Backup {
         const tmpFilePath = path.join(tmpDir, fileName);
 
         //var res = await common.exec(`mysqldump --verbose -u root --add-drop-database --opt --skip-set-charset --default-character-set=utf8mb4 --databases cms > ${tmpFilePath}`);
-        await controller.createDatabaseBackup(tmpFilePath);
+        await controller.getDatabaseController().createDatabaseBackup(tmpFilePath);
         if (fs.existsSync(tmpFilePath)) {
             const model = controller.getShelf().getModel('backup');
             const attr = model.getAttribute('file');
-            const localPath = controller.getPathForFile(attr);
+            const localPath = controller.getFileStorageController().getPathForFile(attr);
             if (localPath && fs.existsSync(localPath) && fs.statSync(localPath).isDirectory()) {
                 const target = path.join(localPath, filePath);
 
@@ -37,6 +37,21 @@ class Backup {
         } else
             throw new Error("Creating backup failed!");
         return Promise.resolve(data);
+    }
+
+    static async restore(data) {
+        Logger.info('[Extension:backup] Restoring backup...');
+
+        const model = controller.getShelf().getModel('backup');
+        const attr = model.getAttribute('file');
+        const localPath = controller.getFileStorageController().getPathForFile(attr);
+        const file = path.join(localPath, data['file']);
+        if (fs.existsSync(file))
+            await controller.getDatabaseController().restoreDatabaseBackup(file);
+        else
+            throw new Error('File not found!');
+
+        return Promise.resolve();
     }
 }
 

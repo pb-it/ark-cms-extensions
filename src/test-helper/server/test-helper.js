@@ -55,7 +55,7 @@ class TestHelper {
             await sleep(100); // prevent blocking of own response in case of batched task
             block(seconds * 1000 - 100);
         } else
-            await controller.getKnex().raw("SELECT SLEEP(" + seconds + ");");
+            await controller.getDatabaseController().getKnex().raw("SELECT SLEEP(" + seconds + ");");
 
         msg = 'end: ' + new Date().toISOString();
         if (logfile)

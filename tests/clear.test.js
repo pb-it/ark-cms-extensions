@@ -68,7 +68,7 @@ describe('Testsuit - clear', function () {
         const ac = app.getApiController();
         const tools = ac.getTools();
         const cmd = `async function test() {
-            var knex = controller.getKnex();
+            var knex = controller.getDatabaseController().getKnex();
             var rs = await knex.raw("TRUNCATE TABLE _extension;");
             return Promise.resolve('OK');
         };

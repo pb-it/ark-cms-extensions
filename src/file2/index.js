@@ -60,7 +60,7 @@ async function init() {
                 else if (data[str]['url'] && data[str]['url'].startsWith("http"))
                     throw new Error('NotImplementedException'); //TODO:
             } else if (attr['storage'] == 'filesystem') {
-                const localPath = controller.getPathForFile(attr);
+                const localPath = controller.getFileStorageController().getPathForFile(attr);
                 if (localPath) {
                     const tmpDir = await controller.getTmpDir();
                     var tmpFilePath;
@@ -211,7 +211,7 @@ async function init() {
             return;
         },
         'destroy': async function (attr, data, value) {
-            const localPath = controller.getPathForFile(attr);
+            const localPath = controller.getFileStorageController().getPathForFile(attr);
             if (localPath) {
                 const file = path.join(localPath, value);
                 if (fs.existsSync(file))

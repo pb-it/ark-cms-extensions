@@ -104,6 +104,7 @@ class FaceRecognition {
             const controller = app.getController();
             try {
                 controller.setLoadingState(true);
+                var selected;
                 const sc = controller.getSelectionController();
                 if (sc)
                     selected = sc.getSelected();
@@ -161,21 +162,23 @@ class FaceRecognition {
         var entries;
         var extGroup;
         for (var model of models) {
-            entries = model.getContextMenuEntries();
-            if (entries) {
-                extGroup = null;
-                for (var e of entries) {
-                    if (e.getName() === 'Extensions') {
-                        extGroup = e;
-                        break;
+            if (model.getModelDefaultsController().getDefaultMediaTypeProperty()) {
+                entries = model.getContextMenuEntries();
+                if (entries) {
+                    extGroup = null;
+                    for (var e of entries) {
+                        if (e.getName() === 'Extensions') {
+                            extGroup = e;
+                            break;
+                        }
                     }
-                }
-                if (extGroup)
-                    extGroup.entries.push(entry);
-                else {
-                    extGroup = new ContextMenuEntry('Extensions', null, [entry]);
-                    extGroup.setIcon(new Icon('puzzle-piece'));
-                    entries.unshift(extGroup);
+                    if (extGroup)
+                        extGroup.entries.push(entry);
+                    else {
+                        extGroup = new ContextMenuEntry('Extensions', null, [entry]);
+                        extGroup.setIcon(new Icon('puzzle-piece'));
+                        entries.unshift(extGroup);
+                    }
                 }
             }
         }

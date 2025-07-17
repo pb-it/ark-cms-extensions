@@ -1,8 +1,8 @@
 const path = require('path');
 const fs = require('fs');
 
-//const appRoot = controller.getAppRoot();
-//const Logger = require(path.join(appRoot, "./src/common/logger/logger.js"));
+const appRoot = controller.getAppRoot();
+const Logger = require(path.join(appRoot, "./src/common/logger/logger.js"));
 
 const Backup = require('./server/backup.js');
 
@@ -21,7 +21,7 @@ const Backup = require('./server/backup.js');
 
 async function setup() {
     const data = {};
-    if (controller.getDatabaseSettings()['client'].startsWith('mysql')) {
+    if (controller.getDatabaseController().getDatabaseSettings()['client'].startsWith('mysql')) {
         data['client-extension'] = fs.readFileSync(path.join(__dirname, 'client.mjs'), 'utf8');
 
         const manifest = require(path.join(__dirname, 'manifest.json'));
@@ -95,7 +95,7 @@ async function init() {
     const model = controller.getShelf().getModel('backup');
     if (model) {
         const attr = model.getAttribute('file');
-        const localPath = controller.getPathForFile(attr);
+        const localPath = controller.getFileStorageController().getPathForFile(attr);
         const dir = path.join(localPath, 'backup');
         if (!(fs.existsSync(dir) && fs.statSync(dir).isDirectory()))
             fs.mkdirSync(dir, { recursive: true });
@@ -122,8 +122,34 @@ async function init() {
         });*/
     }
 
-    /*const ws = controller.getWebServer();
-    ws.addExtensionRoute(routePublic);*/
+    const ws = controller.getWebServer();
+    //ws.addExtensionRoute(routePublic);
+
+    ws.addCustomDataRoute(
+        {
+            'regex': '^/backup/(\\d+)/restore$', // /api/data/v1/backup/<id>/restore
+            'fn': async function (req, res) {
+                try {
+                    const model = controller.getShelf().getModel('backup');
+                    if (model) {
+                        const id = req.locals['match'][1];
+                        const x = await model.read(id);
+                        if (x && x['file']) {
+                            await Backup.restore(x);
+                        } else
+                            throw new Error("Restoring backup failed!");
+                    }
+                    res.send('OK');
+                } catch (error) {
+                    Logger.parseError(error);
+                    res.status(500);
+                    res.send("Something went wrong!");
+                }
+                return Promise.resolve();
+            }
+        }
+    );
+
     return Promise.resolve();
 }
 
