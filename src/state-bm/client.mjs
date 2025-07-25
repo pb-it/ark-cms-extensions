@@ -15,31 +15,15 @@ async function init() {
     const bc = new BookmarkController();
     await bc.init();
 
-    controller.getView().getSideNavigationBar().addIconBarItem({
-        name: 'bookmarks',
-        func: () => {
-            var conf;
-            const controller = app.getController();
-            if (controller.hasConnection() && controller.isInDebugMode()) {
-                conf = {
-                    'style': 'iconbar',
-                    'icon': new Icon('bookmark'),
-                    'tooltip': 'Bookmarks',
-                    'click': async function (event, icon) {
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        const controller = app.getController();
-                        controller.getView().getSideNavigationBar().close();
-
-                        const config = { 'minWidth': '1000px' };
-                        return controller.getModalController().openPanelInModal(new ManageBookmarkPanel(config, bc));
-                    }.bind(this)
-                };
-            }
-            return conf;
+    var application = {
+        'name': 'Bookmarks',
+        'icon': new Icon('bookmark'),
+        'start': async function (event) {
+            const config = { 'minWidth': '1000px' };
+            return app.getController().getModalController().openPanelInModal(new ManageBookmarkPanel(config, bc));
         }
-    }, false);
+    };
+    controller.getAppController().addApp(application);
 
     return Promise.resolve();
 }

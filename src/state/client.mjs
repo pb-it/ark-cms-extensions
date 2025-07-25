@@ -14,44 +14,22 @@ async function init() {
         await initModel(model);
     }
 
-    /*controller.getView().getSideNavigationBar().addIconBarItem({
-        name: 'state',
-        func: () => {
-            var conf;
-            if (controller.hasConnection() && controller.isInDebugMode()) {
-                conf = {
-                    'style': 'iconbar',
-                    'icon': new Icon('paperclip'),
-                    'tooltip': 'State',
-                    'click': async function (event, icon) {
-                        event.preventDefault();
-                        event.stopPropagation();
-
-                        const controller = app.getController();
-                        try {
-                            const snb = controller.getView().getSideNavigationBar();
-                            const bib = snb.getBottomIconBar();
-                            const activeIcon = bib.getActiveItem();
-                            snb.close();
-
-                            const item = icon.getMenuItem();
-                            if (activeIcon != item) {
-                                bib.setActiveItem(item);
-                                snb.updateSideNavigationBar();
-                                const $div = $('<div/>');
-                                $div.append('Under Construction');
-                                snb.getSidePanel().show($div);
-                            }
-                        } catch (error) {
-                            controller.showError(error);
-                        }
-                        return Promise.resolve();
-                    }
-                };
+    /*var application = {
+        'name': 'State',
+        'icon': new Icon('paperclip'),
+        'start': async function (event, icon) {
+            const item = icon.getMenuItem();
+            if (activeIcon != item) {
+                bib.setActiveItem(item);
+                snb.updateSideNavigationBar();
+                const $div = $('<div/>');
+                $div.append('Under Construction');
+                snb.getSidePanel().show($div);
             }
-            return conf;
+            return Promise.resolve();
         }
-    }, false);*/
+    };
+    controller.getAppController().addApp(application);*/
 
     return Promise.resolve();
 }

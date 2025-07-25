@@ -9,6 +9,8 @@ const webdriver = require('selenium-webdriver');
 const config = require('./config/test-config.js');
 const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
+const { Menu } = require('@pb-it/ark-cms-selenium-test-helper');
+
 describe('Testsuit - backup', function () {
 
     let driver;
@@ -100,11 +102,20 @@ describe('Testsuit - backup', function () {
             if (!bNative) {
                 sidemenu = window.getSideMenu();
                 await sidemenu.click('Extensions');
-                await ExtendedTestHelper.delay(1000);
-                await sidemenu.click('dlh');
-                await ExtendedTestHelper.delay(1000);
-                await sidemenu.click('Configure');
                 await app.waitLoadingFinished(10);
+                await ExtendedTestHelper.delay(1000);
+
+                var canvas = await window.getCanvas();
+                assert.notEqual(canvas, null);
+                var panel = await canvas.getPanel('dlh');
+                assert.notEqual(panel, null);
+                var xpath = `.//div[contains(@class, 'menuitem') and contains(@class, 'root')]`;
+                var element = await panel.getElement().findElement(webdriver.By.xpath(xpath));
+                assert.notEqual(element, null);
+                var menu = new Menu(helper, element);
+                await menu.open();
+                await ExtendedTestHelper.delay(1000);
+                await menu.click('Configure');
                 await ExtendedTestHelper.delay(1000);
 
                 modal = await window.getTopModal();
@@ -137,6 +148,29 @@ describe('Testsuit - backup', function () {
                 await ExtendedTestHelper.delay(1000);
                 modal = await app.getWindow().getTopModal();
                 assert.equal(modal, null);
+            }
+
+            var xpath = `//*[@id="sidenav"]/div[contains(@class, 'menu') and contains(@class, 'iconbar')]/div[contains(@class, 'menuitem') and @title="DownloadHelper"]`;
+            var elements = await driver.findElements(webdriver.By.xpath(xpath));
+            if (elements.length == 0) {
+                sidemenu = window.getSideMenu();
+                await sidemenu.click('Apps');
+                await app.waitLoadingFinished(10);
+                await ExtendedTestHelper.delay(1000);
+
+                var canvas = await window.getCanvas();
+                assert.notEqual(canvas, null);
+                var panel = await canvas.getPanel('DownloadHelper');
+                assert.notEqual(panel, null);
+                var xpath = `.//div[contains(@class, 'menuitem') and contains(@class, 'root')]`;
+                var element = await panel.getElement().findElement(webdriver.By.xpath(xpath));
+                assert.notEqual(element, null);
+                var menu = new Menu(helper, element);
+                await menu.open();
+                await ExtendedTestHelper.delay(1000);
+                await menu.click('Pin to Sidemenu');
+                await app.waitLoadingFinished(10);
+                await ExtendedTestHelper.delay(1000);
             }
 
             sidemenu = window.getSideMenu();
@@ -187,11 +221,20 @@ describe('Testsuit - backup', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Extensions');
-        await ExtendedTestHelper.delay(1000);
-        await sidemenu.click('dlh');
-        await ExtendedTestHelper.delay(1000);
-        await sidemenu.click('Configure');
         await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel('dlh');
+        assert.notEqual(panel, null);
+        var xpath = `.//div[contains(@class, 'menuitem') and contains(@class, 'root')]`;
+        var element = await panel.getElement().findElement(webdriver.By.xpath(xpath));
+        assert.notEqual(element, null);
+        var menu = new Menu(helper, element);
+        await menu.open();
+        await ExtendedTestHelper.delay(1000);
+        await menu.click('Configure');
         await ExtendedTestHelper.delay(1000);
 
         modal = await window.getTopModal();

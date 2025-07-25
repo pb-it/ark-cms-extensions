@@ -7,6 +7,8 @@ const webdriver = require('selenium-webdriver');
 const config = require('./config/test-config.js');
 const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
+const { Menu } = require('@pb-it/ark-cms-selenium-test-helper');
+
 describe('Testsuit - File2', function () {
 
     let driver;
@@ -501,10 +503,20 @@ describe('Testsuit - File2', function () {
         const window = app.getWindow();
         var sidemenu = window.getSideMenu();
         await sidemenu.click('Extensions');
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
-        await sidemenu.click('file2');
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel('file2');
+        assert.notEqual(panel, null);
+        var xpath = `.//div[contains(@class, 'menuitem') and contains(@class, 'root')]`;
+        var element = await panel.getElement().findElement(webdriver.By.xpath(xpath));
+        assert.notEqual(element, null);
+        var menu = new Menu(helper, element);
+        await menu.open();
         await ExtendedTestHelper.delay(1000);
-        await sidemenu.click('Configure');
+        await menu.click('Configure');
         await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 

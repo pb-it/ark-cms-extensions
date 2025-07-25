@@ -25,30 +25,18 @@ async function init() {
     };
     controller.getRouteController().addRoute(route);
 
-    controller.getView().getSideNavigationBar().addIconBarItem({
-        name: 'snippets',
-        func: () => {
-            var conf;
-            const controller = app.getController();
-            if (controller.hasConnection() && controller.isInDebugMode()) {
-                conf = {
-                    'style': 'iconbar',
-                    'icon': new Icon('code'),
-                    'tooltip': 'Snippets',
-                    'click': function (event, icon) {
-                        const controller = app.getController();
-                        controller.getView().getSideNavigationBar().close();
-
-                        if (event.ctrlKey)
-                            controller.getModalController().openPanelInModal(new ConsolePanel());
-                        else
-                            controller.loadState(new State({ customRoute: '/console' }), true);
-                    }
-                };
-            }
-            return conf;
+    var application = {
+        'name': 'Snippets',
+        'icon': new Icon('code'),
+        'start': async function (event) {
+            if (event.ctrlKey)
+                app.getController().getModalController().openPanelInModal(new ConsolePanel());
+            else
+                app.getController().loadState(new State({ customRoute: '/console' }), true);
+            return Promise.resolve();
         }
-    }, false);
+    };
+    controller.getAppController().addApp(application);
 
     const extensions = controller.getView().getTopNavigationBar().getBreadcrumb().getBreadcrumbExtensions();
     var menu = {

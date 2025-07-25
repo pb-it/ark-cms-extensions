@@ -36,26 +36,14 @@ async function init() {
     };
     controller.getRouteController().addRoute(route);
 
-    controller.getView().getSideNavigationBar().addIconBarItem({
-        name: 'dlh',
-        func: () => {
-            var conf;
-            if (controller.hasConnection()) {
-                conf = {
-                    'style': 'iconbar',
-                    'icon': new Icon('download'),
-                    'tooltip': 'DownloadHelper',
-                    'click': function (event, icon) {
-                        const controller = app.getController();
-                        controller.getView().getSideNavigationBar().close();
-
-                        controller.loadState(new State({ customRoute: '/dlh' }), true);
-                    }
-                };
-            }
-            return conf;
+    var application = {
+        'name': 'DownloadHelper',
+        'icon': new Icon('download'),
+        'start': async function (event) {
+            return app.getController().loadState(new State({ customRoute: '/dlh' }), true);
         }
-    }, false);
+    };
+    controller.getAppController().addApp(application);
 
     return Promise.resolve();
 }

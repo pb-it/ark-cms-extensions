@@ -23,23 +23,14 @@ class Template {
         };
         controller.getRouteController().addRoute(route);
 
-        controller.getView().getSideNavigationBar().addIconBarItem({
-            name: 'template',
-            func: () => {
-                var conf;
-                if (controller.hasConnection()) {
-                    conf = {
-                        'style': 'iconbar',
-                        'icon': new Icon('icons'),
-                        'tooltip': 'Template',
-                        'click': function (event, icon) {
-                            app.getController().loadState(new State({ customRoute: '/template' }), true);
-                        }
-                    };
-                }
-                return conf;
+        var application = {
+            'name': 'Template',
+            'icon': new Icon('icons'),
+            'start': async function (event) {
+                return app.getController().loadState(new State({ customRoute: '/template' }), true);
             }
-        }, false);
+        };
+        controller.getAppController().addApp(application);
 
         return Promise.resolve();
     }

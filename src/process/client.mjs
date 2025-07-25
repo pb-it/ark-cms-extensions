@@ -40,31 +40,20 @@ async function init() {
     };
     controller.getRouteController().addRoute(route);
 
-    controller.getView().getSideNavigationBar().addIconBarItem({
-        name: 'process',
-        func: () => {
-            var conf;
-            if (controller.hasConnection()) {
-                conf = {
-                    'style': 'iconbar',
-                    'icon': new Icon('bars-progress'),
-                    'tooltip': 'Process',
-                    'click': function (event, icon) {
-                        const controller = app.getController();
-                        controller.getView().getSideNavigationBar().close();
-
-                        if (event.ctrlKey) {
-                            const win = window.open(url, '_blank');
-                            if (win)
-                                win.focus();
-                        } else
-                            controller.loadState(new State({ customRoute: '/process' }), true);
-                    }
-                };
-            }
-            return conf;
+    var application = {
+        'name': 'Process',
+        'icon': new Icon('bars-progress'),
+        'start': async function (event) {
+            if (event.ctrlKey) {
+                const win = window.open(url, '_blank');
+                if (win)
+                    win.focus();
+            } else
+                app.getController().loadState(new State({ customRoute: '/process' }), true);
+            return Promise.resolve();
         }
-    }, false);
+    };
+    controller.getAppController().addApp(application);
 
     return Promise.resolve();
 }

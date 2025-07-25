@@ -1,8 +1,8 @@
 {
     "name": "process",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Process Controller",
-    "app_version": "^0.5.0",
+    "app_version": "^0.7.7",
     "npm_dependencies": {
         "ejs": "",
         "socket.io": ""

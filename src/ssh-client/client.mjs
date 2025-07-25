@@ -19,29 +19,18 @@ async function init() {
     };
     controller.getRouteController().addRoute(route);
 
-    controller.getView().getSideNavigationBar().addIconBarItem({
-        name: 'ssh-client',
-        func: () => {
-            var conf;
-            if (app.getController().hasConnection() && app.getController().isInDebugMode()) {
-                conf = {
-                    'style': 'iconbar',
-                    'icon': new Icon('terminal'),
-                    'tooltip': 'SSH Client',
-                    'click': function (event, icon) {
-                        var controller = app.getController();
-                        controller.getView().getSideNavigationBar().close();
-
-                        if (event.ctrlKey)
-                            controller.getModalController().openPanelInModal(new SshClientPanel());
-                        else
-                            controller.loadState(new State({ customRoute: '/ssh-client' }), true);
-                    }
-                };
-            }
-            return conf;
+    var application = {
+        'name': 'SSH Client',
+        'icon': new Icon('terminal'),
+        'start': async function (event) {
+            if (event.ctrlKey)
+                app.getController().getModalController().openPanelInModal(new SshClientPanel());
+            else
+                app.getController().loadState(new State({ customRoute: '/ssh-client' }), true);
+            return Promise.resolve();
         }
-    }, false);
+    };
+    controller.getAppController().addApp(application);
 
     return Promise.resolve();
 }
