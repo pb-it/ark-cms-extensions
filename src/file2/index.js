@@ -122,26 +122,40 @@ async function init() {
                                 tmp = await controller.getWebClientController().getWebClient().download(data[str]['url'], tmpFilePath);
                                 tmpFilePath = path.join(tmpDir, tmp);
                             }
+                        } else if (data[str]['url'].startsWith("file://")) {
+                            var file = data[str]['url'].substring(7);
+                            if (!fileName) {
+                                if (typeof attr.funcFileName == 'function')
+                                    fileName = await attr.funcFileName(data, old);
+                                else if (funcFileName)
+                                    fileName = await funcFileName(model, data, old);
+                                else
+                                    fileName = path.basename(file);
+                            }
+                            tmpFilePath = file;
                         } else
                             throw new Error("Invalid URL!");
                     }
 
                     if (tmpFilePath) {
-                        if (old && old[str]) {
-                            var oldFile = path.join(localPath, old[str]);
-                            if (fs.existsSync(oldFile))
-                                fs.unlinkSync(oldFile);
-                        }
-                        const target = path.join(localPath, fileName);
-                        const dir = path.dirname(target);
-                        if (dir && !(fs.existsSync(dir) && fs.statSync(dir).isDirectory()))
-                            fs.mkdirSync(dir, { recursive: true });
-                        // fs.rename fails if two separate partitions are involved
-                        if (data[str]['force'])
-                            fs.copyFileSync(tmpFilePath, target);
-                        else
-                            fs.copyFileSync(tmpFilePath, target, fs.constants.COPYFILE_EXCL);
-                        fs.unlinkSync(tmpFilePath);
+                        if (fileName) {
+                            if (old && old[str]) {
+                                var oldFile = path.join(localPath, old[str]);
+                                if (fs.existsSync(oldFile))
+                                    fs.unlinkSync(oldFile);
+                            }
+                            const target = path.join(localPath, fileName);
+                            const dir = path.dirname(target);
+                            if (dir && !(fs.existsSync(dir) && fs.statSync(dir).isDirectory()))
+                                fs.mkdirSync(dir, { recursive: true });
+                            // fs.rename fails if two separate partitions are involved
+                            if (data[str]['force'])
+                                fs.copyFileSync(tmpFilePath, target);
+                            else
+                                fs.copyFileSync(tmpFilePath, target, fs.constants.COPYFILE_EXCL);
+                            fs.unlinkSync(tmpFilePath);
+                        } else
+                            throw new Error("Missing Filename!");
                     } else {
                         if (fileName) {
                             if (old && old[str] && old[str] != fileName) {
@@ -162,7 +176,7 @@ async function init() {
                                                 throw error;
                                         }
                                     } else
-                                        throw new Error("File '" + newFile + "' already exists");
+                                        throw new Error("File '" + newFile + "' already exists!");
                                 }
                             }
                         } else {
@@ -184,7 +198,7 @@ async function init() {
             if (attr['filename_prop'] && data[str]['filename'])
                 forge[attr['filename_prop']] = data[str]['filename'];
             if (attr['url_prop']) {
-                if (data[str]['url']) {
+                if (data[str]['url'] && !data[str]['url'].startsWith("file://")) {
                     if (!old || !old[attr['url_prop']] || old[attr['url_prop']] != data[str]['url'])
                         forge[attr['url_prop']] = data[str]['url'];
                 } else {

@@ -25,7 +25,10 @@ async function configure() {
             const changed = await panel.getChanges();
             if (changed) {
                 if (changed.hasOwnProperty('funcFileName')) {
-                    await ds.request('_registry', ActionEnum.update, null, { 'key': 'ext.file2.funcFileName', 'value': changed['funcFileName'] });
+                    if (changed['funcFileName'])
+                        await ds.request('_registry', ActionEnum.update, null, { 'key': 'ext.file2.funcFileName', 'value': changed['funcFileName'] });
+                    else
+                        await ds.request('_registry', ActionEnum.delete, null, { 'key': 'ext.file2.funcFileName' });
 
                     const ac = app.getController().getApiController();
                     const client = ac.getApiClient();

@@ -1,5 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+const { existsSync, createWriteStream } = require('fs');
+//const { mkdir, writeFile } = require('fs/promises');
+const { pipeline } = require('stream/promises');
+//const fetch = require('node-fetch');
+const fetch = require('cross-fetch');
 
 const assert = require('assert');
 const webdriver = require('selenium-webdriver');
@@ -10,6 +15,10 @@ const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 const { Menu } = require('@pb-it/ark-cms-selenium-test-helper');
 
 describe('Testsuit - File2', function () {
+
+    async function downloadFile(url, path) {
+        return pipeline((await fetch(url)).body, createWriteStream(path, { flags: 'wx' }));
+    }
 
     let driver;
 
@@ -626,6 +635,83 @@ return Promise.resolve('test.png');`);
 
         tmp = await ds.request('GET', '/api/ext/file2/init');
         assert.equal(tmp, 'OK');
+
+        return Promise.resolve();
+    });
+
+    it('#test local file', async function () {
+        this.timeout(60000);
+
+        if (config['api'].startsWith('https://localhost:')) {
+            var file = path.resolve(__dirname, './tmp/test.pdf');
+            await downloadFile('https://assets.ubuntu.com/v1/3bd0daaf-Ubuntu%20Server%20CLI%20cheat%20sheet%202024%20v6.pdf', file);
+            assert.ok(fs.existsSync(file));
+
+            const app = helper.getApp();
+            var bDebugMode = await app.isDebugModeActive();
+            if (!bDebugMode)
+                await app.setDebugMode(true);
+
+            const window = app.getWindow();
+            var sidemenu = window.getSideMenu();
+            await sidemenu.click('Data');
+            await ExtendedTestHelper.delay(1000);
+            var menu = await sidemenu.getEntry('other');
+            if (menu) {
+                await sidemenu.click('other');
+                await ExtendedTestHelper.delay(1000);
+            }
+            await sidemenu.click('file2');
+            await ExtendedTestHelper.delay(1000);
+            await sidemenu.click('Create');
+            await app.waitLoadingFinished(10);
+            await ExtendedTestHelper.delay(1000);
+
+            var canvas = await window.getCanvas();
+            assert.notEqual(canvas, null);
+            var panel = await canvas.getPanel();
+            assert.notEqual(panel, null);
+            var form = await panel.getForm();
+            assert.notEqual(form, null);
+            var input = await form.getFormInput('title');
+            assert.notEqual(input, null, 'Input not found!');
+            await input.sendKeys('test');
+            var entry = await form.getFormEntry('file');
+            assert.notEqual(entry, null);
+            var inputs = await entry.findElements(webdriver.By.xpath(`./div[@class="value"]/input`));
+            assert.equal(inputs.length, 3);
+            input = inputs[1];
+            await input.sendKeys('file://' + file);
+            await ExtendedTestHelper.delay(1000);
+            button = await panel.getButton('Create');
+            assert.notEqual(button, null);
+            await button.click();
+            bDebugMode = await app.isDebugModeActive();
+            if (bDebugMode) {
+                await ExtendedTestHelper.delay(1000);
+                var modal = await window.getTopModal();
+                assert.notEqual(modal, null);
+                button = await modal.findElement(webdriver.By.xpath('//button[text()="OK"]'));
+                assert.notEqual(button, null);
+                await button.click();
+            }
+            await app.waitLoadingFinished(10);
+            await ExtendedTestHelper.delay(1000);
+
+            modal = await window.getTopModal();
+            assert.equal(modal, null);
+
+            canvas = await window.getCanvas();
+            assert.notEqual(canvas, null);
+            var panels = await canvas.getPanels();
+            assert.equal(panels.length, 1);
+
+            var obj = await ExtendedTestHelper.readJson(window, panels[0]);
+            assert.equal(obj['file'], 'test.pdf');
+
+            assert.ok(!fs.existsSync(file));
+        } else
+            this.skip();
 
         return Promise.resolve();
     });
