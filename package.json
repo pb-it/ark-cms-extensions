@@ -21,6 +21,7 @@
         "test:proxy": "node build.js http-proxy && mocha tests/http-proxy.test.js",
         "test:proxy:forward": "mocha tests/http-proxy.test.js --grep \"#test forward request\"",
         "test:proxy:formdata": "mocha tests/http-proxy.test.js --grep \"#test forward formdata\"",
+        "test:proxy:app": "mocha tests/http-proxy.test.js --grep \"#test app\"",
         "test:scraper": "node build.js scraper && mocha tests/scraper.test.js",
         "test:scraper:scrape": "mocha tests/scraper.test.js --grep \"#test scrape\"",
         "test:webclient": "node build.js axios-webclient && mocha tests/webclient.test.js",
@@ -60,6 +61,7 @@
     "devDependencies": {
         "@pb-it/ark-cms-selenium-test-helper": "0.1.29-beta",
         "cross-fetch": "^4.1.0",
+        "jsdom": "^26.1.0",
         "mocha": "^10.8.2",
         "selenium-webdriver": "^4.34.0",
         "semver": "^7.7.2"

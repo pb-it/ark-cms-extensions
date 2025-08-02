@@ -73,6 +73,15 @@ async function init() {
         }
     }
 
+    var application = {
+        'name': 'HttpProxy',
+        'icon': new Icon('globe'),
+        'start': async function (event) {
+            return app.getController().loadState(new State({ customRoute: '/http-proxy' }), true);
+        }
+    };
+    controller.getAppController().addApp(application);
+
     return Promise.resolve();
 }
 

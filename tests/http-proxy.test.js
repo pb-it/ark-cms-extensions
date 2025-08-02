@@ -1,10 +1,14 @@
 const path = require('path');
 
+const { JSDOM } = require('jsdom');
+
 const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
 const ExtendedTestHelper = require('./helper/extended-test-helper.js');
+
+const { Menu } = require('@pb-it/ark-cms-selenium-test-helper');
 
 describe('Testsuit - HttpProxy', function () {
 
@@ -30,15 +34,28 @@ describe('Testsuit - HttpProxy', function () {
 
         const tools = await app.getApiController().getTools();
         const client = 'fetch';
-        const cmd = `async function test() {
+        var cmd = `async function test() {
     const registry = controller.getRegistry();
     await registry.upsert('defaultWebClient', '${client}');
     controller.getWebClientController().setDefaultWebClient('${client}');
     return Promise.resolve('OK');
 };
 module.exports = test;`
-        const res = await tools.serverEval(cmd);
+        var res = await tools.serverEval(cmd);
         assert.equal(res, 'OK', "Setting WebClient Failed!");
+
+        cmd = `async function test() {
+    var knex = controller.getDatabaseController().getKnex();
+    if (await knex.schema.hasTable('http_proxy_cache')) {
+        //var rs = await knex.raw("SET FOREIGN_KEY_CHECKS = 0;");
+        var rs = await knex.raw("TRUNCATE TABLE http_proxy_cache;");
+        //rs = await knex.raw("SET FOREIGN_KEY_CHECKS = 1;");
+    }
+    return Promise.resolve('OK');
+};        
+module.exports = test;`;
+        res = await tools.serverEval(cmd);
+        assert.equal(res, 'OK', 'Truncating tables failed');
 
         return Promise.resolve();
     });
@@ -232,6 +249,99 @@ module.exports = test;`
         await ExtendedTestHelper.delay(1000);
 
         //TODO: check browser log
+
+        return Promise.resolve();
+    });
+
+    it('#test app', async function () {
+        this.timeout(30000);
+
+        const app = helper.getApp();
+        const window = app.getWindow();
+        var sidemenu;
+
+        var xpath = `//*[@id="sidenav"]/div[contains(@class, 'menu') and contains(@class, 'iconbar')]/div[contains(@class, 'menuitem') and @title="HttpProxy"]`;
+        var elements = await driver.findElements(webdriver.By.xpath(xpath));
+        if (elements.length == 0) {
+            sidemenu = window.getSideMenu();
+            await sidemenu.click('Apps');
+            await app.waitLoadingFinished(10);
+            await ExtendedTestHelper.delay(1000);
+
+            var canvas = await window.getCanvas();
+            assert.notEqual(canvas, null);
+            var panel = await canvas.getPanel('HttpProxy');
+            assert.notEqual(panel, null);
+            var xpath = `.//div[contains(@class, 'menuitem') and contains(@class, 'root')]`;
+            var element = await panel.getElement().findElement(webdriver.By.xpath(xpath));
+            assert.notEqual(element, null);
+            var menu = new Menu(helper, element);
+            await menu.open();
+            await ExtendedTestHelper.delay(1000);
+            await menu.click('Pin to Sidemenu');
+            await app.waitLoadingFinished(10);
+            await ExtendedTestHelper.delay(1000);
+        }
+
+        sidemenu = window.getSideMenu();
+        await sidemenu.click('HttpProxy');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
+        assert.equal(panels.length, 1);
+        var panel = panels[0];
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('url');
+        assert.notEqual(input, null);
+        await input.clear();
+        await ExtendedTestHelper.delay(100);
+        var url = 'https://example.com/'; //'https://www.google.com'
+        await input.sendKeys(url);
+        await ExtendedTestHelper.delay(1000);
+        var button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Request"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var response = await panel.getElement().findElement(webdriver.By.xpath(`.//textarea[@id="response"]`));
+        assert.notEqual(input, response);
+        var value = await response.getAttribute('value');
+        assert.notEqual(value, null);
+        const dom = new JSDOM(value);
+        assert.equal(dom.window.document.querySelector("head > title").textContent, 'Example Domain');
+
+        input = await form.getFormInput('options');
+        assert.notEqual(input, null);
+        var options = {
+            //'client': 'fetch',
+            //'method': 'GET',
+            //'withCredentials': true,
+            //'rejectUnauthorized': false,
+            'meta': true,
+            //'bCache': true,
+            //'headers': {},
+            //'data': '',
+            //'formdata': '',
+            //'body': '',
+        };
+        await input.sendKeys(JSON.stringify(options, null, '\t'));
+        await ExtendedTestHelper.delay(1000);
+        await button.click();
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+        response = await panel.getElement().findElement(webdriver.By.xpath(`.//textarea[@id="response"]`));
+        assert.notEqual(input, response);
+        value = await response.getAttribute('value');
+        assert.notEqual(value, null);
+        var obj = JSON.parse(value);
+        assert.equal(obj['status'], 200);
+
+        // add test with invalid url 'google.comm'
 
         return Promise.resolve();
     });
