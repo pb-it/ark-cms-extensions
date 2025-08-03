@@ -64,8 +64,10 @@ class HttpProxy {
             if (rule) {
                 var defaults = rule['options'];
                 if (defaults) {
-                    for (var prop in defaults) {
-                        defaults[prop] = options[prop];
+                    if (options) {
+                        for (var prop in options) {
+                            defaults[prop] = options[prop];
+                        }
                     }
                     options = defaults;
                 }

@@ -54,6 +54,12 @@ class TestScraperPanel extends Panel {
         this._doc = doc;
         this._scraper = scraper;
         this._options = options;
+        if (this._options)
+            this._options['console'] = this._console;
+        else
+            this._options = {
+                'console': this._console
+            };
     }
 
     /*dispose() {
