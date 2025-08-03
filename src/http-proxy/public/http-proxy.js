@@ -48,17 +48,22 @@ class HttpProxy {
             const controller = app.getController();
             const ac = controller.getApiController();
             const client = ac.getApiClient();
+            var response;
             var tmp = await client.request('POST', '/api/ext/http-proxy/forward', null, data);
-            if (tmp && tmp.length > 0) {
-                const response = JSON.parse(tmp);
-                if (options && options['meta'])
-                    res = response;
-                else {
-                    if (response && response['status'] == 200)
-                        res = response['body'];
-                    else
-                        throw new HttpError(null, response);
-                }
+            if (tmp && tmp.length > 0)
+                response = JSON.parse(tmp);
+            if (response) {
+                if (typeof (response) === 'object' && !(response instanceof String)) {
+                    if (options && options['meta'])
+                        res = response;
+                    else {
+                        if (response && response['status'] == 200)
+                            res = response['body'];
+                        else
+                            throw new HttpError(null, response);
+                    }
+                } else if (typeof (response) === 'string' || response instanceof String)
+                    throw new HttpError('Response with unexpected content type');
             } else
                 throw new Error('Empty HTTP Response');
         }

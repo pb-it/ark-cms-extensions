@@ -13,6 +13,28 @@ const Logger = require(path.join(appRoot, './src/common/logger/logger.js'));
 
 class HttpProxy {
 
+    static _ruleset;
+
+    static async init() {
+        const model = controller.getShelf().getModel('http-proxy-rules');
+        if (model) {
+            var tmp = await model.readAll();
+            if (tmp && tmp.length > 0) {
+                for (var rule of tmp) {
+                    HttpProxy.addRule(rule);
+                }
+            }
+        }
+        return Promise.resolve();
+    }
+
+    static addRule(rule) {
+        if (HttpProxy._ruleset)
+            HttpProxy._ruleset.push(rule);
+        else
+            HttpProxy._ruleset = [rule];
+    }
+
     static async forward(req, res, next) {
         var url;
         var options;
@@ -26,9 +48,40 @@ class HttpProxy {
             options = body['options'];
         }
         if (url) {
+            var rule;
+            if (HttpProxy._ruleset && HttpProxy._ruleset.length > 0) {
+                var match;
+                for (var x of HttpProxy._ruleset) {
+                    if (x['url'] && x['url'].startsWith('^')) {
+                        match = new RegExp(x['url'], 'ig').exec(url);
+                        if (match) {
+                            rule = x;
+                            break;
+                        }
+                    }
+                }
+            }
+            if (rule) {
+                var defaults = rule['options'];
+                if (defaults) {
+                    for (var prop in defaults) {
+                        defaults[prop] = options[prop];
+                    }
+                    options = defaults;
+                }
+            }
             try {
-                const response = await HttpProxy.request(url, options);
-                res.json(response);
+                var response;
+                if (rule && rule['fn']) {
+                    const AsyncFunction = Object.getPrototypeOf(async function () { }).constructor;
+                    const fn = new AsyncFunction('exports', 'require', 'module', '__filename', '__dirname', 'url', 'options', rule['fn']);
+                    response = await fn(exports, require, module, __filename, __dirname, url, options);
+                } else
+                    response = await HttpProxy.request(url, options);
+                if (response)
+                    res.json(response);
+                else
+                    next();
             } catch (error) {
                 Logger.parseError(error);
                 if (!res.headersSent) {

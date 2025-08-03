@@ -15,6 +15,8 @@ async function setup() {
 }
 
 async function init() {
+    await HttpProxy.init();
+
     const cacheModel = controller.getShelf().getModel('http-proxy-cache');
     if (cacheModel) {
         const definition = cacheModel.getDefinition();
@@ -68,6 +70,12 @@ async function init() {
 }
 
 async function teardown() {
+    var resolved;
+    var p = './server/http-proxy.js';
+    resolved = require.resolve(p);
+    if (resolved)
+        delete require.cache[p];
+
     controller.setRestartRequest();
     return Promise.resolve();
 }
@@ -97,11 +105,32 @@ async function _createModels() {
         model = await shelf.upsertModel(null, definition);
         await model.initModel();
     }
+    model = shelf.getModel('http-proxy-rules');
+    if (!model) {
+        var p = path.join(__dirname, 'models/http-proxy-rules.js');
+        var resolved = require.resolve(p);
+        if (resolved)
+            delete require.cache[resolved];
+        var definition = require(p);
+        const mimeText = controller.getExtensionController().getExtension('mime-text');
+        if (mimeText) {
+            var tmp = definition['attributes'].filter(x => x['name'] === 'fn');
+            if (tmp && tmp.length == 1) {
+                const attr = tmp[0];
+                attr['dataType'] = 'mime-text';
+                attr['view'] = 'javascript';
+                attr['bSyntaxPrefix'] = false;
+            }
+        }
+        model = await shelf.upsertModel(null, definition);
+        await model.initModel();
+    }
     if (model) {
         var profile = {
             "name": "http-proxy",
             "menu": [
-                "http-proxy-cache"
+                "http-proxy-cache",
+                "http-proxy-rules"
             ]
         };
 
