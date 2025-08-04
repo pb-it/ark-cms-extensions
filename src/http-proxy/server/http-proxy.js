@@ -124,70 +124,50 @@ class HttpProxy {
                 str = 'null';
             Logger.info('[app:http-proxy] options:\n' + str);
         }
+        var opt;
         var client;
         var bCache;
         if (options) {
-            client = options['client'];
-            if (options.hasOwnProperty('bCache')) {
-                bCache = options['bCache'];
-                delete options['bCache'];
+            opt = { ...options };
+            if (opt.hasOwnProperty('client')) {
+                client = opt['client'];
+                delete opt['bCache'];
+            }
+            if (opt.hasOwnProperty('bCache')) {
+                bCache = opt['bCache'];
+                delete opt['bCache'];
             }
         }
         const webclient = controller.getWebClientController().getWebClient(client);
         if (webclient) {
-            if (!client)
-                client = webclient.getName();
             var method;
             var data;
-            if (options) {
-                method = options['method'];
-                var agent;
-                if (options.hasOwnProperty('rejectUnauthorized')) {
-                    if (!options['rejectUnauthorized'])
-                        agent = httpsAgent;
-                    delete options['rejectUnauthorized'];
+            if (opt) {
+                var tmp;
+                if (opt.hasOwnProperty('method')) {
+                    method = opt['method'];
+                    delete opt['method'];
                 }
-                var formData;
-                if (options.hasOwnProperty('formdata')) {
-                    formData = new FormData();
-                    for (const name in options['formdata']) {
-                        formData.append(name, options['formdata'][name]);
-                    }
-                    delete options['formdata'];
+                if (opt.hasOwnProperty('data')) {
+                    tmp = opt['data'];
+                    delete opt['data'];
                 }
-                if (!client || client === 'fetch') {
-                    if (agent)
-                        options['agent'] = agent;
-                    if (formData)
-                        options['body'] = new URLSearchParams(formData);
-                } else if (client === 'axios') {
-                    if (agent)
-                        options['httpsAgent'] = httpsAgent;
-                    if (formData)
-                        data = formData;
-                    var tmp;
-                    if (options.hasOwnProperty('data')) {
-                        tmp = options['data'];
-                        delete options['data'];
-                    }
-                    if (options.hasOwnProperty('body')) {
-                        tmp = options['body'];
-                        delete options['body'];
-                    }
-                    if (tmp) {
-                        if (typeof tmp === 'string' || tmp instanceof String)
-                            data = tmp;
-                        else
-                            data = JSON.stringify(tmp);
-                    }
+                if (opt.hasOwnProperty('body')) {
+                    tmp = opt['body'];
+                    delete opt['body'];
+                }
+                if (tmp) {
+                    if (typeof tmp === 'string' || tmp instanceof String)
+                        data = tmp;
+                    else
+                        data = JSON.stringify(tmp);
                 }
             } else
-                options = {};
-            options['meta'] = true;
+                opt = {};
+            opt['meta'] = true;
             if (!method)
                 method = 'GET';
-
-            res = await webclient.request(url, method, data, options); // await fetch(url, options);
+            res = await webclient.request(url, method, data, opt); // await fetch(url, opt);
             if (res && bCache) {
                 if (res['status'] == 200 && res['body']) {
                     const model = controller.getShelf().getModel('http-proxy-cache');

@@ -2,8 +2,13 @@ const debug = require('debug');
 const log = debug('app:webclient');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 const axios = require('axios');
 //const { stringify } = require('flatted');
+
+const httpsAgent = new https.Agent({
+    rejectUnauthorized: false
+});
 
 const appRoot = controller.getAppRoot();
 const WebClient = require(path.join(appRoot, './src/common/webclient/webclient.js'));
@@ -130,25 +135,41 @@ class AxiosWebClient extends WebClient {
             Logger.info('[webclient(axios)] data:\n' + str);
         }
         var res;
+        var opt;
         var bMeta;
-        if (options && options.hasOwnProperty('meta')) {
-            bMeta = options['meta'];
-            delete options['meta'];
+        if (options) {
+            opt = { ...options };
+            if (opt.hasOwnProperty('meta')) {
+                bMeta = opt['meta'];
+                delete opt['meta'];
+            }
+            if (opt.hasOwnProperty('rejectUnauthorized')) {
+                if (opt['rejectUnauthorized'] === false)
+                    opt['httpsAgent'] = httpsAgent;
+                delete opt['rejectUnauthorized'];
+            }
+            if (opt.hasOwnProperty('formdata')) {
+                data = new FormData();
+                for (const name in opt['formdata']) {
+                    data.append(name, opt['formdata'][name]);
+                }
+                delete opt['formdata'];
+            }
         }
         var response;
         try {
             switch (method) {
                 case 'GET':
-                    response = await this._ax.get(url, options);
+                    response = await this._ax.get(url, opt);
                     break;
                 case 'DELETE':
                     response = await this._ax.delete(url);
                     break;
                 case 'POST':
-                    response = await this._ax.post(url, data, options);
+                    response = await this._ax.post(url, data, opt);
                     break;
                 case 'PUT':
-                    response = await this._ax.put(url, data, options);
+                    response = await this._ax.put(url, data, opt);
                     break;
                 default:
                     throw new Error('Unsupported method');
@@ -229,74 +250,76 @@ class AxiosWebClient extends WebClient {
         if (index != -1)
             ext = name.substr(index + 1);
 
-        if (!options || !options['client'] || options['client'] == 'axios') {
-            var opt;
-            if (options && options['options'])
-                opt = options['options'];
-            else
-                opt = {};
-            opt['responseType'] = 'stream';
-            //opt['onDownloadProgress'] = WebClient._progress;
-            const response = await this._ax.get(url, opt);
-
-            var extFromHeader;
-            const type = response.headers['content-type'];
-            const disposition = response.headers['content-disposition'];
-            if (disposition && disposition != 'inline') {
-                extFromHeader = disposition.substr(disposition.lastIndexOf('.') + 1);
-                if (extFromHeader.endsWith('"'))
-                    extFromHeader = extFromHeader.substr(0, extFromHeader.length - 1);
-            } else if (type) {
-                var parts = type.split('/');
-                if (parts.length == 2 && !parts[1].startsWith('octet-stream')) {// 'application/octet-stream', 'binary/octet-stream'
-                    extFromHeader = parts[1];
-                    parts = extFromHeader.split(';');
-                    if (parts[0])
-                        extFromHeader = parts[0];
-                }
+        var opt;
+        if (options) {
+            opt = { ...options };
+            if (opt.hasOwnProperty('rejectUnauthorized')) {
+                if (opt['rejectUnauthorized'] === false)
+                    opt['httpsAgent'] = httpsAgent;
+                delete opt['rejectUnauthorized'];
             }
-            if (extFromHeader) {
-                var bChanged = false;
-                if (!ext) {
-                    name += '.' + extFromHeader;
-                    bChanged = true;
-                } else if (ext != extFromHeader) {
-                    var pic = ['jpg', 'jpeg', 'webp'];
-                    if (!pic.includes(ext) || !pic.includes(extFromHeader)) {
-                        name = name.substr(0, index + 1) + extFromHeader;
-                        bChanged = true;
-                    }
-                }
-                if (bChanged) {
-                    if (fpath)
-                        file = `${fpath}${path.sep}${name}`;
-                    else
-                        file = name;
-                }
-            }
-
-            if (fs.existsSync(file))
-                throw new Error("File '" + file + "' already exists!");
-
-            if (this._debugOptions['download']) {
-                const contentLength = response.headers['content-length'];
-                var total = 0;
-                var percentage = 0;
-                var last = 0;
-                response.data.on('data', (chunk) => {
-                    total += chunk.length;
-                    percentage = ((total / contentLength) * 100);
-                    if (percentage - last > 1) {
-                        last = percentage;
-                        console.log(percentage.toFixed(2) + "%");
-                    }
-                });
-            }
-
-            //stream.data.pipe(fs.createWriteStream(file));
-            await this._streamToFile(response, file);
         } else
-            throw new Error('Client missmatch');
+            opt = {};
+        opt['responseType'] = 'stream';
+        //opt['onDownloadProgress'] = WebClient._progress;
+        const response = await this._ax.get(url, opt);
+
+        var extFromHeader;
+        const type = response.headers['content-type'];
+        const disposition = response.headers['content-disposition'];
+        if (disposition && disposition != 'inline') {
+            extFromHeader = disposition.substr(disposition.lastIndexOf('.') + 1);
+            if (extFromHeader.endsWith('"'))
+                extFromHeader = extFromHeader.substr(0, extFromHeader.length - 1);
+        } else if (type) {
+            var parts = type.split('/');
+            if (parts.length == 2 && !parts[1].startsWith('octet-stream')) {// 'application/octet-stream', 'binary/octet-stream'
+                extFromHeader = parts[1];
+                parts = extFromHeader.split(';');
+                if (parts[0])
+                    extFromHeader = parts[0];
+            }
+        }
+        if (extFromHeader) {
+            var bChanged = false;
+            if (!ext) {
+                name += '.' + extFromHeader;
+                bChanged = true;
+            } else if (ext != extFromHeader) {
+                var pic = ['jpg', 'jpeg', 'webp'];
+                if (!pic.includes(ext) || !pic.includes(extFromHeader)) {
+                    name = name.substr(0, index + 1) + extFromHeader;
+                    bChanged = true;
+                }
+            }
+            if (bChanged) {
+                if (fpath)
+                    file = `${fpath}${path.sep}${name}`;
+                else
+                    file = name;
+            }
+        }
+
+        if (fs.existsSync(file))
+            throw new Error("File '" + file + "' already exists!");
+
+        if (this._debugOptions['download']) {
+            const contentLength = response.headers['content-length'];
+            var total = 0;
+            var percentage = 0;
+            var last = 0;
+            response.data.on('data', (chunk) => {
+                total += chunk.length;
+                percentage = ((total / contentLength) * 100);
+                if (percentage - last > 1) {
+                    last = percentage;
+                    console.log(percentage.toFixed(2) + "%");
+                }
+            });
+        }
+
+        //stream.data.pipe(fs.createWriteStream(file));
+        await this._streamToFile(response, file);
 
         if (this._debugOptions['download']) {
             var end = Date.now();
