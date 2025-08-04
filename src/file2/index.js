@@ -119,7 +119,7 @@ async function init() {
                                         tmpFilePath = path.join(tmpDir, fileName);
                                     } while (!tmpFilePath || fs.existsSync(tmpFilePath));
                                 }
-                                tmp = await controller.getWebClientController().getWebClient().download(data[str]['url'], tmpFilePath);
+                                tmp = await controller.getDownloader().download(data[str]['url'], tmpFilePath);
                                 tmpFilePath = path.join(tmpDir, tmp);
                             }
                         } else if (data[str]['url'].startsWith("file://")) {

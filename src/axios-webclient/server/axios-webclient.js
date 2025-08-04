@@ -33,7 +33,6 @@ class AxiosWebClient extends WebClient {
     }
 
     _ax;
-    _options;
     _debugOptions;
 
     constructor(config) {
@@ -49,7 +48,6 @@ class AxiosWebClient extends WebClient {
             }
         }
         this._ax = axios.create(config);
-        this._options = [];
 
         this._debugOptions = {};
         const debugConfig = controller.getServerConfig()['debug'];
@@ -95,16 +93,6 @@ class AxiosWebClient extends WebClient {
 
     getAxios() {
         return this._ax;
-    }
-
-    /**
-     * 
-     * @param {*} url 
-     * @param {*} options 
-     *  [ 'request', 'response', 'download' ]
-     */
-    setOption(url, options) {
-        this._options[url] = options;
     }
 
     async get(url, options) {
@@ -220,7 +208,7 @@ class AxiosWebClient extends WebClient {
         return Promise.resolve(res);
     }
 
-    async download(url, file, config) {
+    async download(url, file, options) {
         log('DOWNLOAD(axios): ' + url);
 
         if (this._debugOptions['download']) {
@@ -241,20 +229,10 @@ class AxiosWebClient extends WebClient {
         if (index != -1)
             ext = name.substr(index + 1);
 
-        if (!config) {
-            var match;
-            for (var key in this._options) {
-                match = new RegExp(key, 'ig').exec(url);
-                if (match) {
-                    config = this._options[key];
-                    break;
-                }
-            }
-        }
-        if (!config || !config['client'] || config['client'] == 'axios') {
+        if (!options || !options['client'] || options['client'] == 'axios') {
             var opt;
-            if (config && config['options'])
-                opt = config['options'];
+            if (options && options['options'])
+                opt = options['options'];
             else
                 opt = {};
             opt['responseType'] = 'stream';

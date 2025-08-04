@@ -52,7 +52,7 @@ class HttpProxy {
             if (HttpProxy._ruleset && HttpProxy._ruleset.length > 0) {
                 var match;
                 for (var x of HttpProxy._ruleset) {
-                    if (x['url'] && x['url'].startsWith('^')) {
+                    if (x['url'] && x['url'].startsWith('^') && x['url'].endsWith('$')) {
                         match = new RegExp(x['url'], 'ig').exec(url);
                         if (match) {
                             rule = x;
@@ -62,14 +62,15 @@ class HttpProxy {
                 }
             }
             if (rule) {
-                var defaults = rule['options'];
-                if (defaults) {
+                if (rule['options']) {
                     if (options) {
+                        var defaults = { ...rule['options'] };
                         for (var prop in options) {
                             defaults[prop] = options[prop];
                         }
-                    }
-                    options = defaults;
+                        options = defaults;
+                    } else
+                        options = rule['options'];
                 }
             }
             try {
