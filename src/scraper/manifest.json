@@ -1,8 +1,8 @@
 {
     "name": "scraper",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Web Scraper",
-    "app_version": "^0.5.5",
+    "app_version": "^0.7.7",
     "npm_dependencies": {
         "jsdom": ""
     },

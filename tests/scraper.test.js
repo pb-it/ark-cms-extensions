@@ -1,12 +1,14 @@
 const path = require('path');
 
+const { JSDOM } = require('jsdom');
+
 const assert = require('assert');
 const webdriver = require('selenium-webdriver');
 
 const config = require('./config/test-config.js');
 const ExtendedTestHelper = require('./helper/extended-test-helper.js');
 
-const { Form } = require('@pb-it/ark-cms-selenium-test-helper');
+const { Form, Menu } = require('@pb-it/ark-cms-selenium-test-helper');
 
 describe('Testsuit - scraper', function () {
 
@@ -28,6 +30,18 @@ describe('Testsuit - scraper', function () {
 
         const modal = await app.getWindow().getTopModal();
         assert.equal(modal, null);
+
+        const tools = await app.getApiController().getTools();
+        cmd = `async function test() {
+    var knex = controller.getDatabaseController().getKnex();
+    if (await knex.schema.hasTable('scraper')) {
+        var rs = await knex.raw("TRUNCATE TABLE scraper;");
+    }
+    return Promise.resolve('OK');
+};        
+module.exports = test;`;
+        res = await tools.serverEval(cmd);
+        assert.equal(res, 'OK', 'Truncating tables failed');
 
         return Promise.resolve();
     });
@@ -177,6 +191,163 @@ describe('Testsuit - scraper', function () {
         assert.notEqual(input, null);
         var result = await input.getAttribute('value');
         assert.equal(result, '{\n\t"name": "NVIDIA",\n\t"wkn": "918422",\n\t"isin": "US67066G1040",\n\t"symbol": "NVDA"\n}');
+
+        return Promise.resolve();
+    });
+
+    it('#test scraper app', async function () {
+        this.timeout(30000);
+
+        const app = helper.getApp();
+        const window = app.getWindow();
+        var sidemenu;
+
+        var xpath = `//*[@id="sidenav"]/div[contains(@class, 'menu') and contains(@class, 'iconbar')]/div[contains(@class, 'menuitem') and @title="Scraper"]`;
+        var elements = await driver.findElements(webdriver.By.xpath(xpath));
+        if (elements.length == 0) {
+            sidemenu = window.getSideMenu();
+            await sidemenu.click('Apps');
+            await app.waitLoadingFinished(10);
+            await ExtendedTestHelper.delay(1000);
+
+            var canvas = await window.getCanvas();
+            assert.notEqual(canvas, null);
+            var panel = await canvas.getPanel('Scraper');
+            assert.notEqual(panel, null);
+            var xpath = `.//div[contains(@class, 'menuitem') and contains(@class, 'root')]`;
+            var element = await panel.getElement().findElement(webdriver.By.xpath(xpath));
+            assert.notEqual(element, null);
+            var menu = new Menu(helper, element);
+            await menu.open();
+            await ExtendedTestHelper.delay(1000);
+            await menu.click('Pin to Sidemenu');
+            await app.waitLoadingFinished(10);
+            await ExtendedTestHelper.delay(1000);
+        }
+
+        sidemenu = window.getSideMenu();
+        await sidemenu.click('Scraper');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panels = await canvas.getPanels();
+        assert.equal(panels.length, 1);
+        var panel = panels[0];
+        var form = await panel.getForm();
+        assert.notEqual(form, null);
+        var input = await form.getFormInput('url');
+        assert.notEqual(input, null);
+        await input.clear();
+        await ExtendedTestHelper.delay(100);
+        var url = 'https://example.com/'; //'https://www.google.com'
+        await input.sendKeys(url);
+        await ExtendedTestHelper.delay(1000);
+        var button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Curl"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        try {
+            await driver.wait(webdriver.until.alertIsPresent(), 1000);
+            var alert = await driver.switchTo().alert();
+            var text = await alert.getText();
+            assert.equal(text, 'Use cached response?');
+            await alert.accept();
+        } catch (error) {
+            ;
+        }
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        var modal = await window.getTopModal();
+        assert.equal(modal, null);
+
+        var response = await panel.getElement().findElement(webdriver.By.xpath(`.//textarea[@name="body"]`));
+        assert.notEqual(input, response);
+        var value = await response.getAttribute('value');
+        assert.notEqual(value, null);
+        const dom = new JSDOM(value);
+        assert.equal(dom.window.document.querySelector("head > title").textContent, 'Example Domain');
+
+        var forms = await panel.getForms();
+        assert.equal(forms.length, 4);
+        form = forms[2];
+        input = await form.getFormInput('domain');
+        assert.notEqual(input, null);
+        await input.sendKeys('example.com');
+        await ExtendedTestHelper.delay(1000);
+        var formEntry = await form.getFormEntry('funcScrape');
+        assert.notEqual(formEntry, null);
+        input = await formEntry.findElement(webdriver.By.xpath('./div[@class="value"]/textarea[@name="funcScrape"]'));
+        assert.notEqual(input, null);
+        await input.sendKeys(`console.log('x');
+return Promise.resolve({});`);
+        await ExtendedTestHelper.delay(1000);
+        button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Test"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        form = forms[3];
+        input = await form.getFormInput('console');
+        assert.notEqual(input, null);
+        value = await input.getAttribute('value');
+        assert.equal(value, 'x\n');
+        input = await form.getFormInput('result');
+        assert.notEqual(input, null);
+        value = await input.getAttribute('value');
+        assert.equal(value, '{}');
+
+        button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Save"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await driver.wait(webdriver.until.alertIsPresent(), 1000);
+        var alert = await driver.switchTo().alert();
+        var text = await alert.getText();
+        assert.equal(text, 'created');
+        await alert.accept();
+        await ExtendedTestHelper.delay(1000);
+
+        modal = await window.getTopModal();
+        assert.equal(modal, null);
+
+        await app.reload();
+        await ExtendedTestHelper.delay(1000);
+
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        panels = await canvas.getPanels();
+        assert.equal(panels.length, 1);
+        panel = panels[0];
+        form = await panel.getForm();
+        assert.notEqual(form, null);
+        input = await form.getFormInput('url');
+        assert.notEqual(input, null);
+        await input.clear();
+        await ExtendedTestHelper.delay(100);
+        url = 'https://example.com/'; //'https://www.google.com'
+        await input.sendKeys(url);
+        await ExtendedTestHelper.delay(1000);
+        button = await panel.getElement().findElement(webdriver.By.xpath(`.//button[text()="Load Scraper"]`));
+        assert.notEqual(button, null, 'Button not found!');
+        await button.click();
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+
+        modal = await window.getTopModal();
+        assert.equal(modal, null);
+
+        forms = await panel.getForms();
+        assert.equal(forms.length, 4);
+        form = forms[2];
+        formEntry = await form.getFormEntry('funcScrape');
+        assert.notEqual(formEntry, null);
+        input = await formEntry.findElement(webdriver.By.xpath('./div[@class="value"]/textarea[@name="funcScrape"]'));
+        assert.notEqual(input, null);
+        value = await input.getAttribute('value');
+        assert.equal(value, `console.log('x');
+return Promise.resolve({});`);
 
         return Promise.resolve();
     });

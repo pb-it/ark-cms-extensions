@@ -29,6 +29,8 @@ class TestScraperPanel extends Panel {
     _scraperForm;
     _resultForm;
 
+    _$saveBtn;
+
     constructor() {
         super();
 
@@ -151,8 +153,13 @@ class TestScraperPanel extends Panel {
             }.bind(this));
         $div.append($test);
 
-        var $save = $('<button>')
-            .text('Save')
+        var bUpdate;
+        if (this._scraper) {
+            var data = this._scraper.getData();
+            bUpdate = (data['id'] != null);
+        }
+        this._$saveBtn = $('<button>')
+            .text(bUpdate ? 'Update' : 'Save')
             .css({ 'float': 'right' })
             .click(async function (event) {
                 event.stopPropagation();
@@ -185,7 +192,7 @@ class TestScraperPanel extends Panel {
 
                 return Promise.resolve();
             }.bind(this));
-        $div.append($save);
+        $div.append(this._$saveBtn);
 
         skeleton = [
             {
@@ -221,9 +228,12 @@ class TestScraperPanel extends Panel {
             const url = fData['url'];
 
             const rule = await Scraper.getRule(url);
-            this._scraper = new CrudObject('scraper', rule);
-
-            await this._renderScraper();
+            if (rule) {
+                this._scraper = new CrudObject('scraper', rule);
+                await this._renderScraper();
+                this._$saveBtn.html('Update');
+            } else
+                throw new Error('No matching rule found!');
 
             controller.setLoadingState(false);
         } catch (error) {

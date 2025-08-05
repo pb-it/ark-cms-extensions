@@ -21,6 +21,19 @@ async function init() {
 
     await Scraper.initModel();
 
+    var application = {
+        'name': 'Scraper',
+        'icon': new Icon('mosquito'),
+        'start': async function (event, icon) {
+            if (event.ctrlKey)
+                await controller.getModalController().openPanelInModal(new ScraperPanel());
+            else
+                controller.loadState(new State({ customRoute: '/scraper' }), true);
+            return Promise.resolve();
+        }
+    };
+    controller.getAppController().addApp(application);
+
     return Promise.resolve();
 }
 
