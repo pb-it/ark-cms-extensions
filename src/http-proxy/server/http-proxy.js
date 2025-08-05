@@ -131,7 +131,7 @@ class HttpProxy {
             opt = { ...options };
             if (opt.hasOwnProperty('client')) {
                 client = opt['client'];
-                delete opt['bCache'];
+                delete opt['client'];
             }
             if (opt.hasOwnProperty('bCache')) {
                 bCache = opt['bCache'];
