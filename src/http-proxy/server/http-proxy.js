@@ -62,6 +62,8 @@ class HttpProxy {
                 }
             }
             if (rule) {
+                if (debug.enabled('app:http-proxy'))
+                    Logger.info('[app:http-proxy] rule:\n' + JSON.stringify(rule, null, '\t'));
                 if (rule['options']) {
                     if (options) {
                         var defaults = { ...rule['options'] };

@@ -105,6 +105,64 @@ class TestScraperPanel extends Panel {
             }.bind(this));
         $div.append($curl);
 
+        const $open = $('<button>')
+            .text('Open')
+            .click(async function (event) {
+                event.stopPropagation();
+
+                const $input = $('<input/>')
+                    .prop('type', 'file')
+                    .prop('accept', 'application/xhtml+xml,text/html,text/plain')
+                    .prop('multiple', false)
+                    .css({ 'visibility': 'hidden' })
+                    .bind('click', function (e) {
+                        //this.remove();
+                    })
+                    .on('change', { 'panel': this }, async function (event) {
+                        if (this.files.length == 1) {
+                            const file = this.files[0];
+                            if (file.type === 'application/xhtml+xml' || file.type === 'text/html'
+                                || file.type === 'text/plain') {
+                                var panel;
+                                if (event.data)
+                                    panel = event.data.panel
+                                if (panel) {
+                                    const controller = app.getController();
+                                    try {
+                                        controller.setLoadingState(true);
+                                        const reader = new FileReader();
+                                        reader.onload = async function fileReadCompleted() {
+                                            if (reader.result) {
+                                                try {
+                                                    var data = {
+                                                        'body': reader.result
+                                                    };
+                                                    panel._bodyForm.setFormData(data);
+                                                    await panel._bodyForm.renderForm();
+
+                                                    const parser = new DOMParser();
+                                                    panel._doc = parser.parseFromString(panel._body, 'text/html');
+                                                } catch (error) {
+                                                    controller.setLoadingState(false);
+                                                    controller.showError(error);
+                                                }
+                                            }
+                                        };
+                                        reader.readAsText(file);
+                                        controller.setLoadingState(false);
+                                    } catch (error) {
+                                        controller.setLoadingState(false);
+                                        controller.showError(error);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                $input.click();
+                return Promise.resolve();
+            }.bind(this));
+        $div.append($open);
+
         var skeleton = [
             {
                 name: 'body',
