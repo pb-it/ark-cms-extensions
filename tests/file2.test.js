@@ -480,10 +480,10 @@ describe('Testsuit - File2', function () {
 
         modal = await window.getTopModal();
         assert.notEqual(modal, null);
-        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="panel"]/div[@class="pre"]`));
-        assert.notEqual(modal, null);
+        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="panel"]/div/div[@class="pre"]`));
+        assert.notEqual(div, null);
         var text = await div.getText();
-        assert.ok(text.startsWith('ERROR:\n404: Not Found'));
+        assert.ok(text.startsWith('404: Not Found'));
         await modal.closeModal();
 
         canvas = await window.getCanvas();
@@ -620,10 +620,10 @@ return Promise.resolve('test.png');`);
 
         modal = await window.getTopModal();
         assert.notEqual(modal, null);
-        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="panel"]/div[@class="pre"]`));
-        assert.notEqual(modal, null);
+        var div = await modal.findElement(webdriver.By.xpath(`./div[@class="modal-content"]/div[@class="panel"]/div/div[@class="pre"]`));
+        assert.notEqual(div, null);
         var text = await div.getText();
-        assert.ok(text.startsWith('ERROR:\n404: Not Found'));
+        assert.ok(text.startsWith('404: Not Found'));
         await modal.closeModal();
 
         await app.navigate('/');

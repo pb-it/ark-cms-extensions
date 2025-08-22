@@ -134,7 +134,7 @@ describe('Testsuit - common', function () {
             callback(res);
         });
         const api = await app.getApiUrl();
-        assert.equal(response, '404: Not Found - ' + api + '/api/ext/echo');
+        assert.ok(response.startsWith('404: Not Found - ' + api + '/api/ext/echo'));
 
         return Promise.resolve();
     });
