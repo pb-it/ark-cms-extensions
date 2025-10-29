@@ -167,6 +167,11 @@ describe('Testsuit - backup', function () {
         //button = await modal.findElement(webdriver.By.xpath(`//input[@type="submit" and @name="confirm"]`));
         assert.notEqual(button, null);
         await button.click();
+        await driver.wait(webdriver.until.alertIsPresent(), 1000);
+        alert = await driver.switchTo().alert();
+        var text = await alert.getText();
+        assert.equal(text, 'Reload State?');
+        await alert.accept();
         await app.waitLoadingFinished(10);
 
         modal = await window.getTopModal();

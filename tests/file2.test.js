@@ -476,6 +476,12 @@ describe('Testsuit - File2', function () {
         var button = elements[0];
         assert.notEqual(button, null);
         await button.click();
+        await driver.wait(webdriver.until.alertIsPresent(), 1000);
+        alert = await driver.switchTo().alert();
+        var text = await alert.getText();
+        assert.equal(text, 'Reload State?');
+        await alert.accept();
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         modal = await window.getTopModal();
@@ -616,6 +622,12 @@ return Promise.resolve('test.png');`);
         button = elements[0];
         assert.notEqual(button, null);
         await button.click();
+        await driver.wait(webdriver.until.alertIsPresent(), 1000);
+        alert = await driver.switchTo().alert();
+        var text = await alert.getText();
+        assert.equal(text, 'Reload State?');
+        await alert.accept();
+        await app.waitLoadingFinished(10);
         await ExtendedTestHelper.delay(1000);
 
         modal = await window.getTopModal();

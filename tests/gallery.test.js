@@ -79,25 +79,28 @@ describe('Testsuit - gallery', function () {
         await ExtendedTestHelper.delay(1000);
 
         const ds = app.getDataService();
-        var data = {
-            'title': 'Testbild',
-            'file': {
-                'filename': 'Testbild_1.png',
-                'url': 'https://upload.wikimedia.org/wikipedia/commons/1/12/Testbild.png'
+        var tmp = await ds.read('image');
+        if (tmp.length === 0) {
+            var data = {
+                'title': 'Testbild',
+                'file': {
+                    'filename': 'Testbild_1.png',
+                    'url': 'https://upload.wikimedia.org/wikipedia/commons/1/12/Testbild.png'
+                }
             }
-        }
-        var response = await ds.create('image', data);
-        assert.notEqual(Object.keys(response).length, 0);
+            var response = await ds.create('image', data);
+            assert.notEqual(Object.keys(response).length, 0);
 
-        data = {
-            'title': 'Testcard',
-            'file': {
-                'filename': 'Testcard.png',
-                'url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Sj%C3%B3nvarpi%C3%B0_Testcard.jpg'
+            data = {
+                'title': 'Testcard',
+                'file': {
+                    'filename': 'Testcard.png',
+                    'url': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Sj%C3%B3nvarpi%C3%B0_Testcard.jpg'
+                }
             }
+            response = await ds.create('image', data);
+            assert.notEqual(Object.keys(response).length, 0);
         }
-        response = await ds.create('image', data);
-        assert.notEqual(Object.keys(response).length, 0);
 
         return Promise.resolve();
     });

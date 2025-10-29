@@ -52,9 +52,11 @@ class SnippetController {
     }
 
     async updateSnippets(snippets) {
-        const str = JSON.stringify(snippets);
+        var str;
+        if (snippets && typeof snippets === 'object' && Object.keys(snippets).length > 0)
+            str = JSON.stringify(snippets);
         const definition = this._model.getDefinition();
-        if (snippets) {
+        if (str) {
             if (definition.hasOwnProperty('_ext'))
                 definition['_ext']['snippets'] = str;
             else
@@ -67,7 +69,10 @@ class SnippetController {
             }
         }
         await this._model.setDefinition(definition);
-        this._treeConfig = snippets;
+        if (snippets && typeof snippets === 'object' && Object.keys(snippets).length > 0)
+            this._treeConfig = snippets;
+        else
+            this._treeConfig = {};
         this._tree.setTreeConf(JSON.parse(JSON.stringify(this._treeConfig)));
         return Promise.resolve();
     }

@@ -46,7 +46,6 @@ class ProcessController {
         this._addSocketRoute(ws);
         this._addLogsRoute(ws);
         this._addProcessRoutes(app);
-
     }
 
     _initIo(server) {
@@ -195,6 +194,10 @@ class ProcessController {
         process.setLogfile(path.join(this._logsDir, logfile), rootPath + '/logs/' + logfile);
         JOBS[id] = process;
         return process;
+    }
+
+    getProcesses() {
+        return JOBS;
     }
 }
 

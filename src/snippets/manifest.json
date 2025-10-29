@@ -1,6 +1,6 @@
 {
     "name": "snippets",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Snippets",
     "app_version": "^0.7.7",
     "npm_dependencies": {},

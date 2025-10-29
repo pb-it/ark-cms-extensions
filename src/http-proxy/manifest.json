@@ -1,6 +1,6 @@
 {
     "name": "http-proxy",
-    "version": "0.1.7",
+    "version": "0.1.8",
     "description": "HTTP Proxy/Agent/Client - Forwarding HTTP Requests",
     "app_version": "^0.7.7"
 }

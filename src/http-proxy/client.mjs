@@ -40,9 +40,21 @@ async function init() {
                     const controller = app.getController();
                     controller.setLoadingState(true);
                     try {
-                        const obj = target.getObject();
-                        const data = obj.getData();
-                        await obj.update({ 'body': null, 'file': { 'url': data['url'], 'base64': Base64.encodeText(data['body'], 'text/html') } });
+                        var selected;
+                        var objects;
+                        const sc = controller.getSelectionController();
+                        if (sc)
+                            selected = sc.getSelectedObjects();
+                        if (selected && selected.length > 0)
+                            objects = selected;
+                        else
+                            objects = [target.getObject()];
+
+                        var data;
+                        for (var obj of objects) {
+                            data = obj.getData();
+                            await obj.update({ 'body': null, 'file': { 'url': data['url'], 'base64': Base64.encodeText(data['body'], 'text/html') } });
+                        }
 
                         controller.setLoadingState(false);
                     } catch (error) {

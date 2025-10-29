@@ -245,6 +245,7 @@ class ConsolePanel extends Panel {
         $rightDiv.append('<br />');
 
         this._$output = $('<textarea/>')
+            .prop('id', 'output')
             .attr('rows', 30)
             .attr('cols', 100)
             .prop("disabled", true);

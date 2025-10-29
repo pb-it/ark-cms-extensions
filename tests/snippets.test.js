@@ -162,6 +162,22 @@ describe('Testsuit - snippets', function () {
             await ExtendedTestHelper.delay(1000);
         }*/
         assert.equal(tmp.length, 1);
+        var response = await driver.executeAsyncScript(async () => {
+            const callback = arguments[arguments.length - 1];
+
+            const controller = app.getController();
+            const models = controller.getModelController().getModels(true);
+            var model;
+            var tmp = models.filter(function (x) { return x.getName() === 'star' });
+            if (tmp.length == 1)
+                model = tmp[0];
+            if (model) {
+                var snippetController = new SnippetController(model);
+                await snippetController.updateSnippets();
+            }
+            callback('OK');
+        });
+        assert.equal(response, 'OK');
         tmp = await ds.read('star');
         assert.equal(tmp.length, 2);
 
@@ -388,6 +404,44 @@ try {
         assert.notEqual(canvas, null);
         var panels = await canvas.getPanels();
         assert.equal(panels.length, 2);
+
+        return Promise.resolve();
+    });
+
+    it('#test console', async function () {
+        this.timeout(30000);
+
+        const app = helper.getApp();
+        const window = app.getWindow();
+        var sidemenu = window.getSideMenu();
+        await sidemenu.click('Apps');
+        await app.waitLoadingFinished(10);
+        await ExtendedTestHelper.delay(1000);
+        var canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        var panel = await canvas.getPanel('Snippets');
+        assert.notEqual(panel, null);
+
+        await app.navigate('/console');
+        await ExtendedTestHelper.delay(1000);
+
+        canvas = await window.getCanvas();
+        assert.notEqual(canvas, null);
+        panel = await canvas.getPanel();
+        assert.notEqual(panel, null);
+        var button = await panel.getButton('Run');
+        assert.notEqual(button, null);
+        await button.click();
+        await app.waitLoadingFinished(30);
+        await ExtendedTestHelper.delay(1000);
+
+        var textarea = await panel.getElement().findElement(webdriver.By.xpath('.//textarea[@id="output"]'));
+        assert.notEqual(textarea, null);
+        var value = await textarea.getAttribute('value');
+        assert.equal(value, '123');
+
+        await app.navigate('/');
+        await ExtendedTestHelper.delay(1000);
 
         return Promise.resolve();
     });

@@ -59,11 +59,11 @@
     },
     "homepage": "https://github.com/pb-it/extensions#readme",
     "devDependencies": {
-        "@pb-it/ark-cms-selenium-test-helper": "0.1.29-beta",
+        "@pb-it/ark-cms-selenium-test-helper": "0.1.30-beta",
         "cross-fetch": "^4.1.0",
         "jsdom": "^26.1.0",
         "mocha": "^10.8.2",
-        "selenium-webdriver": "^4.34.0",
-        "semver": "^7.7.2"
+        "selenium-webdriver": "^4.38.0",
+        "semver": "^7.7.3"
     }
 }
