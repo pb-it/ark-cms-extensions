@@ -121,6 +121,12 @@ async function init() {
                                 }
                                 tmp = await controller.getDownloader().download(data[str]['url'], tmpFilePath);
                                 tmpFilePath = path.join(tmpDir, tmp);
+                                var ext = path.extname(fileName);
+                                if (!ext) {
+                                    ext = path.extname(tmp);
+                                    if (ext)
+                                        fileName += ext;
+                                }
                             }
                         } else if (data[str]['url'].startsWith("file://")) {
                             var file = data[str]['url'].substring(7);

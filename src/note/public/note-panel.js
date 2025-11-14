@@ -3,6 +3,7 @@ class NotePanel extends CrudPanel {
     _$note;
 
     _prop;
+    _parser;
     _syntax;
 
     constructor(config, obj, prop) {
@@ -15,6 +16,14 @@ class NotePanel extends CrudPanel {
 
     getClass() {
         return NotePanel;
+    }
+
+    setParser(parser) {
+        this._parser = parser;
+    }
+
+    setSyntax(syntax) {
+        this._syntax = syntax;
     }
 
     async _init() {
@@ -57,9 +66,12 @@ class NotePanel extends CrudPanel {
 
     async _edit(edit) {
         var note = this._obj.getData()[this._prop];
-        this._syntax = DataView.getSyntax(note);
-        if (this._syntax)
-            note = note.substring(note.indexOf(',') + 1);
+        if (note) {
+            if (!this._syntax)
+                this._syntax = DataView.getSyntax(note);
+            if (this._syntax)
+                note = note.substring(note.indexOf(',') + 1);
+        }
         if (edit) {
             if (note === undefined || note === null)
                 note = '';
@@ -75,7 +87,9 @@ class NotePanel extends CrudPanel {
             this._$note.removeClass('cellEditing');
             var html;
             if (note) {
-                if (this._syntax === 'markdown')
+                if (parser && parser.parse && typeof parser.parse === 'function')
+                    html = await parser.parse(note);
+                else if (this._syntax === 'markdown')
                     html = await DataView.parseMarkdown(note);
                 else
                     html = encodeText(note)
@@ -96,32 +110,41 @@ class NotePanel extends CrudPanel {
     }
 
     async _close() {
-        var controller = app.getController();
+        const controller = app.getController();
         controller.setLoadingState(true);
         try {
-            var newContent = this._$note.children().first().val();
-            var data = {};
-            if (this._syntax)
-                data[this._prop] = 'data:text/' + this._syntax + ';charset=utf-8,' + newContent;
-            else
-                data[this._prop] = newContent;
-            if (this._obj.getId()) {
-                await this._obj.update(data);
-                await this._edit(false);
-            } else {
-                await this._obj.create(data);
-
-                var state = new State();
-                state['typeString'] = this._obj.getTypeString();
-                state['id'] = this._obj.getId();
-                controller.loadState(state, true);
-            }
-        } catch (e) {
-            console.log(e);
-        } finally {
+            await this._update();
             controller.setLoadingState(false);
+        } catch (error) {
+            controller.setLoadingState(false);
+            controller.showError(error);
         }
         return Promise.resolve();
+    }
+
+    async _update() {
+        const data = this._readData();
+        if (this._obj.getId()) // !this._obj.getModel().getDefinition()['options']['increments']
+            await this._obj.update(data);
+        else
+            await this._obj.create(data);
+
+        await this._edit(false);
+        /*const state = new State();
+        state['typeString'] = this._obj.getTypeString();
+        state['id'] = this._obj.getId();
+        app.getController().controller.loadState(state, true);*/
+        return Promise.resolve();
+    }
+
+    _readData() {
+        var newContent = this._$note.children().first().val();
+        const data = {};
+        if (this._syntax)
+            data[this._prop] = 'data:text/' + this._syntax + ';charset=utf-8,' + newContent;
+        else
+            data[this._prop] = newContent;
+        return data;
     }
 }
 
