@@ -62,6 +62,12 @@ async function init() {
             } else if (attr['storage'] == 'filesystem') {
                 const localPath = controller.getFileStorageController().getPathForFile(attr);
                 if (localPath) {
+                    if (old && old[str] && data[str]['delete']) {
+                        var file = path.join(localPath, old[str]);
+                        if (fs.existsSync(file))
+                            fs.unlinkSync(file);
+                    }
+
                     const tmpDir = await controller.getTmpDir();
                     var tmpFilePath;
                     var fileName;
@@ -89,6 +95,25 @@ async function init() {
                             base64.createFile(tmpFilePath, data[str]['base64']);
                         } else
                             throw new Error("Invalid base64 data!");
+                    } else if (data[str]['text']) {
+                        if (!fileName) {
+                            if (typeof attr.funcFileName == 'function')
+                                fileName = await attr.funcFileName(data, old);
+                            else if (funcFileName)
+                                fileName = await funcFileName(model, data, old);
+                        }
+                        if (fileName) {
+                            tmpFilePath = path.join(tmpDir, path.basename(fileName));
+                            if (fs.existsSync(tmpFilePath))
+                                throw new Error("File already exists!");
+                        } else {
+                            var ext = 'txt';
+                            do {
+                                fileName = crypto.randomBytes(16).toString("hex") + '.' + ext;
+                                tmpFilePath = path.join(tmpDir, fileName);
+                            } while (fs.existsSync(tmpFilePath));
+                        }
+                        fs.writeFileSync(tmpFilePath, data[str]['text']);
                     } else if (data[str]['url']) {
                         if (data[str]['url'].startsWith("http")) {
                             if (data[str]['force'] || !attr['url_prop'] || !old || !old[attr['url_prop']] || old[attr['url_prop']] != data[str]['url']) {
@@ -164,7 +189,7 @@ async function init() {
                             throw new Error("Missing Filename!");
                     } else {
                         if (fileName) {
-                            if (old && old[str] && old[str] != fileName) {
+                            if (old && old[str] && old[str] != fileName && !data[str]['delete']) {
                                 var oldFile = path.join(localPath, old[str]);
                                 var newFile = path.join(localPath, fileName);
                                 if (fs.existsSync(oldFile)) {
@@ -184,12 +209,6 @@ async function init() {
                                     } else
                                         throw new Error("File '" + newFile + "' already exists!");
                                 }
-                            }
-                        } else {
-                            if (old && old[str] && data[str]['delete']) {
-                                var file = path.join(localPath, old[str]);
-                                if (fs.existsSync(file))
-                                    fs.unlinkSync(file);
                             }
                         }
                     }

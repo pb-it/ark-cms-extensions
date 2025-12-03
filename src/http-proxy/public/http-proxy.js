@@ -15,7 +15,12 @@ class HttpProxy {
         if (options && options['bCache']) {
             var tmp = await HttpProxy.lookup(url);
             if (tmp) {
-                if (confirm("Use cached response?")) {
+                var bUseCached;
+                if (options && options.hasOwnProperty('bUseCached'))
+                    bUseCached = options['bUseCached'];
+                else
+                    bUseCached = confirm("Use cached response?");
+                if (bUseCached) {
                     if (tmp['body'])
                         res = tmp['body'];
                     else if (tmp['file']) {

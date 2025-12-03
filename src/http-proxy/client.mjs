@@ -50,10 +50,17 @@ async function init() {
                         else
                             objects = [target.getObject()];
 
+
                         var data;
+                        const ac = controller.getApiController();
+                        const client = ac.getApiClient();
+                        var response;
                         for (var obj of objects) {
                             data = obj.getData();
-                            await obj.update({ 'body': null, 'file': { 'url': data['url'], 'base64': Base64.encodeText(data['body'], 'text/html') } });
+                            //await obj.update({ 'body': null, 'file': { 'url': data['url'], 'base64': Base64.encodeText(data['body'], 'text/html') } });
+                            response = await client.request('GET', `/api/data/v1/http-proxy-cache/${data['id']}/dump`);
+                            if (!response || response !== 'OK')
+                                throw new Error('Dump failed!');
                         }
 
                         controller.setLoadingState(false);

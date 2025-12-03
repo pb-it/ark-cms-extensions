@@ -4,12 +4,10 @@ const path = require('path');
 const https = require('https');
 //const FormData = require('form-data');
 
-const httpsAgent = new https.Agent({
-    rejectUnauthorized: false
-});
-
 const appRoot = controller.getAppRoot();
 const Logger = require(path.join(appRoot, './src/common/logger/logger.js'));
+
+const base64 = require(path.join(appRoot, './src/common/base64.js'));
 
 class HttpProxy {
 
@@ -25,6 +23,39 @@ class HttpProxy {
                 }
             }
         }
+
+        const ws = controller.getWebServer();
+        ws.addCustomDataRoute(
+            {
+                'regex': '^/http-proxy-cache/(\\d+)/dump$', // /api/data/v1/http-proxy-cache/<id>/dump
+                'fn': async function (req, res) {
+                    try {
+                        const model = controller.getShelf().getModel('http-proxy-cache');
+                        if (model) {
+                            const id = req.locals['match'][1];
+                            const x = await model.read(id);
+                            if (x && !x['file']) {
+                                await model.update(id, {
+                                    'file': {
+                                        'url': x['url'],
+                                        'base64': base64.encodeText(x['body'], 'text/html')
+                                    },
+                                    'body': null
+                                });
+                            } else
+                                throw new Error("Dump failed!");
+                        }
+                        res.send('OK');
+                    } catch (error) {
+                        Logger.parseError(error);
+                        res.status(500);
+                        res.send("Something went wrong!");
+                    }
+                    return Promise.resolve();
+                }
+            }
+        );
+
         return Promise.resolve();
     }
 

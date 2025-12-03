@@ -1,6 +1,6 @@
 {
     "name": "file2",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "description": "Data Type Extension - File2",
     "app_version": "^0.7.8",
     "npm_dependencies": {},
