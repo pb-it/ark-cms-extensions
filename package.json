@@ -47,7 +47,8 @@
         "test:backup": "node build.js backup && mocha tests/backup.test.js",
         "test:calendar": "node build.js calendar && mocha tests/calendar.test.js",
         "test:snippets": "node build.js snippets && mocha tests/snippets.test.js",
-        "test:note": "node build.js note && mocha tests/note.test.js"
+        "test:note": "node build.js note && mocha tests/note.test.js",
+        "test:clipboard2": "node build.js clipboard2 && mocha tests/clipboard2.test.js"
     },
     "repository": {
         "type": "git",

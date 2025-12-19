@@ -1,0 +1,6 @@
+{
+    "name": "clipboard2",
+    "version": "0.1.0",
+    "description": "Clipboard extension",
+    "app_version": "^0.7.11"
+}
