@@ -87,12 +87,12 @@ class NotePanel extends CrudPanel {
             this._$note.removeClass('cellEditing');
             var html;
             if (note) {
-                if (parser && parser.parse && typeof parser.parse === 'function')
-                    html = await parser.parse(note);
+                if (this._parser && this._parser.parse && typeof this._parser.parse === 'function')
+                    html = await this._parser.parse(note);
                 else if (this._syntax === 'markdown')
                     html = await DataView.parseMarkdown(note);
                 else
-                    html = encodeText(note)
+                    html = encodeText(note);
             } else
                 html = "";
             this._$note.html(html);
@@ -123,27 +123,36 @@ class NotePanel extends CrudPanel {
     }
 
     async _update() {
-        const data = this._readData();
-        if (this._obj.getId()) // !this._obj.getModel().getDefinition()['options']['increments']
-            await this._obj.update(data);
-        else
-            await this._obj.create(data);
+        if (this._config.details === DetailsEnum.all) {
+            await super._update();
+        } else {
+            const data = this._readData();
+            if (this._obj.getId()) // !this._obj.getModel().getDefinition()['options']['increments']
+                await this._obj.update(data);
+            else
+                await this._obj.create(data);
 
-        await this._edit(false);
-        /*const state = new State();
-        state['typeString'] = this._obj.getTypeString();
-        state['id'] = this._obj.getId();
-        app.getController().controller.loadState(state, true);*/
+            await this._edit(false);
+            /*const state = new State();
+            state['typeString'] = this._obj.getTypeString();
+            state['id'] = this._obj.getId();
+            app.getController().controller.loadState(state, true);*/
+        }
         return Promise.resolve();
     }
 
     _readData() {
-        var newContent = this._$note.children().first().val();
-        const data = {};
-        if (this._syntax)
-            data[this._prop] = 'data:text/' + this._syntax + ';charset=utf-8,' + newContent;
-        else
-            data[this._prop] = newContent;
+        var data;
+        if (this._config.details === DetailsEnum.all) {
+            data = super._readData();
+        } else {
+            var newContent = this._$note.children().first().val();
+            data = {};
+            if (this._syntax)
+                data[this._prop] = 'data:text/' + this._syntax + ';charset=utf-8,' + newContent;
+            else
+                data[this._prop] = newContent;
+        }
         return data;
     }
 }
