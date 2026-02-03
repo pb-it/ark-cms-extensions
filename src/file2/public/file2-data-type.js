@@ -177,10 +177,10 @@ class File2DataType extends DataType {
                         }
                     }
                     if (!value) {
-                        if (attribute['cdn'])
+                        if (!fileName.startsWith('/') && attribute['cdn'])
                             value = CrudObject._buildUrl(attribute['cdn'], fileName);
                         else
-                            value = fileName;
+                            value = app.getController().getApiController().getApiOrigin() + fileName;
                     }
                     $value.html("<a href='" + value + "' target='_blank'>" + fileName + "</a><br>");
                 } else if (attribute['storage'] == 'base64') {
