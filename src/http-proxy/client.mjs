@@ -34,9 +34,10 @@ async function init() {
     if (model) {
         const attr = model.getModelAttributesController().getAttribute('file');
         if (attr) {
+            var dumpEntry;
             var tmp = await controller.getDataService().fetchData('_extension', null, 'name=file2');
             if (tmp.length == 1) {
-                const dumpEntry = new ContextMenuEntry("Dump to file", async function (event, target) {
+                dumpEntry = new ContextMenuEntry("Dump to file", async function (event, target) {
                     const controller = app.getController();
                     controller.setLoadingState(true);
                     try {
@@ -70,23 +71,64 @@ async function init() {
                     }
                     return Promise.resolve();
                 });
+            }
+            const downloadEntry = new ContextMenuEntry("Download", async function (event, target) {
+                const controller = app.getController();
+                controller.setLoadingState(true);
+                try {
+                    var selected;
+                    var object;
+                    const sc = controller.getSelectionController();
+                    if (sc)
+                        selected = sc.getSelectedObjects();
+                    if (selected && selected.length > 0) {
+                        if (selected.length === 1)
+                            object = selected[0];
+                        else
+                            alert('Only single selection supported!');
+                    } else
+                        object = target.getObject();
 
-                const entries = model.getContextMenuEntries();
-                if (entries) {
-                    var extGroup = null;
-                    for (var e of entries) {
-                        if (e.getName() === 'Extensions') {
-                            extGroup = e;
-                            break;
+                    if (object) {
+                        var data = object.getData();
+                        if (data['body']) {
+                            try {
+                                FileCreator.createFileFromText('response.html', data['body']);
+                            } catch (error) {
+                                controller.showError(error);
+                            }
                         }
                     }
-                    if (extGroup)
-                        extGroup.entries.push(dumpEntry);
-                    else {
-                        extGroup = new ContextMenuEntry('Extensions', null, [dumpEntry]);
-                        extGroup.setIcon(new Icon('puzzle-piece'));
-                        entries.unshift(extGroup);
+
+                    controller.setLoadingState(false);
+                } catch (error) {
+                    controller.setLoadingState(false);
+                    controller.showError(error);
+                }
+                return Promise.resolve();
+            });
+
+            const entries = model.getContextMenuEntries();
+            if (entries) {
+                var extGroup = null;
+                for (var e of entries) {
+                    if (e.getName() === 'Extensions') {
+                        extGroup = e;
+                        break;
                     }
+                }
+                if (extGroup) {
+                    if (dumpEntry)
+                        extGroup.entries.push(dumpEntry);
+                    extGroup.entries.push(downloadEntry);
+                } else {
+                    tmp = [];
+                    if (dumpEntry)
+                        tmp.push(dumpEntry);
+                    tmp.push(downloadEntry);
+                    extGroup = new ContextMenuEntry('Extensions', null, tmp);
+                    extGroup.setIcon(new Icon('puzzle-piece'));
+                    entries.unshift(extGroup);
                 }
             }
         }
