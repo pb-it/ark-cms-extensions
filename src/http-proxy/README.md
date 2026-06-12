@@ -16,7 +16,7 @@ var res = await HttpProxy.request(url);
 body(json):
 ```js
 {
-    "url": <url>
+    "url": <url>,
     "options": {
         "method": <GET/POST>,
         ...

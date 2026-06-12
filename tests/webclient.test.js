@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 const assert = require('assert');
 
@@ -139,6 +140,189 @@ module.exports = test;`};
             callback(res);
         });
         assert.equal(response.startsWith('\r\n<!DOCTYPE html>'), true);
+
+        return Promise.resolve();
+    });
+
+    it('#test cert', async function () {
+        this.timeout(60000);
+
+        const app = helper.getApp();
+        const api = await app.getApiUrl();
+        //const url = api + '/sys/info'; // 401 Unauthorized
+        const url = api + '/api/ext/__test/echo';
+        console.log(url);
+        const echoSnippet = fs.readFileSync(path.join(__dirname, 'data/snippets/echo-snippet.js'), 'utf8');
+        var response = await driver.executeAsyncScript(async (snippet) => {
+            const callback = arguments[arguments.length - 1];
+
+            var res;
+            try {
+                const data = {
+                    'cmd': `module.exports = async function() {
+        ${snippet}
+        };`};
+                const ac = app.getController().getApiController();
+                const client = ac.getApiClient();
+                res = await client.request('POST', '/sys/tools/dev/eval?_format=text', null, data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                callback(res);
+            }
+        }, echoSnippet);
+        assert.equal(response, 'OK', 'Eval snippet failed');
+
+        var error = await driver.executeAsyncScript(async (url) => {
+            const callback = arguments[arguments.length - 1];
+
+            const options = {
+                //'client': 'axios',
+                'method': 'POST',
+                'body': 'HelloWorld'
+            };
+            var res;
+            try {
+                res = await HttpProxy.request(url, options);
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        }, url);
+        //console.log(error);
+        assert.equal(error['response']['status'], 500);
+        assert.ok(error['response']['body'].endsWith('self-signed certificate'));
+
+        const certSnippet = fs.readFileSync(path.join(__dirname, 'data/snippets/cert-snippet.js'), 'utf8');
+        response = await driver.executeAsyncScript(async (snippet) => {
+            const callback = arguments[arguments.length - 1];
+
+            /*const data = {
+                'cmd': `async function test() {
+    controller.getWebClientController().setDefaultWebClient('axios');
+    return Promise.resolve('OK');
+};
+
+module.exports = test;`};*/
+
+            var res;
+            try {
+                const data = {
+                    'cmd': `module.exports = async function() {
+        ${snippet}
+        };`};
+                const ac = app.getController().getApiController();
+                const client = ac.getApiClient();
+                res = await client.request('POST', '/sys/tools/dev/eval?_format=text', null, data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                callback(res);
+            }
+        }, certSnippet);
+        assert.equal(response, 'OK', 'Eval snippet failed');
+
+        const ac = app.getApiController();
+        await ac.restart(true);
+        await app.reload();
+        await ExtendedTestHelper.delay(1000);
+        await app.prepare(helper.getConfig()['api']);
+        await ExtendedTestHelper.delay(1000);
+
+        response = await driver.executeAsyncScript(async (snippet) => {
+            const callback = arguments[arguments.length - 1];
+
+            var res;
+            try {
+                const data = {
+                    'cmd': `module.exports = async function() {
+        ${snippet}
+        };`};
+                const ac = app.getController().getApiController();
+                const client = ac.getApiClient();
+                res = await client.request('POST', '/sys/tools/dev/eval?_format=text', null, data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                callback(res);
+            }
+        }, echoSnippet);
+        assert.equal(response, 'OK', 'Eval snippet failed');
+
+        response = await driver.executeAsyncScript(async (url) => {
+            const callback = arguments[arguments.length - 1];
+
+            const options = {
+                //'client': 'axios',
+                'method': 'POST',
+                'body': 'HelloWorld'
+            };
+            var res;
+            try {
+                res = await HttpProxy.request(url, options);
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        }, url);
+        //assert.equal(response.startsWith('\r\n<!DOCTYPE html>'), true);
+        assert.equal(response, 'HelloWorld');
+
+        return Promise.resolve();
+    });
+
+    it('#test response type', async function () {
+        this.timeout(10000);
+
+        const app = helper.getApp();
+        const api = await app.getApiUrl();
+        //const url = api + '/sys/info'; // 401 Unauthorized
+        const url = api + '/api/ext/__test/echo';
+        console.log(url);
+
+        const echoSnippet = fs.readFileSync(path.join(__dirname, 'data/snippets/echo-snippet.js'), 'utf8');
+        var response = await driver.executeAsyncScript(async (snippet) => {
+            const callback = arguments[arguments.length - 1];
+
+            var res;
+            try {
+                const data = {
+                    'cmd': `module.exports = async function() {
+        ${snippet}
+        };`};
+                const ac = app.getController().getApiController();
+                const client = ac.getApiClient();
+                res = await client.request('POST', '/sys/tools/dev/eval?_format=text', null, data);
+            } catch (error) {
+                console.log(error);
+            } finally {
+                callback(res);
+            }
+        }, echoSnippet);
+        assert.equal(response, 'OK', 'Eval snippet failed');
+
+        response = await driver.executeAsyncScript(async (url) => {
+            const callback = arguments[arguments.length - 1];
+
+            const options = {
+                'client': 'axios',
+                'method': 'POST',
+                //'responseType': 'text',
+                'headers': {
+                    'Content-Type': 'text/plain',
+                    //'Accept': 'application/pdf'
+                },
+                'body': 'HelloWorld'
+            };
+            var res;
+            try {
+                res = await HttpProxy.request(url, options);
+            } catch (error) {
+                res = error;
+            }
+            callback(res);
+        }, url);
+        assert.equal(response, 'HelloWorld');
 
         return Promise.resolve();
     });
